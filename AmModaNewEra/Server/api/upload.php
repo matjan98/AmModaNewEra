@@ -7,6 +7,8 @@ $allowedOrigins = [
     'http://127.0.0.1:9000',
     'http://localhost:9001',
     'http://127.0.0.1:9001',
+    'https://ammodadev.pl',
+    'http://ammodadev.pl',
 ];
 if ($origin && in_array($origin, $allowedOrigins, true)) {
     header('Access-Control-Allow-Origin: ' . $origin);
@@ -28,36 +30,43 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$fieldName = 'photo';
-if (!isset($_FILES[$fieldName]) || $_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
-    $error = $_FILES[$fieldName]['error'] ?? 'no_file';
-    $message = $error === UPLOAD_ERR_NO_FILE ? 'Brak pliku. Wybierz zdjęcie.' : 'Błąd wgrywania pliku.';
-    http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => $message]);
-    exit;
-}
-
-$file = $_FILES[$fieldName];
 $allowedTypes = [
     'image/jpeg' => 'jpg',
     'image/png' => 'png',
     'image/gif' => 'gif',
     'image/webp' => 'webp',
 ];
-$finfo = finfo_open(FILEINFO_MIME_TYPE);
-$mime = finfo_file($finfo, $file['tmp_name']);
-finfo_close($finfo);
+$maxSize = 5 * 1024 * 1024; // 5 MB per file
+$maxFiles = 50;
 
-if (!isset($allowedTypes[$mime])) {
+// Collect files: support single "photo" or multiple "photos[]"
+$files = [];
+if (!empty($_FILES['photo']) && is_uploaded_file($_FILES['photo']['tmp_name'] ?? '')) {
+    $f = $_FILES['photo'];
+    if (($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+        $files[] = ['tmp_name' => $f['tmp_name'], 'size' => $f['size']];
+    }
+}
+if (!empty($_FILES['photos']) && is_array($_FILES['photos']['tmp_name'] ?? null)) {
+    foreach ($_FILES['photos']['tmp_name'] as $i => $tmp) {
+        if (is_uploaded_file($tmp) && ($_FILES['photos']['error'][$i] ?? 0) === UPLOAD_ERR_OK) {
+            $files[] = [
+                'tmp_name' => $tmp,
+                'size' => (int) ($_FILES['photos']['size'][$i] ?? 0),
+            ];
+        }
+    }
+}
+
+if (count($files) === 0) {
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'Dozwolone formaty: JPG, PNG, GIF, WEBP.']);
+    echo json_encode(['ok' => false, 'error' => 'Brak pliku. Wybierz zdjęcie.']);
     exit;
 }
 
-$maxSize = 5 * 1024 * 1024; // 5 MB
-if ($file['size'] > $maxSize) {
-    http_response_code(413);
-    echo json_encode(['ok' => false, 'error' => 'Plik zbyt duży (max 5 MB).']);
+if (count($files) > $maxFiles) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => "Maksymalnie {$maxFiles} zdjęć na raz."]);
     exit;
 }
 
@@ -75,23 +84,47 @@ if (!is_writable($photosDir)) {
     exit;
 }
 
-// Remove previous main photo (any main.*)
-foreach (glob($photosDir . '/main.*') as $old) {
-    @unlink($old);
+$finfo = finfo_open(FILEINFO_MIME_TYPE);
+$uploaded = [];
+$errors = [];
+
+foreach ($files as $file) {
+    $tmp = $file['tmp_name'];
+    $size = $file['size'];
+
+    if ($size > $maxSize) {
+        $errors[] = 'Plik zbyt duży (max 5 MB).';
+        continue;
+    }
+
+    $mime = finfo_file($finfo, $tmp);
+    if (!isset($allowedTypes[$mime])) {
+        $errors[] = 'Dozwolone formaty: JPG, PNG, GIF, WEBP.';
+        continue;
+    }
+
+    $ext = $allowedTypes[$mime];
+    $baseName = 'photo_' . uniqid('', true);
+    $targetPath = $photosDir . '/' . $baseName . '.' . $ext;
+
+    if (!move_uploaded_file($tmp, $targetPath)) {
+        $errors[] = 'Zapis pliku nie powiódł się.';
+        continue;
+    }
+
+    $uploaded[] = $baseName . '.' . $ext;
 }
+finfo_close($finfo);
 
-$ext = $allowedTypes[$mime];
-$targetPath = $photosDir . '/main.' . $ext;
-
-if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
-    http_response_code(500);
-    echo json_encode(['ok' => false, 'error' => 'Zapis pliku nie powiódł się.']);
+if (count($uploaded) === 0) {
+    $message = count($errors) > 0 ? implode(' ', $errors) : 'Błąd wgrywania plików.';
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => $message]);
     exit;
 }
 
-// URL to fetch photo (frontend may append base)
 echo json_encode([
     'ok' => true,
-    'url' => 'api/photo.php',
-    'message' => 'Zdjęcie zapisane.',
+    'uploaded' => $uploaded,
+    'message' => count($uploaded) === 1 ? 'Zdjęcie zapisane.' : 'Zapisano ' . count($uploaded) . ' zdjęć.',
 ]);

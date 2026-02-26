@@ -263,7 +263,8 @@ public class FrontendCodeTests
                 foreach (Match match in imgMatches)
                 {
                     var tag = match.Value;
-                    var altPattern = @"\salt\s*=\s*[""'].*?[""']";
+                    // Accept both static alt= and Vue v-bind :alt=
+                    var altPattern = @"\s:?alt\s*=\s*[""'].*?[""']";
                     var altMatch = Regex.IsMatch(tag, altPattern);
 
                     if (!altMatch)

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,10 +17,12 @@ public class ProcessRunner
         var processStartInfo = new ProcessStartInfo
         {
             FileName = "cmd.exe",
-            Arguments = $"/c {fileName}{commandArguments}",
+            Arguments = $"/c chcp 65001 >nul & {fileName}{commandArguments}",
             WorkingDirectory = workingDirectory,
             RedirectStandardError = true,
             RedirectStandardOutput = true,
+            StandardErrorEncoding = Encoding.UTF8,
+            StandardOutputEncoding = Encoding.UTF8,
             UseShellExecute = false,
             CreateNoWindow = true
         };

@@ -1,6 +1,15 @@
+using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using AmModaDeploy;
 using AmModaDeploy.Deployment;
+
+// Use UTF-8 for console so output from child processes (e.g. Quasar build) displays correctly
+Console.OutputEncoding = Encoding.UTF8;
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
+    try { Native.SetConsoleOutputCP(65001); } catch { /* ignore if not running in console */ }
+}
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -57,4 +66,10 @@ while (true)
             Console.WriteLine("Invalid choice. Try again.\n");
             break;
     }
+}
+
+internal static partial class Native
+{
+    [DllImport("kernel32.dll", SetLastError = true)]
+    internal static extern bool SetConsoleOutputCP(uint wCodePageID);
 }
