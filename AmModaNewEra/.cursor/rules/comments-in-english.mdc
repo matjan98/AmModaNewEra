@@ -16,6 +16,7 @@ This applies to:
 
 **Exceptions:**
 - i18n translation files (e.g. `pl-PL/index.js`) contain user-facing strings in their target language – keep those as-is.
+- **User-facing strings** – labels, messages, buttons and any text displayed to the user in the UI can be in Polish (or the app’s display language). E.g. `<span>Brak zdjęcia</span>`, `:label="'Wgraj zdjęcie'"`, `error.value = 'Nie udało się załadować zdjęcia.'` are fine in Polish.
 - `ReportMenu.vue` – report content strings in `buildReportContent` stay in Polish (report content sent to backend).
 
 ```csharp
