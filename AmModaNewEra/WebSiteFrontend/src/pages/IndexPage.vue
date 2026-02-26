@@ -61,7 +61,7 @@ async function loadPhoto() {
     } else {
       photoUrl.value = null
     }
-  } catch (e) {
+  } catch {
     error.value = 'Nie udało się załadować zdjęcia.'
     photoUrl.value = null
   } finally {
@@ -91,7 +91,7 @@ async function onFileSelected(ev) {
     } else {
       error.value = data.error || 'Błąd wgrywania.'
     }
-  } catch (e) {
+  } catch {
     error.value = 'Błąd połączenia z serwerem.'
   } finally {
     loading.value = false
