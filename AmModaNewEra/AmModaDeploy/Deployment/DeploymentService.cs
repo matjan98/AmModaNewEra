@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AmModaDeploy;
 
 namespace AmModaDeploy.Deployment;
 
@@ -26,10 +27,10 @@ public class DeploymentService
         var validationErrors = _configuration.Validate().ToList();
         if (validationErrors.Any())
         {
-            Console.WriteLine("Configuration errors:");
+            ConsoleColors.WriteLine(ConsoleColors.Red, "Configuration errors:");
             foreach (var error in validationErrors)
             {
-                Console.WriteLine($"- {error}");
+                ConsoleColors.WriteLine(ConsoleColors.Red, $"- {error}");
             }
 
             throw new InvalidOperationException("Deployment configuration is invalid.");
@@ -52,8 +53,8 @@ public class DeploymentService
             var frontendPath = ResolveFrontendPath();
             var buildOutputPath = ResolveBuildOutputPath(frontendPath);
 
-            Console.WriteLine($"Frontend path: {frontendPath}");
-            Console.WriteLine($"Build output path: {buildOutputPath}");
+            ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Frontend path: {frontendPath}");
+            ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Build output path: {buildOutputPath}");
 
             await BuildFrontendAsync(frontendPath, cancellationToken).ConfigureAwait(false);
 
@@ -65,13 +66,13 @@ public class DeploymentService
             var backendPath = ResolveBackendPath();
             if (backendPath != null)
             {
-                Console.WriteLine($"Backend path: {backendPath}");
+                ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Backend path: {backendPath}");
                 CopyBackendIntoBuildOutput(backendPath, buildOutputPath);
             }
 
             ReplaceFavicon(buildOutputPath, frontendPath);
 
-            Console.WriteLine("Uploading frontend files...");
+            ConsoleColors.WriteLine(ConsoleColors.Yellow, "Uploading frontend files...");
             await _ftpUploader.UploadDirectoryAsync(buildOutputPath, _configuration, cancellationToken).ConfigureAwait(false);
 
             if (_configuration.CreateGitTagOnDeploy)
@@ -79,7 +80,7 @@ public class DeploymentService
                 await CreateGitTagAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            Console.WriteLine("Deployment completed successfully.");
+            ConsoleColors.WriteLine(ConsoleColors.Green, "Deployment completed successfully.");
         }
         finally
         {
@@ -91,7 +92,7 @@ public class DeploymentService
     {
         var backendDestination = CombineWithRelativePath(buildOutputPath, _configuration.RemoteBackendPath ?? "server");
 
-        Console.WriteLine($"Copying backend files to '{backendDestination}'...");
+        ConsoleColors.WriteLine(ConsoleColors.Yellow, $"Copying backend files to '{backendDestination}'...");
 
         if (Directory.Exists(backendDestination))
         {
@@ -103,7 +104,7 @@ public class DeploymentService
         var smtpConfigPath = Path.Combine(backendDestination, "config", "smtp.php");
         if (File.Exists(smtpConfigPath) && !string.IsNullOrWhiteSpace(_configuration.SmtpPassword))
         {
-            Console.WriteLine("Updating SMTP configuration in build output...");
+            ConsoleColors.WriteLine(ConsoleColors.Cyan, "Updating SMTP configuration in build output...");
             var smtpConfig = File.ReadAllText(smtpConfigPath);
 
             var newSmtpConfig = smtpConfig.Replace(
@@ -115,7 +116,7 @@ public class DeploymentService
         }
         else if (File.Exists(smtpConfigPath))
         {
-            Console.WriteLine($"SMTP config present; Deployment:SmtpPassword not set – leaving smtp.php unchanged.");
+            ConsoleColors.WriteLine(ConsoleColors.Dim, $"SMTP config present; Deployment:SmtpPassword not set – leaving smtp.php unchanged.");
         }
     }
 
@@ -124,7 +125,7 @@ public class DeploymentService
         var sourceFavicon = Path.Combine(frontendPath, "public", "ammoda-logo.ico");
         if (!File.Exists(sourceFavicon))
         {
-            Console.WriteLine($"Custom favicon not found at '{sourceFavicon}'. Skipping replacement.");
+            ConsoleColors.WriteLine(ConsoleColors.Dim, $"Custom favicon not found at '{sourceFavicon}'. Skipping replacement.");
             return;
         }
 
@@ -135,7 +136,7 @@ public class DeploymentService
             Directory.CreateDirectory(destinationDirectory);
         }
 
-        Console.WriteLine($"Replacing favicon with '{sourceFavicon}'.");
+        ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Replacing favicon with '{sourceFavicon}'.");
         File.Copy(sourceFavicon, destinationFavicon, overwrite: true);
     }
 
@@ -185,10 +186,10 @@ public class DeploymentService
         var validationErrors = _configuration.Validate().ToList();
         if (validationErrors.Any())
         {
-            Console.WriteLine("Configuration errors:");
+            ConsoleColors.WriteLine(ConsoleColors.Red, "Configuration errors:");
             foreach (var error in validationErrors)
             {
-                Console.WriteLine($"- {error}");
+                ConsoleColors.WriteLine(ConsoleColors.Red, $"- {error}");
             }
 
             return;
@@ -205,13 +206,13 @@ public class DeploymentService
 
         try
         {
-            Console.WriteLine("Testing FTP connection...");
+            ConsoleColors.WriteLine(ConsoleColors.Yellow, "Testing FTP connection...");
             await _ftpUploader.TestConnectionAsync(_configuration, cancellationTokenSource.Token).ConfigureAwait(false);
-            Console.WriteLine("Connection test completed successfully.");
+            ConsoleColors.WriteLine(ConsoleColors.Green, "Connection test completed successfully.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Connection test failed: {ex.Message}");
+            ConsoleColors.WriteLine(ConsoleColors.Red, $"Connection test failed: {ex.Message}");
         }
         finally
         {
@@ -221,7 +222,7 @@ public class DeploymentService
 
     private async Task BuildFrontendAsync(string frontendPath, CancellationToken cancellationToken)
     {
-        Console.WriteLine("Building frontend (npx quasar build)...");
+        ConsoleColors.WriteLine(ConsoleColors.Yellow, "Building frontend (npx quasar build)...");
         await _processRunner.RunAsync("npx", "quasar build", frontendPath, cancellationToken).ConfigureAwait(false);
     }
 
@@ -230,11 +231,11 @@ public class DeploymentService
         var repositoryPath = GitTagger.ResolveGitRepositoryPath(_configuration.GitRepositoryPath);
         if (repositoryPath is null)
         {
-            Console.WriteLine("Git repository not found. Skipping tag creation.");
+            ConsoleColors.WriteLine(ConsoleColors.Dim, "Git repository not found. Skipping tag creation.");
             return;
         }
 
-        Console.WriteLine($"Git repository path: {repositoryPath}");
+        ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Git repository path: {repositoryPath}");
         await _gitTagger.CreateAndPushTagAsync(repositoryPath, _configuration.GitTagPrefix, cancellationToken).ConfigureAwait(false);
     }
 

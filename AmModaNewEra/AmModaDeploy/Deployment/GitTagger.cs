@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using AmModaDeploy;
 
 namespace AmModaDeploy.Deployment;
 
@@ -18,13 +19,13 @@ public class GitTagger
     {
         var tagName = $"{tagPrefix}-{DateTime.Now:yyyy-MM-dd-HH-mm}";
         
-        Console.WriteLine($"Creating git tag '{tagName}'...");
+        ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Creating git tag '{tagName}'...");
         await _processRunner.RunAsync("git", $"tag -f {tagName}", repositoryPath, cancellationToken).ConfigureAwait(false);
         
-        Console.WriteLine($"Pushing git tag '{tagName}' to origin...");
+        ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Pushing git tag '{tagName}' to origin...");
         await _processRunner.RunAsync("git", $"push origin {tagName} --force", repositoryPath, cancellationToken).ConfigureAwait(false);
         
-        Console.WriteLine($"Git tag '{tagName}' created and pushed successfully.");
+        ConsoleColors.WriteLine(ConsoleColors.Green, $"Git tag '{tagName}' created and pushed successfully.");
     }
 
     public static string? ResolveGitRepositoryPath(string? configuredPath)
@@ -37,7 +38,7 @@ public class GitTagger
                 return fullPath;
             }
 
-            Console.WriteLine($"Configured git repository path '{fullPath}' does not contain a .git directory.");
+            ConsoleColors.WriteLine(ConsoleColors.Dim, $"Configured git repository path '{fullPath}' does not contain a .git directory.");
             return null;
         }
 

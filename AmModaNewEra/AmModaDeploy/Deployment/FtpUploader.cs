@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using AmModaDeploy;
 using FluentFTP;
 using FluentFTP.Exceptions;
 
@@ -150,11 +151,11 @@ public class FtpUploader
 
             if (ShouldSkipDeletion(relativePath))
             {
-                Console.WriteLine($"Skipping remote file {item.FullName} (retention)");
+                ConsoleColors.WriteLine(ConsoleColors.Dim, $"Skipping remote file {item.FullName} (retention)");
                 continue;
             }
 
-            Console.WriteLine($"Deleting remote file {item.FullName}");
+            ConsoleColors.WriteLine(ConsoleColors.Yellow, $"Deleting remote file {item.FullName}");
             await client.DeleteFile(item.FullName, cancellationToken).ConfigureAwait(false);
         }
 
@@ -174,11 +175,11 @@ public class FtpUploader
         {
             if (ShouldSkipDeletion(GetRelativeRemotePath(directory, remoteDirectory)))
             {
-                Console.WriteLine($"Skipping remote directory {directory.FullName} (retention)");
+                ConsoleColors.WriteLine(ConsoleColors.Dim, $"Skipping remote directory {directory.FullName} (retention)");
                 continue;
             }
 
-            Console.WriteLine($"Deleting remote directory {directory.FullName}");
+            ConsoleColors.WriteLine(ConsoleColors.Yellow, $"Deleting remote directory {directory.FullName}");
             await client.DeleteDirectory(directory.FullName, cancellationToken).ConfigureAwait(false);
         }
     }
@@ -196,14 +197,14 @@ public class FtpUploader
             return;
         }
 
-        Console.WriteLine($"Creating remote directory {absolutePath}");
+        ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Creating remote directory {absolutePath}");
         await client.CreateDirectory(absolutePath, true, cancellationToken).ConfigureAwait(false);
     }
 
     private static async Task UploadFileAsync(AsyncFtpClient client, string localFilePath, string remotePath, CancellationToken cancellationToken)
     {
         var absolutePath = ToAbsoluteRemotePath(remotePath);
-        Console.WriteLine($"Uploading {localFilePath} -> {absolutePath}");
+        ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Uploading {localFilePath} -> {absolutePath}");
 
         await client.UploadFile(localFilePath, absolutePath, FtpRemoteExists.Overwrite, true, FtpVerify.None, null, cancellationToken).ConfigureAwait(false);
     }

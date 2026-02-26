@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AmModaDeploy;
 
 namespace AmModaDeploy.Deployment;
 
@@ -47,7 +48,7 @@ public class ProcessRunner
         {
             if (args.Data is not null)
             {
-                Console.WriteLine(args.Data);
+                ConsoleColors.WriteLine(ConsoleColors.Red, args.Data);
             }
         };
 

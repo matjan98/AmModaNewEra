@@ -8,7 +8,12 @@ using AmModaDeploy.Deployment;
 Console.OutputEncoding = Encoding.UTF8;
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    try { Native.SetConsoleOutputCP(65001); } catch { /* ignore if not running in console */ }
+    try
+    {
+        Native.SetConsoleOutputCP(65001);
+        Native.EnableVirtualTerminalProcessing();
+    }
+    catch { /* ignore if not running in console */ }
 }
 
 var configuration = new ConfigurationBuilder()
@@ -22,7 +27,7 @@ var deploymentSettings = configuration.GetSection("Deployment").Get<DeploymentCo
 
 if (deploymentSettings is null)
 {
-    Console.WriteLine("Deployment section is missing in configuration. Ensure user secrets are configured.");
+    ConsoleColors.WriteLine(ConsoleColors.Red, "Deployment section is missing in configuration. Ensure user secrets are configured.");
     return;
 }
 
@@ -30,12 +35,12 @@ var deploymentService = new DeploymentService(deploymentSettings, new ProcessRun
 
 while (true)
 {
-    Console.WriteLine("AmModa Deploy Tool");
+    ConsoleColors.WriteLine(ConsoleColors.Cyan, "AmModa Deploy Tool");
     Console.WriteLine("1 - Deploy");
     Console.WriteLine("2 - Test connection");
     Console.WriteLine("3 - Show git statistics");
     Console.WriteLine("4 - Exit");
-    Console.Write("Your choice > ");
+    ConsoleColors.Write(ConsoleColors.Yellow, "Your choice > ");
 
     var choice = Console.ReadLine();
 
@@ -48,7 +53,7 @@ while (true)
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Deployment failed: {ex.Message}");
+                ConsoleColors.WriteLine(ConsoleColors.Red, $"Deployment failed: {ex.Message}");
             }
 
             Console.WriteLine();
@@ -63,7 +68,7 @@ while (true)
         case "4":
             return;
         default:
-            Console.WriteLine("Invalid choice. Try again.\n");
+            ConsoleColors.WriteLine(ConsoleColors.Red, "Invalid choice. Try again.\n");
             break;
     }
 }
@@ -72,4 +77,27 @@ internal static partial class Native
 {
     [DllImport("kernel32.dll", SetLastError = true)]
     internal static extern bool SetConsoleOutputCP(uint wCodePageID);
+
+    private const int StdOutputHandle = -11;
+    private const uint VtProcessingFlag = 0x0004;
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr GetStdHandle(int nStdHandle);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
+    internal static void EnableVirtualTerminalProcessing()
+    {
+        var handle = GetStdHandle(StdOutputHandle);
+        if (handle == IntPtr.Zero || handle == new IntPtr(-1))
+            return;
+        if (!GetConsoleMode(handle, out var mode))
+            return;
+        mode |= VtProcessingFlag;
+        SetConsoleMode(handle, mode);
+    }
 }
