@@ -18,7 +18,7 @@ dotnet user-secrets set "Deployment:FtpUsername" "deploy_user"
 dotnet user-secrets set "Deployment:FtpPassword" "SkomplikowaneHaslo123!"
 dotnet user-secrets set "Deployment:RemoteBasePath" "public_html/ammoda"
 
-# Konfiguracja SMTP (wymagane dla formularza kontaktowego)
+# Konfiguracja SMTP (opcjonalne – tylko gdy backend ma config/smtp.php)
 dotnet user-secrets set "Deployment:SmtpPassword" "twoje-haslo-smtp"
 ```
 
@@ -26,7 +26,7 @@ dotnet user-secrets set "Deployment:SmtpPassword" "twoje-haslo-smtp"
 * `Deployment:FtpPort` - port FTP (najczęściej `21`, dla SFTP `22`)
 * `Deployment:FtpUsername` i `Deployment:FtpPassword` - dane logowania FTP
 * `Deployment:RemoteBasePath` - katalog docelowy dla frontendu (np. `public_html/subfolder`)
-* `Deployment:SmtpPassword` - hasło SMTP do wysyłania emaili z formularza kontaktowego
+* `Deployment:SmtpPassword` - opcjonalne; hasło SMTP wstrzykiwane do `config/smtp.php` przy deployu (gdy plik istnieje)
 
 ### Opcjonalne ustawienia ścieżek
 
@@ -35,14 +35,14 @@ dotnet user-secrets set "Deployment:SmtpPassword" "twoje-haslo-smtp"
 dotnet user-secrets set "Deployment:FrontendPath" "/pelna/sciezka/do/WebSiteFrontend"
 dotnet user-secrets set "Deployment:BuildOutputSubPath" "dist/spa"
 
-# Backend (opcjonalne - wykrywa automatycznie)
-dotnet user-secrets set "Deployment:BackendPath" "/pelna/sciezka/do/server"
+# Backend PHP (opcjonalne - wykrywa automatycznie katalog Server)
+dotnet user-secrets set "Deployment:BackendPath" "/pelna/sciezka/do/Server"
 dotnet user-secrets set "Deployment:RemoteBackendPath" "server"
 ```
 
 * `FrontendPath` - ścieżka do katalogu `WebSiteFrontend` (wykrywa automatycznie)
 * `BuildOutputSubPath` - podfolder z buildem (domyślnie "dist/spa")
-* `BackendPath` - ścieżka do katalogu `server/` (wykrywa automatycznie)
+* `BackendPath` - ścieżka do katalogu `Server/` (wykrywa automatycznie katalog **Server**)
 * `RemoteBackendPath` - nazwa katalogu na serwerze dla backendu (domyślnie "server")
 
 ## Użycie
@@ -73,10 +73,13 @@ public_html/ammoda/  # RemoteBasePath
 ├── index.html          # Frontend (dist/spa)
 ├── ...                 # Pozostałe pliki frontendu
 └── server/            # RemoteBackendPath
-    ├── api/           # Endpointy API
-    ├── config/        # Konfiguracja
+    ├── api/           # Endpointy API (upload.php, photo.php itd.)
+    ├── config/        # Konfiguracja (opcjonalnie smtp.php)
+    ├── photos/        # Zdjęcia wgrywane przez stronę (nie są usuwane przy deployu)
     └── ...           # Pozostałe pliki backendu
 ```
+
+Katalog `server/photos/` na serwerze jest zachowywany przy każdym deployu (zdjęcia użytkowników nie są nadpisywane ani usuwane).
 
 ## Favicon
 

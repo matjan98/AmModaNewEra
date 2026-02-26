@@ -150,7 +150,7 @@ public class FtpUploader
 
             if (ShouldSkipDeletion(relativePath))
             {
-                Console.WriteLine($"Skipping remote file {item.FullName} (log retention)");
+                Console.WriteLine($"Skipping remote file {item.FullName} (retention)");
                 continue;
             }
 
@@ -174,7 +174,7 @@ public class FtpUploader
         {
             if (ShouldSkipDeletion(GetRelativeRemotePath(directory, remoteDirectory)))
             {
-                Console.WriteLine($"Skipping remote directory {directory.FullName} (log retention)");
+                Console.WriteLine($"Skipping remote directory {directory.FullName} (retention)");
                 continue;
             }
 
@@ -301,6 +301,11 @@ public class FtpUploader
             .Split('/', StringSplitOptions.RemoveEmptyEntries);
 
         if (segments.Any(segment => segment.Equals("logs", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        if (segments.Any(segment => segment.Equals("photos", StringComparison.OrdinalIgnoreCase)))
         {
             return true;
         }

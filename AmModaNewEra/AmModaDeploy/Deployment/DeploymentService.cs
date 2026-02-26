@@ -101,7 +101,7 @@ public class DeploymentService
         CopyDirectory(backendPath, backendDestination);
 
         var smtpConfigPath = Path.Combine(backendDestination, "config", "smtp.php");
-        if (File.Exists(smtpConfigPath))
+        if (File.Exists(smtpConfigPath) && !string.IsNullOrWhiteSpace(_configuration.SmtpPassword))
         {
             Console.WriteLine("Updating SMTP configuration in build output...");
             var smtpConfig = File.ReadAllText(smtpConfigPath);
@@ -113,9 +113,9 @@ public class DeploymentService
 
             File.WriteAllText(smtpConfigPath, newSmtpConfig);
         }
-        else
+        else if (File.Exists(smtpConfigPath))
         {
-            Console.WriteLine($"SMTP configuration file not found at '{smtpConfigPath}'.");
+            Console.WriteLine($"SMTP config present; Deployment:SmtpPassword not set – leaving smtp.php unchanged.");
         }
     }
 
@@ -291,7 +291,7 @@ public class DeploymentService
         var searchRoot = new DirectoryInfo(AppContext.BaseDirectory);
         for (var i = 0; i < 6 && searchRoot is not null; i++)
         {
-            var candidate = Path.Combine(searchRoot.FullName, "server");
+            var candidate = Path.Combine(searchRoot.FullName, "Server");
             if (Directory.Exists(candidate))
             {
                 return candidate;

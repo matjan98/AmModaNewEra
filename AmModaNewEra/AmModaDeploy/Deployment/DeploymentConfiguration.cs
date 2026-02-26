@@ -53,9 +53,10 @@ public class DeploymentConfiguration
             yield return "Deployment:FtpPassword is missing.";
         }
 
-        if (string.IsNullOrWhiteSpace(SmtpPassword))
+        // SmtpPassword optional – używane tylko gdy backend ma config/smtp.php
+        if (!string.IsNullOrWhiteSpace(SmtpPassword))
         {
-            yield return "Deployment:SmtpPassword is missing. Set it using: dotnet user-secrets set \"Deployment:SmtpPassword\" \"your-smtp-password\"";
+            // OK – będzie wstrzyknięte przy deployu
         }
     }
 }
