@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -223,7 +224,13 @@ public class DeploymentService
     private async Task BuildFrontendAsync(string frontendPath, CancellationToken cancellationToken)
     {
         ConsoleColors.WriteLine(ConsoleColors.Yellow, "Building frontend (npx quasar build)...");
-        await _processRunner.RunAsync("npx", "quasar build", frontendPath, cancellationToken).ConfigureAwait(false);
+        // FORCE_COLOR=1 so Quasar/Vite emit ANSI colors even when stdout/stderr are redirected (no TTY).
+        await _processRunner.RunAsync(
+            "npx",
+            "quasar build",
+            frontendPath,
+            cancellationToken,
+            additionalEnvironment: new Dictionary<string, string> { ["FORCE_COLOR"] = "1" }).ConfigureAwait(false);
     }
 
     private async Task CreateGitTagAsync(CancellationToken cancellationToken)

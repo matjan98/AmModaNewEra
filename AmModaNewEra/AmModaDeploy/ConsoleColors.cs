@@ -21,6 +21,12 @@ public static class ConsoleColors
     /// <summary>ANSI escape code for blue foreground.</summary>
     public const string Blue = "\x1b[34m";
 
+    /// <summary>ANSI escape code for dark blue (dim + blue).</summary>
+    public const string DarkBlue = "\x1b[2m\x1b[34m";
+
+    /// <summary>ANSI escape code for bright/light blue (used e.g. for git tag/push output).</summary>
+    public const string BrightBlue = "\x1b[94m";
+
     /// <summary>ANSI escape code for magenta foreground.</summary>
     public const string Magenta = "\x1b[35m";
 

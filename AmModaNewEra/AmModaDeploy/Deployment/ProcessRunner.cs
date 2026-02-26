@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
@@ -9,7 +10,15 @@ namespace AmModaDeploy.Deployment;
 
 public class ProcessRunner
 {
-    public async Task RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken)
+    /// <param name="stderrColorAnsi">ANSI color for stderr lines (e.g. ConsoleColors.Blue for git output). If null, uses Red.</param>
+    /// <param name="additionalEnvironment">Optional env vars for the process (e.g. FORCE_COLOR=1 for Quasar/Node to emit colors).</param>
+    public async Task RunAsync(
+        string fileName,
+        string arguments,
+        string workingDirectory,
+        CancellationToken cancellationToken,
+        string? stderrColorAnsi = null,
+        IReadOnlyDictionary<string, string>? additionalEnvironment = null)
     {
         var commandArguments = string.IsNullOrWhiteSpace(arguments)
             ? string.Empty
@@ -27,6 +36,16 @@ public class ProcessRunner
             UseShellExecute = false,
             CreateNoWindow = true
         };
+
+        if (additionalEnvironment is not null)
+        {
+            foreach (var kv in additionalEnvironment)
+            {
+                processStartInfo.Environment[kv.Key] = kv.Value;
+            }
+        }
+
+        var stderrColor = stderrColorAnsi ?? ConsoleColors.Red;
 
         using var process = new Process
         {
@@ -48,7 +67,7 @@ public class ProcessRunner
         {
             if (args.Data is not null)
             {
-                ConsoleColors.WriteLine(ConsoleColors.Red, args.Data);
+                ConsoleColors.WriteLine(stderrColor, args.Data);
             }
         };
 
