@@ -75,7 +75,7 @@ if (!is_writable($photosDir)) {
     exit;
 }
 
-// Usuń poprzednie zdjęcie główne (dowolne main.*)
+// Remove previous main photo (any main.*)
 foreach (glob($photosDir . '/main.*') as $old) {
     @unlink($old);
 }
@@ -89,7 +89,7 @@ if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
     exit;
 }
 
-// URL do pobrania zdjęcia (frontend może dopisać base)
+// URL to fetch photo (frontend may append base)
 echo json_encode([
     'ok' => true,
     'url' => 'api/photo.php',

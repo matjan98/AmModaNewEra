@@ -1,0 +1,10 @@
+Sprawdź wszystkie zasady w katalogu .cursor przed przystąpieniem do pracy i na ich podstawie wporwadzaj zmiany.
+
+
+
+
+Matik:
+Uruchom testy CodebaseTests i FrontendTests, jeśli pojawią się błędy napraw je i uruchom testy ponownie, poprawiaj i uruchamiaj testy ponownie tak długo aż wszystkie przejdą.
+
+Jakub:
+Uruchom testy CodebaseTests i FrontendTests, jeśli pojawią się błędy napraw je i uruchom testy ponownie, poprawiaj i uruchamiaj testy ponownie tak długo aż wszystkie przejdą.

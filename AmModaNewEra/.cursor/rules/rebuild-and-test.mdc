@@ -1,0 +1,25 @@
+---
+description: Always rebuild and run tests after code changes
+alwaysApply: true
+---
+
+# Rebuild and Test
+
+After making code changes, **always** rebuild the solution and run tests.
+
+1. **Rebuild** (from repo root / solution directory):
+   ```bash
+   dotnet build AmModaNewEra.sln
+   ```
+
+2. **Run tests**:
+   ```bash
+   dotnet test AmModaNewEra.sln --no-build
+   ```
+
+Run both before considering the task done. Fix any build or test failures.
+
+For quick verification of a specific area, you can filter tests, e.g.:
+```bash
+dotnet test CodebaseTests\CodebaseTests.csproj --no-build --filter "FullyQualifiedName~NazwaTestu"
+```

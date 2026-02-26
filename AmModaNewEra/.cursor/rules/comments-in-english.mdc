@@ -1,0 +1,35 @@
+---
+description: Comments, variable names, and function names must be in English
+alwaysApply: true
+---
+
+# English-Only Code
+
+All **comments**, **variable names**, and **function names** in this repository must be written in **English**.
+
+This applies to:
+- XML documentation (`///`, `/** */`)
+- Inline comments (`//`)
+- Block comments (`/* */`)
+- Variable names
+- Function/method names
+
+**Exceptions:**
+- i18n translation files (e.g. `pl-PL/index.js`) contain user-facing strings in their target language – keep those as-is.
+- `ReportMenu.vue` – report content strings in `buildReportContent` stay in Polish (report content sent to backend).
+
+```csharp
+// ✅ GOOD
+/// <summary>
+/// Maps language variant to list of supported languages.
+/// </summary>
+const userName = "John";
+function loadUserData() { }
+
+// ❌ BAD
+/// <summary>
+/// Mapowanie wariantu językowego na listę obsługiwanych języków.
+/// </summary>
+const nazwaUzytkownika = "John";
+function zaladujDaneUzytkownika() { }
+```

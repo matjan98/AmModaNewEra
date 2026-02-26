@@ -12,9 +12,9 @@ namespace AmModaDeploy
         internal static async Task ShowGitStatisticsAsync()
         {
             var authors = await GetAuthorsAsync();
-            Console.WriteLine("\nZajebiste GIT Statistics:\n");
+            Console.WriteLine("\nGit Statistics:\n");
             Console.WriteLine("{0,-25} {1,10} {2,15} {3,15} {4,15} {5,15} {6,40}",
-                "Author", "Commits", "Lines +", "Lines -", "Chars +", "Chars -", "Ulubiony plik");
+                "Author", "Commits", "Lines +", "Lines -", "Chars +", "Chars -", "Favorite file");
 
             foreach (var author in authors)
             {

@@ -49,6 +49,8 @@
 import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 
+const leftDrawerOpen = ref(false)
+
 const linksList = [
   {
     title: 'Docs',
@@ -93,8 +95,6 @@ const linksList = [
     link: 'https://awesome.quasar.dev'
   }
 ]
-
-const leftDrawerOpen = ref(false)
 
 function toggleLeftDrawer () {
   leftDrawerOpen.value = !leftDrawerOpen.value

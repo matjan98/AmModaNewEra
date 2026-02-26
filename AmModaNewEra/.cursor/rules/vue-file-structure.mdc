@@ -1,0 +1,38 @@
+---
+description: Vue file structure - imports, const, computed, methods, return order
+globs: **/*.vue
+alwaysApply: false
+---
+
+# Vue File Structure
+
+Vue single-file components must follow this strict order in the `<script>` section:
+
+1. **Imports** – all import statements at the top
+2. **Constants (function-based first)** – e.g. `const { t } = useI18n();`, `const route = useRoute();`
+3. **Constants (refs)** – e.g. `const userName = ref('');`, `const isSubmitting = ref(false);`
+4. **Computed** – all computed properties
+5. **Methods** – all functions/methods
+6. **Return** – return object with everything needed in the template
+
+```javascript
+// ✅ GOOD
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+const userName = ref('');
+const count = ref(0);
+
+const doubled = computed(() => count.value * 2);
+
+const increment = () => { count.value++; };
+
+return { userName, count, doubled, increment };
+```
+
+```javascript
+// ❌ BAD - refs before useI18n
+const userName = ref('');
+const { t } = useI18n();
+```

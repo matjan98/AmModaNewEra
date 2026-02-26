@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Jeśli żądanie z parametrem img=1 – zwróć obrazek binarnie
+// If request has img=1 – return image as binary
 if (isset($_GET['img']) && $_GET['img'] === '1') {
     $photosDir = __DIR__ . '/../photos';
     $mainFiles = $photosDir ? glob($photosDir . '/main.*') : false;
@@ -49,7 +49,7 @@ if (isset($_GET['img']) && $_GET['img'] === '1') {
     exit;
 }
 
-// GET bez parametrów – JSON z informacją czy jest zdjęcie i URL
+// GET without params – JSON with hasPhoto and URL
 header('Content-Type: application/json; charset=utf-8');
 
 $photosDir = __DIR__ . '/../photos';
