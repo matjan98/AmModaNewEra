@@ -1,1 +1,6 @@
 /* app global css */
+
+/* Override Quasar primary brand color */
+:root {
+  --q-primary: #E61971;
+}

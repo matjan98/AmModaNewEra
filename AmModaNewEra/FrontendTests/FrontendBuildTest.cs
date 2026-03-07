@@ -21,7 +21,7 @@ public class FrontendBuildTest
         var startInfo = new ProcessStartInfo
         {
             FileName = "cmd.exe",
-            Arguments = $"/c \"cd /d \"{webSiteFrontendPath}\" && quasar build\"",
+            Arguments = $"/c \"cd /d \"{webSiteFrontendPath}\" && npm run build\"",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -31,6 +31,7 @@ public class FrontendBuildTest
 
         string output;
         string error;
+        int exitCode;
         using (var process = Process.Start(startInfo))
         {
             if (process == null)
@@ -51,9 +52,11 @@ public class FrontendBuildTest
                 process.Kill();
                 Assert.Fail("Quasar build timed out after 120 seconds.");
             }
+
+            exitCode = process.ExitCode;
         }
 
         var fullOutput = output + "\n" + error;
-        Assert.That(fullOutput, Does.Contain("Build succeeded"), "Quasar build did not succeed. Output: " + fullOutput);
+        Assert.That(exitCode, Is.EqualTo(0), "Quasar build failed with exit code " + exitCode + ". Output: " + fullOutput);
     }
 }
