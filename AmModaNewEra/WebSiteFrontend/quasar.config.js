@@ -27,9 +27,9 @@ export default defineConfig((/* ctx */) => {
       // 'eva-icons',
       // 'themify',
       // 'line-awesome',
-      // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
+      'roboto-font-latin-ext', // same as Roboto but with Polish/latin-ext support in all weights
 
-      'roboto-font', // optional, you are not bound to it
+      // 'roboto-font', // use roboto-font-latin-ext for proper ę, ą, ó etc.
       'material-icons', // optional, you are not bound to it
     ],
 

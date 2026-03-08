@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header ref="headerRef" class="main-layout__header" unelevated :class="{ 'main-layout__header--scrolled': useSidesLayout }">
+    <q-header ref="headerRef" class="main-layout__header" unelevated :class="{ 'main-layout__header--scrolled': useSidesLayout, 'main-layout__header--hidden': !headerVisible }">
       <div class="main-layout__header-inner" :class="{ 'main-layout__header-inner--scrolled': useSidesLayout }">
         <!-- Logo: click scrolls to top, stays on current tab -->
         <div class="main-layout__brand" :class="{ 'main-layout__brand--center': useSidesLayout }">
@@ -42,7 +42,12 @@
               <q-icon :name="hoursExpanded ? 'expand_less' : 'expand_more'" size="20px" class="main-layout__hours-chevron" />
             </button>
             <div v-show="hoursExpanded" class="main-layout__hours-dropdown">
-              <div v-for="row in openingHours" :key="row.label" class="main-layout__hours-row">
+              <div
+                v-for="row in openingHours"
+                :key="row.label"
+                class="main-layout__hours-row"
+                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
+              >
                 <span class="main-layout__hours-day">{{ row.label }}</span>
                 <span class="main-layout__hours-time">{{ row.hours }}</span>
               </div>
@@ -63,7 +68,12 @@
               <q-icon name="schedule" size="22px" />
             </button>
             <div v-show="hoursExpanded" class="main-layout__hours-dropdown">
-              <div v-for="row in openingHours" :key="row.label" class="main-layout__hours-row">
+              <div
+                v-for="row in openingHours"
+                :key="row.label"
+                class="main-layout__hours-row"
+                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
+              >
                 <span class="main-layout__hours-day">{{ row.label }}</span>
                 <span class="main-layout__hours-time">{{ row.hours }}</span>
               </div>
@@ -88,7 +98,12 @@
               <q-icon :name="hoursExpanded ? 'expand_less' : 'expand_more'" size="20px" class="main-layout__hours-chevron" />
             </button>
             <div v-show="hoursExpanded" class="main-layout__hours-dropdown">
-              <div v-for="row in openingHours" :key="row.label" class="main-layout__hours-row">
+              <div
+                v-for="row in openingHours"
+                :key="row.label"
+                class="main-layout__hours-row"
+                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
+              >
                 <span class="main-layout__hours-day">{{ row.label }}</span>
                 <span class="main-layout__hours-time">{{ row.hours }}</span>
               </div>
@@ -135,13 +150,13 @@ function updateSmallScreen() {
 }
 
 const openingHours = [
-  { dayIndex: 1, label: 'Poniedziałek', hours: '9:00 - 18:00' },
-  { dayIndex: 2, label: 'Wtorek', hours: '9:00 - 18:00' },
-  { dayIndex: 3, label: 'Środa', hours: '9:00 - 18:00' },
-  { dayIndex: 4, label: 'Czwartek', hours: '9:00 - 18:00' },
-  { dayIndex: 5, label: 'Piątek', hours: '9:00 - 18:00' },
-  { dayIndex: 6, label: 'Sobota', hours: '9:00 - 14:00' },
-  { dayIndex: 0, label: 'Niedziela', hours: 'Zamknięte' },
+  { dayIndex: 1, label: 'poniedziałek', hours: '09:00 - 18:00' },
+  { dayIndex: 2, label: 'wtorek', hours: '09:00 - 18:00' },
+  { dayIndex: 3, label: 'środa', hours: '09:00 - 18:00' },
+  { dayIndex: 4, label: 'czwartek', hours: '09:00 - 18:00' },
+  { dayIndex: 5, label: 'piątek', hours: '09:00 - 18:00' },
+  { dayIndex: 6, label: 'sobota', hours: '09:00 - 14:00' },
+  { dayIndex: 0, label: 'niedziela', hours: 'Zamknięte' },
 ]
 
 const hoursExpanded = ref(false)
@@ -154,6 +169,22 @@ const todayHours = computed(() => openingToday.value?.hours ?? 'Zamknięte')
 
 const headerRef = ref(null)
 provide('layoutHeaderRef', headerRef)
+
+const headerVisible = ref(true)
+let lastScrollY = 0
+const SCROLL_THRESHOLD = 60
+
+function onScroll() {
+  const scrollY = window.scrollY || window.pageYOffset
+  if (scrollY <= SCROLL_THRESHOLD) {
+    headerVisible.value = true
+  } else if (scrollY > lastScrollY) {
+    headerVisible.value = false
+  } else {
+    headerVisible.value = true
+  }
+  lastScrollY = scrollY
+}
 
 const galleryUploadUnlocked = ref(false)
 const showAuxInput = ref(false)
@@ -174,9 +205,12 @@ onMounted(() => {
   updateSmallScreen()
   mediaQuery = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
   mediaQuery.addEventListener('change', updateSmallScreen)
+  lastScrollY = window.scrollY || window.pageYOffset
+  window.addEventListener('scroll', onScroll, { passive: true })
 })
 onUnmounted(() => {
   if (mediaQuery) mediaQuery.removeEventListener('change', updateSmallScreen)
+  window.removeEventListener('scroll', onScroll)
 })
 </script>
 
@@ -187,6 +221,10 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   overflow: visible;
+  transition: transform 0.3s ease;
+}
+.main-layout__header--hidden {
+  transform: translateY(-100%);
 }
 
 .main-layout__header :deep(.q-header__content) {
@@ -463,28 +501,44 @@ onUnmounted(() => {
   top: 100%;
   right: 0;
   margin-top: 6px;
-  min-width: 200px;
-  padding: 10px 12px;
+  min-width: 260px;
+  max-width: calc(100vw - 24px);
+  padding: 12px 14px;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   z-index: 1100;
+  box-sizing: border-box;
 }
 
 .main-layout__hours-row {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
   font-size: 0.9rem;
-  padding: 3px 0;
+  padding: 4px 8px;
+  margin: 0 -8px;
+  color: #333;
+  border-radius: 6px;
+}
+
+.main-layout__hours-row--today {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .main-layout__hours-day {
-  color: #555555;
-  margin-right: 12px;
+  text-transform: capitalize;
+  color: #555;
+  flex-shrink: 0;
+  font-weight: 400;
 }
 
 .main-layout__hours-time {
   font-weight: 500;
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 @media (min-width: 800px) {
@@ -500,6 +554,16 @@ onUnmounted(() => {
 @media (max-width: 960px) {
   .main-layout__contact {
     justify-content: flex-start;
+  }
+}
+
+/* Keep hours dropdown within viewport on mobile */
+@media (max-width: 600px) {
+  .main-layout__hours-dropdown {
+    left: 0;
+    right: auto;
+    min-width: 220px;
+    max-width: min(320px, calc(100vw - 24px));
   }
 }
 </style>

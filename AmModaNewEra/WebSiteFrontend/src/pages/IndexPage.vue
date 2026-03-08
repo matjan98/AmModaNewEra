@@ -40,73 +40,83 @@
         <transition :name="'index-page__slide-' + panelSlideDirection">
           <div v-if="activeTab === 'info'" key="info" class="index-page__panels">
             <div class="index-page__panels-inner">
-            <!-- 1: Visit us (left) | Photo (right) -->
-            <section class="index-page__split-section">
-              <div class="index-page__split-content">
-                <h2 class="index-page__split-title">Visit us</h2>
-              </div>
-              <div class="index-page__split-media">
-                <img v-if="mainPhotos[0]" :src="mainPhotos[0]" alt="AM Moda" class="index-page__split-img">
-              </div>
-            </section>
-
-            <!-- 2: Photo (left) | Dresses (right) -->
-            <section class="index-page__split-section index-page__split-section--reverse">
-              <div class="index-page__split-media">
-                <img v-if="mainPhotos[1]" :src="mainPhotos[1]" alt="Sukienki" class="index-page__split-img">
-              </div>
-              <div class="index-page__split-content">
-                <h2 class="index-page__split-title">Sukienki</h2>
-              </div>
-            </section>
-
-            <!-- 3: Portfele (left) | Photo (right) -->
-            <section class="index-page__split-section">
-              <div class="index-page__split-content">
-                <h2 class="index-page__split-title">Portfele</h2>
-              </div>
-              <div class="index-page__split-media">
-                <img v-if="mainPhotos[2]" :src="mainPhotos[2]" alt="Portfele" class="index-page__split-img">
-              </div>
-            </section>
-
-            <!-- 4: Photo (left) | Tschüss! (right) -->
-            <section class="index-page__split-section index-page__split-section--reverse">
-              <div class="index-page__split-content">
-                <h2 class="index-page__split-title">Tschüss!</h2>
-              </div>
-              <div class="index-page__split-media">
-                <img v-if="mainPhotos[3]" :src="mainPhotos[3]" alt="AM Moda" class="index-page__split-img">
+            <!-- First hero: full-width grey bg; desktop: left = reviews + text + button, right = image; mobile: text + button above photo, reviews below photo -->
+            <section class="index-page__hero-intro">
+              <div class="index-page__hero-intro-inner">
+                <div class="index-page__hero-intro-content">
+                  <h2 class="index-page__hero-intro-title">STYL i ELEGANCJA</h2>
+                  <p class="index-page__hero-intro-subtitle">na co dzień i na wieczór</p>
+                  <button type="button" class="index-page__hero-btn">
+                    Odwiedź nas
+                  </button>
+                </div>
+                <div class="index-page__hero-intro-reviews">
+                  <div class="index-page__google-reviews">
+                    <div class="index-page__google-reviews-header">
+                      <div class="index-page__google-logo-wrap">
+                        <svg class="index-page__google-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                      </div>
+                      <span class="index-page__google-reviews-label">Google Reviews</span>
+                    </div>
+                    <div class="index-page__google-stars" aria-hidden="true">
+                      <q-icon name="star" class="index-page__google-star" v-for="n in 5" :key="n" />
+                    </div>
+                    <div class="index-page__google-rating-summary">4.7 <span class="index-page__google-rating-light">Gwiazdek</span> | 169 <span class="index-page__google-rating-light">Opinii</span></div>
+                  </div>
+                </div>
+                <div class="index-page__hero-intro-photo">
+                  <img :src="heroIntroImage" alt="AM Moda" class="index-page__hero-intro-photo-img">
+                </div>
               </div>
             </section>
 
-            <!-- 5: And many more (left) | Photo (right) -->
-            <section class="index-page__split-section">
-              <div class="index-page__split-content">
-                <h2 class="index-page__split-title">…i wiele więcej</h2>
+            <!-- Hero blocks: full-width photo with title + "Odwiedź nas" overlay -->
+            <section
+              v-for="(hero, i) in heroSections.slice(1)"
+              :key="hero.title"
+              class="index-page__hero-block"
+            >
+              <div
+                :ref="(el) => setHeroWrapRef(el, i)"
+                class="index-page__hero-photo-wrap"
+              >
+                <img
+                  v-if="hero.photo"
+                  :src="hero.photo"
+                  :alt="hero.alt"
+                  class="index-page__hero-img"
+                  :style="heroParallaxStyle(i)"
+                >
               </div>
-              <div class="index-page__split-media">
-                <img v-if="sectionFifthPhoto" :src="sectionFifthPhoto" alt="Więcej" class="index-page__split-img">
+              <div class="index-page__hero-overlay">
+                <h2 class="index-page__hero-title">{{ hero.title }}</h2>
+                <p v-if="hero.subtitle" class="index-page__hero-subtitle">{{ hero.subtitle }}</p>
+                <button type="button" class="index-page__hero-btn">
+                  Odwiedź nas
+                </button>
               </div>
             </section>
 
-            <!-- 6: Location text (left) | Map (right) -->
-            <section class="index-page__split-section">
-              <div class="index-page__split-content">
-                <h3 class="index-page__split-heading">Znajdziesz nas tutaj</h3>
+            <!-- 6: Location – text and button above, map below -->
+            <section class="index-page__split-section index-page__split-section--location">
+              <div class="index-page__split-content index-page__split-content--center">
+                <h3 class="index-page__split-heading">Znajdziesz nas tutaj:</h3>
                 <p class="index-page__split-address">
-                  Kozy<br>
-                  ul. Bielska 166
+                  Kozy, ul. Bielska 166
                 </p>
-                <q-btn
-                  color="primary"
-                  unelevated
-                  no-caps
-                  class="q-mt-sm"
-                  label="Wyznacz trasę"
+                <a
                   :href="mapsUrl"
                   target="_blank"
-                />
+                  rel="noopener"
+                  class="index-page__route-btn q-mt-sm"
+                >
+                  Wyznacz trasę
+                </a>
               </div>
               <div class="index-page__split-media index-page__split-media--map">
                 <iframe
@@ -120,15 +130,13 @@
               </div>
             </section>
 
-            <!-- 7: Facebook (same section style) -->
-            <section class="index-page__split-section">
-              <div class="index-page__split-content">
-                <h3 class="index-page__split-heading">Bądź na bieżąco</h3>
-                <p class="index-page__split-text">
-                  Zapraszamy na naszą stronę na Facebooku, gdzie publikujemy zawsze aktualne zdjęcia nowych kolekcji.
+            <!-- 7: Facebook – centered, single-column -->
+            <section class="index-page__split-section index-page__split-section--facebook">
+              <div class="index-page__facebook-block">
+                <h3 class="index-page__facebook-heading">Bądź na bieżąco</h3>
+                <p class="index-page__facebook-text">
+                  Zapraszamy na naszą stronę na Facebooku, gdzie publikujemy aktualne zdjęcia nowych kolekcji.
                 </p>
-              </div>
-              <div class="index-page__split-content index-page__split-content--cta">
                 <a
                   :href="facebookUrl"
                   target="_blank"
@@ -270,11 +278,33 @@
         </transition>
         </div>
 
-            <q-dialog v-model="lightboxOpen">
+            <q-dialog v-model="lightboxOpen" class="index-page__lightbox-dialog">
               <q-card class="index-page__lightbox-card">
-                <div class="index-page__lightbox-inner">
+                <button
+                  v-if="lightboxHasPrev"
+                  type="button"
+                  class="index-page__lightbox-arrow index-page__lightbox-arrow--prev"
+                  aria-label="Poprzednie zdjęcie"
+                  @click="lightboxGoPrev"
+                >
+                  <q-icon name="chevron_left" size="32px" />
+                </button>
+                <button
+                  v-if="lightboxHasNext"
+                  type="button"
+                  class="index-page__lightbox-arrow index-page__lightbox-arrow--next"
+                  aria-label="Następne zdjęcie"
+                  @click="lightboxGoNext"
+                >
+                  <q-icon name="chevron_right" size="30px" />
+                </button>
+                <div
+                  class="index-page__lightbox-inner"
+                  @touchstart.passive="onLightboxTouchStart"
+                  @touchend.passive="onLightboxTouchEnd"
+                >
                   <span class="index-page__lightbox-img-wrap">
-                    <img :src="lightboxUrl" alt="Podgląd zdjęcia" class="index-page__lightbox-img">
+                    <img v-if="lightboxUrl" :src="lightboxUrl" alt="Podgląd zdjęcia" class="index-page__lightbox-img">
                     <q-btn
                       round
                       dense
@@ -304,7 +334,8 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import heroIntroImage from '../assets/Main photos/1.jpg'
 
 const TAB_STORAGE_KEY = 'index-page-active-tab'
 
@@ -368,6 +399,7 @@ watch(activeTab, (value) => {
   } catch {
     /* persist best-effort; ignore when storage unavailable */
   }
+  if (value === 'info') nextTick(() => updateHeroParallax())
 })
 
 const photoList = ref([])
@@ -381,9 +413,51 @@ const dragActive = ref(false)
 const pendingFiles = ref([])
 
 const lightboxOpen = ref(false)
-const lightboxUrl = ref('')
+const lightboxIndex = ref(0)
+const lightboxTouchStartX = ref(0)
+
+const lightboxPhotoList = computed(() => {
+  const urls = []
+  if (galleryUploadUnlocked.value && photoListWithUrls.value.length) {
+    urls.push(...photoListWithUrls.value.map((p) => p.urlWithCache))
+  }
+  urls.push(...productPhotos.value)
+  return urls
+})
+
+const lightboxUrl = computed(
+  () => lightboxPhotoList.value[lightboxIndex.value] ?? '',
+)
+const lightboxHasPrev = computed(() => lightboxIndex.value > 0)
+const lightboxHasNext = computed(
+  () =>
+    lightboxPhotoList.value.length > 0 &&
+    lightboxIndex.value < lightboxPhotoList.value.length - 1,
+)
 const panelSlideDirection = ref('left')
 const mainRef = ref(null)
+const heroWrapRefs = ref([null, null, null])
+const heroParallaxY = ref([0, 0, 0])
+const HERO_PARALLAX_FACTOR = 0.25
+
+function setHeroWrapRef(el, i) {
+  if (el) heroWrapRefs.value[i] = el
+}
+
+function heroParallaxStyle(i) {
+  return { transform: `translateY(${heroParallaxY.value[i] ?? 0}px)` }
+}
+
+function updateHeroParallax() {
+  if (activeTab.value !== 'info') return
+  heroWrapRefs.value.forEach((el, i) => {
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const viewportCenter = window.innerHeight * 0.5
+    const offset = (rect.top - viewportCenter) * HERO_PARALLAX_FACTOR
+    heroParallaxY.value[i] = offset
+  })
+}
 
 function goToGallery() {
   panelSlideDirection.value = 'left'
@@ -423,6 +497,16 @@ const mainPhotos = computed(() => {
 const sectionFifthPhoto = computed(() => {
   const photos = mainPhotos.value
   return photos[4] ?? photos[photos.length - 1] ?? photos[0]
+})
+
+const heroSections = computed(() => {
+  const photos = mainPhotos.value
+  return [
+    { title: 'STYL i ELEGANCJA', subtitle: 'na co dzień i na wieczór', photo: photos[0], alt: 'AM Moda' },
+    { title: 'Sukienki', photo: photos[2], alt: 'Sukienki' },
+    { title: 'Buty', photo: sectionFifthPhoto.value, alt: 'Buty' },
+    { title: 'Portfele', photo: photos[1], alt: 'Portfele' },
+  ]
 })
 
 const productPhotos = computed(() => {
@@ -544,8 +628,43 @@ async function deletePhoto(id) {
 }
 
 function openPhoto(url) {
-  lightboxUrl.value = url
+  const list = lightboxPhotoList.value
+  const idx = list.indexOf(url)
+  lightboxIndex.value = idx >= 0 ? idx : 0
   lightboxOpen.value = true
+}
+
+function lightboxGoPrev() {
+  if (lightboxHasPrev.value) lightboxIndex.value--
+}
+
+function lightboxGoNext() {
+  if (lightboxHasNext.value) lightboxIndex.value++
+}
+
+function onLightboxTouchStart(e) {
+  lightboxTouchStartX.value = e.touches[0]?.clientX ?? 0
+}
+
+function onLightboxTouchEnd(e) {
+  const endX = e.changedTouches[0]?.clientX ?? 0
+  const delta = endX - lightboxTouchStartX.value
+  const threshold = 50
+  if (delta > threshold) lightboxGoPrev()
+  else if (delta < -threshold) lightboxGoNext()
+}
+
+function onLightboxKeydown(e) {
+  if (!lightboxOpen.value) return
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault()
+    lightboxGoPrev()
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault()
+    lightboxGoNext()
+  } else if (e.key === 'Escape') {
+    lightboxOpen.value = false
+  }
 }
 
 function formatSize(size) {
@@ -556,8 +675,25 @@ function formatSize(size) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`
 }
 
+function setupLightboxKeyboard(on) {
+  if (on) {
+    window.addEventListener('keydown', onLightboxKeydown)
+  } else {
+    window.removeEventListener('keydown', onLightboxKeydown)
+  }
+}
+
+watch(lightboxOpen, (open) => {
+  nextTick(() => setupLightboxKeyboard(open))
+})
 onMounted(async () => {
   loadPhotos()
+  window.addEventListener('scroll', updateHeroParallax, { passive: true })
+  nextTick(() => updateHeroParallax())
+})
+onUnmounted(() => {
+  setupLightboxKeyboard(false)
+  window.removeEventListener('scroll', updateHeroParallax)
 })
 </script>
 
@@ -704,9 +840,9 @@ onMounted(async () => {
 }
 
 .index-page__panels-inner {
-  max-width: 1120px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 16px 16px 24px;
+  padding: 16px 6px 24px;
   box-sizing: border-box;
 }
 
@@ -765,13 +901,277 @@ onMounted(async () => {
   transform: translateX(100%);
 }
 
+/* First hero: full-width grey bg, left content (rating + text + button), right = picture */
+.index-page__hero-intro {
+  position: relative;
+  margin-bottom: 48px;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  background: linear-gradient(145deg, #f8f8f8 0%, #f0f0f0 35%, #e8e8e8 70%, #e5e5e5 100%);
+  box-sizing: border-box;
+  overflow: visible;
+}
+.index-page__hero-intro-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  row-gap: 20px;
+  align-items: start;
+  max-width: 1400px;
+  margin: 0 auto;
+  overflow: visible;
+}
+/* Desktop: left = Google Reviews on top, then title + button (compact); right = photo */
+.index-page__hero-intro-reviews {
+  grid-column: 1;
+  grid-row: 1;
+  padding: 24px 40px 0 56px;
+  align-self: start;
+}
+.index-page__hero-intro-content {
+  grid-column: 1;
+  grid-row: 2;
+  padding-left: 56px;
+  padding-right: 40px;
+  align-self: start;
+}
+.index-page__hero-intro-photo {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  min-height: 0;
+}
+.index-page__hero-intro-photo-img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  transform: scale(1.1);
+}
+.index-page__hero-intro-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0 40px 32px;
+  padding-left: 56px;
+}
+.index-page__google-reviews {
+  margin-bottom: 24px;
+}
+.index-page__google-reviews-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.index-page__google-logo-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid #dadce0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.index-page__google-logo-wrap::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-left-color: #dadce0;
+  border-right: 0;
+}
+.index-page__google-logo-wrap::before {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: #fff;
+  border-right: 0;
+}
+.index-page__google-logo {
+  width: 22px;
+  height: 22px;
+  position: relative;
+  z-index: 1;
+}
+.index-page__google-reviews-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #5f6368;
+}
+.index-page__google-stars {
+  display: inline-flex;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+.index-page__google-star {
+  color: #fbbc04;
+  font-size: 22px;
+}
+.index-page__google-rating-summary {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3c4043;
+}
+.index-page__google-rating-light {
+  font-weight: 400;
+}
+.index-page__hero-intro-title {
+  margin: 0px;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.index-page__hero-intro-subtitle {
+  margin: 0 0 20px;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #444444;
+}
+
+@media (max-width: 768px) {
+  .index-page__hero-intro-inner {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    gap: 32px;
+  }
+  .index-page__hero-intro-content,
+  .index-page__hero-intro-reviews,
+  .index-page__hero-intro-photo {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  /* Order: title + subtitle + button above photo, then photo, then reviews below */
+  .index-page__hero-intro-content {
+    order: -1;
+    padding: 20px 20px 8px;
+    margin-bottom: 0;
+    text-align: center;
+    align-items: center;
+  }
+  .index-page__hero-intro-photo {
+    order: 0;
+  }
+  .index-page__hero-intro-reviews {
+    order: 1;
+    padding: 0 20px 28px;
+    padding-top: 0;
+    margin-top: 0;
+  }
+  .index-page__hero-intro-photo-img {
+    transform: scale(1.2);
+    max-width: 100%;
+  }
+  .index-page__hero-intro-reviews .index-page__google-reviews {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .index-page__google-reviews-header {
+    justify-content: center;
+  }
+  .index-page__hero-intro-content .index-page__hero-btn {
+    align-self: center;
+  }
+}
+
+/* Hero blocks: photo with side margins, max-height 60vh, title + "Odwiedź nas" overlay, parallax */
+.index-page__hero-block {
+  position: relative;
+  margin-bottom: 48px;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.index-page__hero-photo-wrap {
+  max-height: 60vh;
+  overflow: hidden;
+  position: relative;
+}
+.index-page__hero-img {
+  width: 100%;
+  min-height: 75vh;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  will-change: transform;
+}
+.index-page__hero-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 32px;
+  max-width: 50%;
+  pointer-events: none;
+}
+.index-page__hero-overlay .index-page__hero-btn {
+  pointer-events: auto;
+}
+.index-page__hero-title {
+  margin: 0 0 8px;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  /* Shadow below text only: larger y-offset so blur does not darken the letters */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.index-page__hero-subtitle {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: #ffffff;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  /* Shadow below text only: larger y-offset so blur does not darken the letters */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.index-page__hero-btn {
+  align-self: flex-start;
+  min-width: 140px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.index-page__hero-btn:hover {
+  background: #f5f5f5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .index-page__split-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   align-items: center;
   min-height: 220px;
-  margin-bottom: 24px;
+  margin-bottom: 48px;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -798,6 +1198,14 @@ onMounted(async () => {
   justify-content: center;
 }
 
+.index-page__split-content--center {
+  text-align: center;
+}
+.index-page__split-content--center .index-page__split-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
 .index-page__split-title {
   margin: 0;
   font-size: 1.75rem;
@@ -815,6 +1223,28 @@ onMounted(async () => {
   font-size: 0.98rem;
 }
 
+/* Route button – same shape as Facebook, glassmorphic, pink */
+.index-page__route-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #c41e5a;
+  font-weight: 600;
+  font-size: 1rem;
+  background: rgba(196, 30, 90, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(196, 30, 90, 0.25);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.index-page__route-btn:hover {
+  background: rgba(196, 30, 90, 0.2);
+  transform: translateY(-1px);
+}
+
 .index-page__split-text {
   margin: 0;
   font-size: 0.95rem;
@@ -827,6 +1257,35 @@ onMounted(async () => {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
   min-height: 200px;
   background: #f3f3f3;
+}
+
+/* Location: stacked – text and button first, map below */
+.index-page__split-section--location {
+  grid-template-columns: 1fr;
+  min-height: 0;
+}
+
+.index-page__split-section--location > .index-page__split-content {
+  margin-bottom: 24px;
+}
+
+.index-page__split-section--location .index-page__split-heading {
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: #666666;
+}
+
+.index-page__split-section--location .index-page__split-address {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.index-page__split-section--location > .index-page__split-media--map {
+  max-width: 1000px;
+  min-height: 420px;
+  width: 100%;
+  justify-self: center;
 }
 
 .index-page__split-media--map {
@@ -848,18 +1307,59 @@ onMounted(async () => {
   display: block;
 }
 
+.index-page__split-section--location .index-page__split-iframe {
+  min-height: 420px;
+}
+
+/* Facebook section: centered, card-style */
+.index-page__split-section--facebook {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+.index-page__facebook-block {
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.index-page__facebook-heading {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+.index-page__facebook-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #444444;
+}
 .index-page__facebook-link {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 14px 24px;
   text-decoration: none;
-  color: #1b74e4;
-  font-weight: 500;
+  color: #1877f2;
+  font-weight: 600;
+  font-size: 1.05rem;
+  background: rgba(24, 119, 242, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(24, 119, 242, 0.2);
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.index-page__facebook-link:hover {
+  background: rgba(24, 119, 242, 0.12);
+  box-shadow: 0 4px 12px rgba(24, 119, 242, 0.15);
+  transform: translateY(-1px);
 }
 
 .index-page__facebook-logo {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   background: #1877f2;
   display: flex;
@@ -867,7 +1367,8 @@ onMounted(async () => {
   justify-content: center;
   color: #ffffff;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
+  flex-shrink: 0;
 }
 
 .index-page__section--upload {
@@ -1044,15 +1545,45 @@ onMounted(async () => {
 }
 
 .index-page__lightbox-card {
+  position: relative;
   max-width: 90vw;
   max-height: 90vh;
   padding: 0;
   background: transparent;
   box-shadow: none;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.index-page__lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.index-page__lightbox-arrow:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+.index-page__lightbox-arrow--prev {
+  left: 12px;
+}
+.index-page__lightbox-arrow--next {
+  right: 12px;
 }
 
 .index-page__lightbox-inner {
@@ -1098,6 +1629,21 @@ onMounted(async () => {
 
 .index-page__lightbox-close:hover {
   background: rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 600px) {
+  .index-page__lightbox-arrow {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  .index-page__lightbox-arrow--prev {
+    left: 8px;
+  }
+  .index-page__lightbox-arrow--next {
+    right: 8px;
+  }
 }
 
 @media (max-width: 960px) {
