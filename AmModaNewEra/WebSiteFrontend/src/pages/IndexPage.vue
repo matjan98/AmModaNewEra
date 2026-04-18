@@ -41,10 +41,14 @@
           <div v-if="activeTab === 'info'" key="info" class="index-page__panels">
             <div class="index-page__panels-inner">
             <!-- First hero: full-bleed image with center-focused responsive zoom -->
-            <section ref="heroIntroRef" class="index-page__hero-intro">
-              <div class="index-page__hero-intro-photo">
+            <section
+              ref="heroIntroRef"
+              class="index-page__hero-intro"
+              :style="heroIntroCtaCssVars"
+            >
+              <div ref="heroIntroPhotoRef" class="index-page__hero-intro-photo">
                 <img
-                  :src="heroIntroImage"
+                  :src="heroIntroFirstImage"
                   alt="AM Moda"
                   class="index-page__hero-intro-photo-img"
                   @load="onHeroIntroImageLoad"
@@ -52,23 +56,27 @@
               </div>
               <div
                 class="index-page__hero-intro-sticky-cta"
-                :style="{ transform: `translateY(${heroIntroCtaOffsetY}px)` }"
+                :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroCtaFloated }"
               >
                 <div ref="heroIntroCtaRef" class="index-page__hero-intro-cta-block">
-                  <p
-                    class="index-page__hero-intro-address"
-                    :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
-                  >
-                    Kozy, ul. Bielska 166
-                  </p>
-                  <button
-                    type="button"
-                    class="index-page__hero-intro-cta-btn"
-                    :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
-                    @click="scrollToLocationSection"
-                  >
-                    <span class="index-page__hero-intro-cta-label">Odwiedź nas</span>
-                  </button>
+                  <div class="index-page__hero-intro-address-row">
+                    <p
+                      class="index-page__hero-intro-address"
+                      :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
+                    >
+                      Kozy, ul. Bielska 166
+                    </p>
+                  </div>
+                  <div class="index-page__hero-intro-btn-row">
+                    <button
+                      type="button"
+                      class="index-page__hero-intro-cta-btn"
+                      :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
+                      @click="scrollToLocationSection"
+                    >
+                      <span class="index-page__hero-intro-cta-label">Odwiedź nas</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -88,10 +96,14 @@
               </div>
             </section>
 
-            <section ref="heroIntroAfterRef" class="index-page__hero-intro">
-              <div class="index-page__hero-intro-photo">
+            <section
+              ref="heroIntroAfterRef"
+              class="index-page__hero-intro"
+              :style="heroIntroCtaCssVars"
+            >
+              <div ref="heroIntroAfterPhotoRef" class="index-page__hero-intro-photo">
                 <img
-                  :src="heroIntroImage"
+                  :src="heroIntroSecondImage"
                   alt=""
                   class="index-page__hero-intro-photo-img"
                   @load="onHeroIntroImageLoad"
@@ -99,23 +111,87 @@
               </div>
               <div
                 class="index-page__hero-intro-sticky-cta"
-                :style="{ transform: `translateY(${heroIntroAfterCtaOffsetY}px)` }"
+                :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroAfterCtaFloated }"
               >
                 <div ref="heroIntroAfterCtaRef" class="index-page__hero-intro-cta-block">
-                  <p
-                    class="index-page__hero-intro-address"
-                    :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
-                  >
-                    Kozy, ul. Bielska 166
-                  </p>
-                  <button
-                    type="button"
-                    class="index-page__hero-intro-cta-btn"
-                    :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
-                    @click="scrollToLocationSection"
-                  >
-                    <span class="index-page__hero-intro-cta-label">Odwiedź nas</span>
-                  </button>
+                  <div class="index-page__hero-intro-address-row">
+                    <p
+                      class="index-page__hero-intro-address"
+                      :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
+                    >
+                      Kozy, ul. Bielska 166
+                    </p>
+                  </div>
+                  <div class="index-page__hero-intro-btn-row">
+                    <button
+                      type="button"
+                      class="index-page__hero-intro-cta-btn"
+                      :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
+                      @click="scrollToLocationSection"
+                    >
+                      <span class="index-page__hero-intro-cta-label">Odwiedź nas</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="index-page__store-open-banner"
+              :aria-label="`${storeHoursHeadingLabel}, harmonogram tygodnia`"
+            >
+              <h3 class="index-page__store-hours-heading">
+                {{ storeHoursHeadingLabel }}
+              </h3>
+              <ul class="index-page__store-hours-list">
+                <li
+                  v-for="row in STORE_OPENING_HOURS"
+                  :key="row.dayIndex"
+                  class="index-page__store-hours-row"
+                  :class="{ 'index-page__store-hours-row--today': row.dayIndex === todayStoreDayIndex }"
+                >
+                  <span class="index-page__store-hours-day">{{ row.label }}</span>
+                  <span class="index-page__store-hours-time">{{ row.hours }}</span>
+                </li>
+              </ul>
+            </section>
+
+            <section
+              ref="heroIntroThirdRef"
+              class="index-page__hero-intro"
+              :style="heroIntroCtaCssVars"
+            >
+              <div ref="heroIntroThirdPhotoRef" class="index-page__hero-intro-photo">
+                <img
+                  :src="heroIntroThirdImage"
+                  alt=""
+                  class="index-page__hero-intro-photo-img"
+                  @load="onHeroIntroImageLoad"
+                >
+              </div>
+              <div
+                class="index-page__hero-intro-sticky-cta"
+                :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroThirdCtaFloated }"
+              >
+                <div ref="heroIntroThirdCtaRef" class="index-page__hero-intro-cta-block">
+                  <div class="index-page__hero-intro-address-row">
+                    <p
+                      class="index-page__hero-intro-address"
+                      :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
+                    >
+                      Kozy, ul. Bielska 166
+                    </p>
+                  </div>
+                  <div class="index-page__hero-intro-btn-row">
+                    <button
+                      type="button"
+                      class="index-page__hero-intro-cta-btn"
+                      :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
+                      @click="scrollToLocationSection"
+                    >
+                      <span class="index-page__hero-intro-cta-label">Odwiedź nas</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -361,7 +437,9 @@
 
 <script setup>
 import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import heroIntroImage from '../assets/Main photos/atf_photo.png'
+import heroIntroFirstImage from '../assets/Main photos/main2.png'
+import heroIntroSecondImage from '../assets/Main photos/atf_photo.png'
+import heroIntroThirdImage from '../assets/Main photos/main3.png'
 import sectionTwoBony from '../assets/Main photos/section 2/bony.jpg'
 import sectionTwoBut from '../assets/Main photos/section 2/but.jpg'
 import sectionTwoCzapka from '../assets/Main photos/section 2/czapka.jpg'
@@ -384,6 +462,17 @@ const sectionTwoItems = [
   { name: 'Rękawiczki', photo: sectionTwoRekawiczki },
   { name: 'Bony', photo: sectionTwoBony },
   { name: 'Peruki', photo: sectionTwoPeruka },
+]
+
+/** Same data as MainLayout opening hours (between hero blocks). */
+const STORE_OPENING_HOURS = [
+  { dayIndex: 1, label: 'poniedziałek', hours: '09:00 - 18:00' },
+  { dayIndex: 2, label: 'wtorek', hours: '09:00 - 18:00' },
+  { dayIndex: 3, label: 'środa', hours: '09:00 - 18:00' },
+  { dayIndex: 4, label: 'czwartek', hours: '09:00 - 18:00' },
+  { dayIndex: 5, label: 'piątek', hours: '09:00 - 18:00' },
+  { dayIndex: 6, label: 'sobota', hours: '09:00 - 14:00' },
+  { dayIndex: 0, label: 'niedziela', hours: 'Zamknięte' },
 ]
 
 function getStoredTab() {
@@ -447,7 +536,12 @@ watch(activeTab, (value) => {
     /* persist best-effort; ignore when storage unavailable */
   }
   if (value === 'info') {
-    nextTick(() => updateHeroIntroCtaPosition())
+    nextTick(() => {
+      setupHeroCtaIntersection(true)
+      updateHeroCtaModes()
+    })
+  } else {
+    setupHeroCtaIntersection(false)
   }
 })
 
@@ -486,56 +580,142 @@ const lightboxHasNext = computed(
 const panelSlideDirection = ref('left')
 const mainRef = ref(null)
 const heroIntroRef = ref(null)
+const heroIntroPhotoRef = ref(null)
 const heroIntroCtaRef = ref(null)
 const heroIntroAfterRef = ref(null)
+const heroIntroAfterPhotoRef = ref(null)
 const heroIntroAfterCtaRef = ref(null)
+const heroIntroThirdRef = ref(null)
+const heroIntroThirdPhotoRef = ref(null)
+const heroIntroThirdCtaRef = ref(null)
 const locationSectionRef = ref(null)
-const heroIntroCtaOffsetY = ref(0)
-const heroIntroAfterCtaOffsetY = ref(0)
+/** True while CTA tracks viewport bottom (`position: fixed`); false = anchored at photo bottom. */
+const heroIntroCtaFloated = ref(false)
+const heroIntroAfterCtaFloated = ref(false)
+const heroIntroThirdCtaFloated = ref(false)
 const heroIntroCtaVisible = ref(false)
+
+/** Distance of anchored / fixed CTA from the photo or viewport bottom (CSS only); dock threshold uses photo bottom vs visible viewport bottom (no gap in JS — avoids double-counting jump). */
+const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
+/** Fixed total height (px) for hero address + button; row heights sum to this. */
+const HERO_CTA_STACK_HEIGHT_PX = 96
+const HERO_CTA_ADDRESS_ROW_HEIGHT_PX = 49
+const HERO_CTA_BUTTON_ROW_HEIGHT_PX = 47
+/** Dense thresholds so IO fires while scrolling through tall heroes */
+const HERO_CTA_IO_THRESHOLDS = Array.from({ length: 100 }, (_, i) => i / 99)
+
+const heroIntroCtaCssVars = computed(() => ({
+  '--hero-cta-img-gap': `${HERO_CTA_IMAGE_BOTTOM_GAP_PX}px`,
+  '--hero-cta-stack-height': `${HERO_CTA_STACK_HEIGHT_PX}px`,
+  '--hero-cta-address-row-height': `${HERO_CTA_ADDRESS_ROW_HEIGHT_PX}px`,
+  '--hero-cta-button-row-height': `${HERO_CTA_BUTTON_ROW_HEIGHT_PX}px`,
+}))
+
+let heroCtaIntersectionObserver = null
+let heroCtaResizeAttached = false
+let heroCtaVisualViewportAttached = false
+
+/** Bottom edge of the visible viewport in client coordinates (matches `position: fixed` / getBoundingClientRect). */
+function getViewportBottomClientY() {
+  const vv = window.visualViewport
+  if (vv) {
+    return vv.offsetTop + vv.height
+  }
+  return window.innerHeight || document.documentElement.clientHeight || 0
+}
 
 function scrollToLocationSection() {
   locationSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-function clampValue(value, min, max) {
-  return Math.min(Math.max(value, min), max)
+/**
+ * Floated while the photo bottom is still below the visible viewport bottom (then fixed `bottom: gap` matches anchored `photoBottom - gap` at the switch).
+ */
+function computeHeroCtaFloated(photoEl, sectionFallbackEl) {
+  const el = photoEl ?? sectionFallbackEl
+  if (!el) return false
+  const rect = el.getBoundingClientRect()
+  if (rect.height <= 0) return false
+
+  const viewportBottom = getViewportBottomClientY()
+  const epsilon = 0.5
+
+  if (rect.bottom <= 0 || rect.top >= viewportBottom) return false
+
+  return rect.bottom > viewportBottom - epsilon
 }
 
-function computeHeroIntroCtaOffsetY(heroElement, ctaElement) {
-  if (!heroElement || !ctaElement) return null
-  const heroRect = heroElement.getBoundingClientRect()
-  if (heroRect.height <= 0) return null
-
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight
-  const ctaHeight = ctaElement.offsetHeight || 47
-  const edgeGap = 20
-  const minOffset = edgeGap
-  const maxOffset = Math.max(edgeGap, heroRect.height - ctaHeight - edgeGap)
-  const viewportAnchor = viewportHeight - ctaHeight - edgeGap
-  const relativeOffset = viewportAnchor - heroRect.top
-  return clampValue(relativeOffset, minOffset, maxOffset)
+function updateHeroCtaModes() {
+  heroIntroCtaFloated.value = computeHeroCtaFloated(heroIntroPhotoRef.value, heroIntroRef.value)
+  heroIntroAfterCtaFloated.value = computeHeroCtaFloated(
+    heroIntroAfterPhotoRef.value,
+    heroIntroAfterRef.value,
+  )
+  heroIntroThirdCtaFloated.value = computeHeroCtaFloated(
+    heroIntroThirdPhotoRef.value,
+    heroIntroThirdRef.value,
+  )
 }
 
-function updateHeroIntroCtaPosition() {
-  const top = computeHeroIntroCtaOffsetY(heroIntroRef.value, heroIntroCtaRef.value)
-  if (top !== null) heroIntroCtaOffsetY.value = top
-  const after = computeHeroIntroCtaOffsetY(heroIntroAfterRef.value, heroIntroAfterCtaRef.value)
-  if (after !== null) heroIntroAfterCtaOffsetY.value = after
+function onHeroCtaIntersection() {
+  updateHeroCtaModes()
 }
 
-function setupHeroIntroCtaTracking(on) {
-  if (on) {
-    window.addEventListener('scroll', updateHeroIntroCtaPosition, { passive: true })
-    window.addEventListener('resize', updateHeroIntroCtaPosition)
-  } else {
-    window.removeEventListener('scroll', updateHeroIntroCtaPosition)
-    window.removeEventListener('resize', updateHeroIntroCtaPosition)
+function setupHeroCtaIntersection(on) {
+  if (!on) {
+    if (heroCtaIntersectionObserver) {
+      heroCtaIntersectionObserver.disconnect()
+      heroCtaIntersectionObserver = null
+    }
+    if (heroCtaResizeAttached) {
+      window.removeEventListener('resize', updateHeroCtaModes)
+      heroCtaResizeAttached = false
+    }
+    if (heroCtaVisualViewportAttached && window.visualViewport) {
+      const vv = window.visualViewport
+      vv.removeEventListener('resize', updateHeroCtaModes)
+      vv.removeEventListener('scroll', updateHeroCtaModes)
+      heroCtaVisualViewportAttached = false
+    }
+    return
   }
+
+  if (!heroCtaResizeAttached) {
+    window.addEventListener('resize', updateHeroCtaModes)
+    heroCtaResizeAttached = true
+  }
+
+  if (!heroCtaVisualViewportAttached && window.visualViewport) {
+    const vv = window.visualViewport
+    vv.addEventListener('resize', updateHeroCtaModes)
+    vv.addEventListener('scroll', updateHeroCtaModes)
+    heroCtaVisualViewportAttached = true
+  }
+
+  if (typeof IntersectionObserver === 'undefined') {
+    updateHeroCtaModes()
+    return
+  }
+
+  if (heroCtaIntersectionObserver) {
+    heroCtaIntersectionObserver.disconnect()
+  }
+
+  heroCtaIntersectionObserver = new IntersectionObserver(onHeroCtaIntersection, {
+    root: null,
+    rootMargin: '0px',
+    threshold: HERO_CTA_IO_THRESHOLDS,
+  })
+
+  const sections = [heroIntroRef.value, heroIntroAfterRef.value, heroIntroThirdRef.value]
+  for (const el of sections) {
+    if (el) heroCtaIntersectionObserver.observe(el)
+  }
+  updateHeroCtaModes()
 }
 
 function onHeroIntroImageLoad() {
-  updateHeroIntroCtaPosition()
+  updateHeroCtaModes()
   if (!heroIntroCtaVisible.value) {
     heroIntroCtaVisible.value = true
   }
@@ -560,6 +740,12 @@ function getApiUrl(path) {
   if (base) return `${base}/${path}`
   return `${API_SUBPATH}/${path}`
 }
+
+const todayStoreDayIndex = computed(() => new Date().getDay())
+
+const storeHoursHeadingLabel = computed(() =>
+  todayStoreDayIndex.value === 0 ? 'Godziny otwarcia' : 'dziś otwarte!',
+)
 
 const photoListWithUrls = computed(() =>
   photoList.value.map((p) => ({
@@ -748,16 +934,18 @@ watch(lightboxOpen, (open) => {
 onMounted(async () => {
   loadPhotos()
   await nextTick()
-  setupHeroIntroCtaTracking(true)
-  updateHeroIntroCtaPosition()
+  if (activeTab.value === 'info') {
+    setupHeroCtaIntersection(true)
+  }
+  updateHeroCtaModes()
   window.setTimeout(() => {
-    updateHeroIntroCtaPosition()
+    updateHeroCtaModes()
     heroIntroCtaVisible.value = true
   }, 300)
 })
 onUnmounted(() => {
   setupLightboxKeyboard(false)
-  setupHeroIntroCtaTracking(false)
+  setupHeroCtaIntersection(false)
 })
 </script>
 
@@ -1000,10 +1188,12 @@ onUnmounted(() => {
   box-sizing: border-box;
   overflow: visible;
 }
+
 .index-page__hero-intro-photo {
   width: 100%;
   overflow: visible;
 }
+
 .index-page__hero-intro-photo-img {
   width: 100%;
   height: auto;
@@ -1016,21 +1206,79 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
+  bottom: 0;
   z-index: 6;
   display: flex;
+  align-items: flex-end;
   justify-content: center;
-  padding: 0 16px;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-right: 16px;
+  padding-bottom: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
+  padding-left: 16px;
+  box-sizing: border-box;
   pointer-events: none;
-  will-change: transform;
+}
+
+.index-page__hero-intro-sticky-cta--floated {
+  position: fixed;
+  top: auto;
+  bottom: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
+  left: 0;
+  right: 0;
+  height: auto;
+  justify-content: center;
+  align-items: flex-end;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-right: 16px;
+  padding-bottom: 0;
+  padding-left: 16px;
+  z-index: 1500;
 }
 
 .index-page__hero-intro-cta-block {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: clamp(7px, 1.5vw, 11px);
+  align-items: stretch;
+  gap: 0;
+  box-sizing: border-box;
+  width: 100%;
   max-width: min(92vw, 560px);
+  height: var(--hero-cta-stack-height, 96px);
+  min-height: var(--hero-cta-stack-height, 96px);
+  max-height: var(--hero-cta-stack-height, 96px);
+  margin: 0;
+  padding: 0;
   pointer-events: none;
+}
+
+.index-page__hero-intro-address-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: var(--hero-cta-address-row-height, 49px);
+  min-height: var(--hero-cta-address-row-height, 49px);
+  max-height: var(--hero-cta-address-row-height, 49px);
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.index-page__hero-intro-btn-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: var(--hero-cta-button-row-height, 47px);
+  min-height: var(--hero-cta-button-row-height, 47px);
+  max-height: var(--hero-cta-button-row-height, 47px);
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 .index-page__hero-intro-address {
@@ -1045,6 +1293,12 @@ onUnmounted(() => {
   color: #ffffff;
   text-transform: none;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.45s ease 0.05s,
@@ -1063,9 +1317,12 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
   min-width: 140px;
-  min-height: 47px;
-  padding: 8px 15px;
+  min-height: 0;
+  max-height: 100%;
+  margin: 0;
+  padding: 12px 15px;
   text-decoration: none;
   font-size: 0.75rem;
   font-weight: 500;
@@ -1121,6 +1378,70 @@ onUnmounted(() => {
 .index-page__hero-intro-cta-btn--visible:active {
   --cta-inset-x: 7px;
   --cta-inset-y: 3px;
+}
+
+.index-page__store-open-banner {
+  margin: 0;
+  padding: clamp(16px, 3.5vw, 26px) clamp(16px, 4vw, 28px);
+  text-align: center;
+  background: transparent;
+}
+
+.index-page__store-hours-heading {
+  margin: 0 0 clamp(12px, 2.5vw, 18px);
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.index-page__store-hours-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: min(420px, 100%);
+  text-align: left;
+}
+
+.index-page__store-hours-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 6px 10px;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.88rem, 2.4vw, 1rem);
+  color: #ffffff;
+  border-radius: 8px;
+}
+
+.index-page__store-hours-row--today {
+  background: rgba(255, 105, 180, 0.14);
+  backdrop-filter: blur(12px) saturate(1.35);
+  -webkit-backdrop-filter: blur(12px) saturate(1.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 170, 210, 0.5),
+    0 1px 12px rgba(255, 120, 180, 0.12);
+}
+
+.index-page__store-hours-row--today .index-page__store-hours-day,
+.index-page__store-hours-row--today .index-page__store-hours-time {
+  color: #ffffff;
+}
+
+.index-page__store-hours-day {
+  text-transform: capitalize;
+  font-weight: 400;
+}
+
+.index-page__store-hours-time {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #ffffff;
 }
 
 .index-page__section-two {
@@ -1182,6 +1503,10 @@ onUnmounted(() => {
   }
 
   .index-page__hero-intro-sticky-cta {
+    padding: 0 12px max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
+  }
+
+  .index-page__hero-intro-sticky-cta--floated {
     padding: 0 12px;
   }
 

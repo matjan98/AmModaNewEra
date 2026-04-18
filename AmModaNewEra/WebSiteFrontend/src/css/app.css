@@ -27,3 +27,14 @@ body,
 :root {
   --q-primary: #E61971;
 }
+
+/* Pink text selection (readable on dark UI) */
+::selection {
+  background-color: rgba(230, 25, 113, 0.48);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: rgba(230, 25, 113, 0.48);
+  color: #ffffff;
+}
