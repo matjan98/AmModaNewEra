@@ -158,7 +158,7 @@
           >
             <q-icon name="phone" size="22px" />
             <span
-              v-if="isOpenToday"
+              v-if="isStoreOpenNow"
               class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-0"
               aria-hidden="true"
             />
@@ -186,7 +186,7 @@
           >
             <q-icon name="fa-regular fa-clock" size="22px" />
             <span
-              v-if="isOpenToday"
+              v-if="isStoreOpenNow"
               class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-1"
               aria-hidden="true"
             />
@@ -233,7 +233,7 @@
         />
       </svg>
       <span
-        v-if="!isOpenToday"
+        v-if="!isStoreOpenNow"
         class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-fb"
         aria-hidden="true"
       />
@@ -267,11 +267,29 @@ const openingHours = [
 
 const hoursExpanded = ref(false)
 
-const today = new Date()
-const todayDayIndex = today.getDay()
-const openingToday = computed(() => openingHours.find((h) => h.dayIndex === todayDayIndex))
+/** Wall-clock time for “today” / open-now checks (updates every minute). */
+const now = ref(new Date())
+const todayDayIndex = computed(() => now.value.getDay())
+const openingToday = computed(() => openingHours.find((h) => h.dayIndex === todayDayIndex.value))
 const isOpenToday = computed(() => openingToday.value?.hours !== 'Zamknięte')
 const todayHours = computed(() => openingToday.value?.hours ?? 'Zamknięte')
+
+function parseOpeningRangeMinutes(hoursStr) {
+  if (!hoursStr || hoursStr === 'Zamknięte') return null
+  const m = hoursStr.trim().match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/)
+  if (!m) return null
+  const startMin = Number(m[1]) * 60 + Number(m[2])
+  const endMin = Number(m[3]) * 60 + Number(m[4])
+  return { startMin, endMin }
+}
+
+/** True only within today’s opening interval (local time); end time is exclusive. */
+const isStoreOpenNow = computed(() => {
+  const range = parseOpeningRangeMinutes(openingToday.value?.hours)
+  if (!range) return false
+  const mins = now.value.getHours() * 60 + now.value.getMinutes()
+  return mins >= range.startMin && mins < range.endMin
+})
 
 const headerRef = ref(null)
 provide('layoutHeaderRef', headerRef)
@@ -312,8 +330,10 @@ const facebookUrl = 'https://www.facebook.com/AMModaDamska/'
 const facebookFabEntered = ref(false)
 let facebookFabEnterTimer = null
 const FACEBOOK_FAB_ENTER_DELAY_MS = 2000
+const OPEN_STATUS_TICK_MS = 60_000
 
 const phoneFabExpanded = ref(false)
+let openStatusTickTimer = null
 
 function togglePhoneFab() {
   phoneFabExpanded.value = !phoneFabExpanded.value
@@ -338,6 +358,11 @@ provide('galleryUploadUnlocked', galleryUploadUnlocked)
 provide('showAuxInput', showAuxInput)
 
 onMounted(() => {
+  now.value = new Date()
+  openStatusTickTimer = window.setInterval(() => {
+    now.value = new Date()
+  }, OPEN_STATUS_TICK_MS)
+
   updateSmallScreen()
   mediaQuery = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
   mediaQuery.addEventListener('change', updateSmallScreen)
@@ -348,6 +373,10 @@ onMounted(() => {
   }, FACEBOOK_FAB_ENTER_DELAY_MS)
 })
 onUnmounted(() => {
+  if (openStatusTickTimer != null) {
+    window.clearInterval(openStatusTickTimer)
+    openStatusTickTimer = null
+  }
   if (mediaQuery) mediaQuery.removeEventListener('change', updateSmallScreen)
   window.removeEventListener('scroll', onWindowScroll)
   document.removeEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
@@ -768,19 +797,32 @@ onUnmounted(() => {
   }
 }
 
-/* Fixed column: vertically centered (50% viewport height); each FAB slides in from the right with stagger */
+/* Fixed column: mobile = vertical cluster; desktop (751+) = Facebook only, bottom-right */
 .main-layout__fab-column {
   position: fixed;
-  top: 50%;
-  bottom: auto;
   right: max(16px, env(safe-area-inset-right, 0px));
-  transform: translateY(-50%);
   z-index: 6000;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 10px;
   pointer-events: none;
+}
+
+@media (max-width: 750px) {
+  .main-layout__fab-column {
+    top: calc(50% - 30vh);
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+}
+
+@media (min-width: 751px) {
+  .main-layout__fab-column {
+    top: auto;
+    bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    transform: none;
+  }
 }
 
 .main-layout__fab-column > * {
@@ -814,14 +856,38 @@ onUnmounted(() => {
   .main-layout__fab-column--entered .main-layout__facebook-fab {
     transition-delay: 0s;
   }
+
   .main-layout__mobile-fab-stack {
     display: none;
+  }
+
+  .main-layout__facebook-fab {
+    width: 64px;
+    height: 48px;
+    border-radius: 3px;
+  }
+
+  .main-layout__facebook-fab-icon {
+    width: 28px;
+    height: 28px;
   }
 }
 
 @media (max-width: 750px) {
   .main-layout__contact--below {
     display: none !important;
+  }
+
+  .main-layout__mobile-fab-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+
+  .main-layout__facebook-fab {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
   }
 }
 
@@ -888,14 +954,14 @@ onUnmounted(() => {
   min-width: 0;
   max-width: calc(100vw - 48px);
   padding: 6px 11px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(18px) saturate(1.25);
-  -webkit-backdrop-filter: blur(18px) saturate(1.25);
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: rgba(14, 14, 18, 0.92);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 14px 44px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .main-layout__mobile-fab-phone-link {
@@ -905,7 +971,7 @@ onUnmounted(() => {
   gap: 2px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #121212;
+  color: rgba(255, 255, 255, 0.96);
   text-align: center;
   text-decoration: none;
 }
@@ -915,7 +981,7 @@ onUnmounted(() => {
   font-size: 0.82rem;
   font-weight: 400;
   line-height: 1.2;
-  color: rgba(0, 0, 0, 0.52);
+  color: rgba(255, 255, 255, 0.52);
 }
 
 .main-layout__mobile-fab-phone-number {
@@ -949,8 +1015,8 @@ onUnmounted(() => {
   height: 38px;
   padding: 0;
   margin: 0;
-  background: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: #1877f2;
+  border: 1px solid rgba(255, 255, 255, 0.38);
   border-radius: 2px;
   color: #ffffff;
   text-decoration: none;
@@ -958,7 +1024,8 @@ onUnmounted(() => {
 }
 
 .main-layout__facebook-fab:hover {
-  border-color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.55);
+  background: #166fe5;
 }
 
 .main-layout__facebook-fab:focus-visible {
@@ -992,6 +1059,10 @@ onUnmounted(() => {
 
 .main-layout__fab-status-dot--delay-fb {
   animation-delay: 0s;
+}
+
+.main-layout__facebook-fab .main-layout__fab-status-dot {
+  border-color: rgba(255, 255, 255, 0.55);
 }
 
 @keyframes main-layout-fab-dot-pulse {
