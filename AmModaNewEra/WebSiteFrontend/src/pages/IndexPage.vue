@@ -143,17 +143,41 @@
               <h3 class="index-page__store-hours-heading">
                 {{ storeHoursHeadingLabel }}
               </h3>
-              <ul class="index-page__store-hours-list">
-                <li
-                  v-for="row in STORE_OPENING_HOURS"
-                  :key="row.dayIndex"
-                  class="index-page__store-hours-row"
-                  :class="{ 'index-page__store-hours-row--today': row.dayIndex === todayStoreDayIndex }"
+              <div class="index-page__store-hours-block">
+                <ul id="index-store-hours-list" class="index-page__store-hours-list">
+                  <li
+                    v-for="row in STORE_OPENING_HOURS"
+                    :key="row.dayIndex"
+                    class="index-page__store-hours-row"
+                    :class="{
+                      'index-page__store-hours-row--today': row.dayIndex === todayStoreDayIndex,
+                      'index-page__store-hours-row--collapsed-hide':
+                        !storeHoursExpanded && row.dayIndex !== todayStoreDayIndex,
+                    }"
+                    :aria-hidden="
+                      !storeHoursExpanded && row.dayIndex !== todayStoreDayIndex ? true : undefined
+                    "
+                  >
+                    <span class="index-page__store-hours-day">{{ row.label }}</span>
+                    <span class="index-page__store-hours-time">{{ row.hours }}</span>
+                  </li>
+                </ul>
+                <button
+                  type="button"
+                  class="index-page__store-hours-toggle"
+                  :aria-expanded="storeHoursExpanded"
+                  aria-controls="index-store-hours-list"
+                  aria-label="Pokaż lub ukryj pełny harmonogram tygodnia"
+                  @click="storeHoursExpanded = !storeHoursExpanded"
                 >
-                  <span class="index-page__store-hours-day">{{ row.label }}</span>
-                  <span class="index-page__store-hours-time">{{ row.hours }}</span>
-                </li>
-              </ul>
+                  <q-icon
+                    :name="storeHoursExpanded ? 'expand_less' : 'expand_more'"
+                    size="34px"
+                    class="index-page__store-hours-toggle-icon"
+                    aria-hidden="true"
+                  />
+                </button>
+              </div>
             </section>
 
             <section
@@ -594,6 +618,7 @@ const heroIntroCtaFloated = ref(false)
 const heroIntroAfterCtaFloated = ref(false)
 const heroIntroThirdCtaFloated = ref(false)
 const heroIntroCtaVisible = ref(false)
+const storeHoursExpanded = ref(false)
 
 /** Distance of anchored / fixed CTA from the photo or viewport bottom (CSS only); dock threshold uses photo bottom vs visible viewport bottom (no gap in JS — avoids double-counting jump). */
 const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
@@ -1382,13 +1407,13 @@ onUnmounted(() => {
 
 .index-page__store-open-banner {
   margin: 0;
-  padding: clamp(16px, 3.5vw, 26px) clamp(16px, 4vw, 28px);
+  padding: clamp(11px, 2.35vw, 17px) clamp(11px, 2.65vw, 19px);
   text-align: center;
   background: transparent;
 }
 
 .index-page__store-hours-heading {
-  margin: 0 0 clamp(12px, 2.5vw, 18px);
+  margin: 0 0 clamp(8px, 1.65vw, 12px);
   font-family: 'Poppins', sans-serif;
   font-size: clamp(0.85rem, 2.2vw, 1rem);
   font-weight: 500;
@@ -1405,17 +1430,83 @@ onUnmounted(() => {
   text-align: left;
 }
 
+.index-page__store-hours-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.index-page__store-hours-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: clamp(12px, 3vw, 19px) auto 0;
+  padding: 4px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    opacity 0.25s ease,
+    transform 0.2s ease;
+}
+
+.index-page__store-hours-toggle:hover {
+  opacity: 0.92;
+}
+
+.index-page__store-hours-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 170, 210, 0.55);
+}
+
+.index-page__store-hours-toggle-icon {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .index-page__store-hours-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 16px;
+  gap: clamp(36px, 12vw, 72px);
+  box-sizing: border-box;
+  max-height: 4.5rem;
   padding: 6px 10px;
   margin: 0;
+  overflow: hidden;
   font-family: 'Poppins', sans-serif;
   font-size: clamp(0.88rem, 2.4vw, 1rem);
   color: #ffffff;
   border-radius: 8px;
+  opacity: 1;
+  transition:
+    max-height 0.48s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.38s ease,
+    padding-top 0.48s cubic-bezier(0.4, 0, 0.2, 1),
+    padding-bottom 0.48s cubic-bezier(0.4, 0, 0.2, 1),
+    margin-top 0.48s cubic-bezier(0.4, 0, 0.2, 1),
+    margin-bottom 0.48s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.index-page__store-hours-row--collapsed-hide {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  border: none;
+  box-shadow: none;
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .index-page__store-hours-row--today {
