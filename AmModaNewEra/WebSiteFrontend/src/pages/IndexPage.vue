@@ -3,7 +3,7 @@
     <!-- Fixed at one height, stuck to screen edges (not container) -->
     <div class="index-page__nav-buttons-fixed">
       <button
-        v-if="activeTab === 'info'"
+        v-if="SHOW_GALLERY_NAV_BUTTON && activeTab === 'info'"
         type="button"
         class="index-page__nav-btn index-page__nav-btn--right text-primary"
         @click="goToGallery"
@@ -40,70 +40,92 @@
         <transition :name="'index-page__slide-' + panelSlideDirection">
           <div v-if="activeTab === 'info'" key="info" class="index-page__panels">
             <div class="index-page__panels-inner">
-            <!-- First hero: full-width grey bg; desktop: left = reviews + text + button, right = image; mobile: text + button above photo, reviews below photo -->
-            <section class="index-page__hero-intro">
-              <div class="index-page__hero-intro-inner">
-                <div class="index-page__hero-intro-content">
-                  <h2 class="index-page__hero-intro-title">STYL i ELEGANCJA</h2>
-                  <p class="index-page__hero-intro-subtitle">na co dzień i na wieczór</p>
-                  <button type="button" class="index-page__hero-btn">
-                    Odwiedź nas
+            <!-- First hero: full-bleed image with center-focused responsive zoom -->
+            <section ref="heroIntroRef" class="index-page__hero-intro">
+              <div class="index-page__hero-intro-photo">
+                <img
+                  :src="heroIntroImage"
+                  alt="AM Moda"
+                  class="index-page__hero-intro-photo-img"
+                  @load="onHeroIntroImageLoad"
+                >
+              </div>
+              <div
+                class="index-page__hero-intro-sticky-cta"
+                :style="{ transform: `translateY(${heroIntroCtaOffsetY}px)` }"
+              >
+                <div ref="heroIntroCtaRef" class="index-page__hero-intro-cta-block">
+                  <p
+                    class="index-page__hero-intro-address"
+                    :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
+                  >
+                    Kozy, ul. Bielska 166
+                  </p>
+                  <button
+                    type="button"
+                    class="index-page__hero-intro-cta-btn"
+                    :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
+                    @click="scrollToLocationSection"
+                  >
+                    <span class="index-page__hero-intro-cta-label">Odwiedź nas</span>
                   </button>
-                </div>
-                <div class="index-page__hero-intro-reviews">
-                  <div class="index-page__google-reviews">
-                    <div class="index-page__google-reviews-header">
-                      <div class="index-page__google-logo-wrap">
-                        <svg class="index-page__google-logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                      </div>
-                      <span class="index-page__google-reviews-label">Google Reviews</span>
-                    </div>
-                    <div class="index-page__google-stars" aria-hidden="true">
-                      <q-icon name="star" class="index-page__google-star" v-for="n in 5" :key="n" />
-                    </div>
-                    <div class="index-page__google-rating-summary">4.7 <span class="index-page__google-rating-light">Gwiazdek</span> | 169 <span class="index-page__google-rating-light">Opinii</span></div>
-                  </div>
-                </div>
-                <div class="index-page__hero-intro-photo">
-                  <img :src="heroIntroImage" alt="AM Moda" class="index-page__hero-intro-photo-img">
                 </div>
               </div>
             </section>
 
-            <!-- Hero blocks: full-width photo with title + "Odwiedź nas" overlay -->
-            <section
-              v-for="(hero, i) in heroSections.slice(1)"
-              :key="hero.title"
-              class="index-page__hero-block"
-            >
-              <div
-                :ref="(el) => setHeroWrapRef(el, i)"
-                class="index-page__hero-photo-wrap"
-              >
+            <section class="index-page__section-two" aria-label="Kategorie produktów">
+              <div class="index-page__section-two-grid">
+                <article
+                  v-for="item in sectionTwoItems"
+                  :key="item.name"
+                  class="index-page__section-two-card"
+                >
+                  <img :src="item.photo" :alt="item.name" class="index-page__section-two-img">
+                  <div class="index-page__section-two-caption">
+                    {{ item.name }}
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section ref="heroIntroAfterRef" class="index-page__hero-intro">
+              <div class="index-page__hero-intro-photo">
                 <img
-                  v-if="hero.photo"
-                  :src="hero.photo"
-                  :alt="hero.alt"
-                  class="index-page__hero-img"
-                  :style="heroParallaxStyle(i)"
+                  :src="heroIntroImage"
+                  alt=""
+                  class="index-page__hero-intro-photo-img"
+                  @load="onHeroIntroImageLoad"
                 >
               </div>
-              <div class="index-page__hero-overlay">
-                <h2 class="index-page__hero-title">{{ hero.title }}</h2>
-                <p v-if="hero.subtitle" class="index-page__hero-subtitle">{{ hero.subtitle }}</p>
-                <button type="button" class="index-page__hero-btn">
-                  Odwiedź nas
-                </button>
+              <div
+                class="index-page__hero-intro-sticky-cta"
+                :style="{ transform: `translateY(${heroIntroAfterCtaOffsetY}px)` }"
+              >
+                <div ref="heroIntroAfterCtaRef" class="index-page__hero-intro-cta-block">
+                  <p
+                    class="index-page__hero-intro-address"
+                    :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
+                  >
+                    Kozy, ul. Bielska 166
+                  </p>
+                  <button
+                    type="button"
+                    class="index-page__hero-intro-cta-btn"
+                    :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
+                    @click="scrollToLocationSection"
+                  >
+                    <span class="index-page__hero-intro-cta-label">Odwiedź nas</span>
+                  </button>
+                </div>
               </div>
             </section>
 
             <!-- 6: Location – text and button above, map below -->
-            <section class="index-page__split-section index-page__split-section--location">
+            <section
+              ref="locationSectionRef"
+              id="mapka"
+              class="index-page__split-section index-page__split-section--location"
+            >
               <div class="index-page__split-content index-page__split-content--center">
                 <h3 class="index-page__split-heading">Znajdziesz nas tutaj:</h3>
                 <p class="index-page__split-address">
@@ -116,6 +138,7 @@
                   class="index-page__route-btn q-mt-sm"
                 >
                   Wyznacz trasę
+                  <q-icon name="open_in_new" size="16px" class="index-page__route-btn-icon" aria-hidden="true" />
                 </a>
               </div>
               <div class="index-page__split-media index-page__split-media--map">
@@ -330,14 +353,38 @@
         >
       </div>
     </div>
+    <section class="index-page__brand-footer" aria-label="Logo AM Moda">
+      <img :src="footerLogo" alt="AM Moda Damska" class="index-page__brand-footer-logo">
+    </section>
   </q-page>
 </template>
 
 <script setup>
 import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import heroIntroImage from '../assets/Main photos/1.jpg'
+import heroIntroImage from '../assets/Main photos/atf_photo.png'
+import sectionTwoBony from '../assets/Main photos/section 2/bony.jpg'
+import sectionTwoBut from '../assets/Main photos/section 2/but.jpg'
+import sectionTwoCzapka from '../assets/Main photos/section 2/czapka.jpg'
+import sectionTwoMarynarka from '../assets/Main photos/section 2/marynarka.jpg'
+import sectionTwoPeruka from '../assets/Main photos/section 2/peruka.jpg'
+import sectionTwoPortfel from '../assets/Main photos/section 2/portfel.jpg'
+import sectionTwoRekawiczki from '../assets/Main photos/section 2/rekawiczki.jpg'
+import sectionTwoSukienka from '../assets/Main photos/section 2/sukienka.jpg'
+import footerLogo from '../assets/logo.png'
 
 const TAB_STORAGE_KEY = 'index-page-active-tab'
+/** Toggle to show the fixed "Galeria" shortcut in the corner again. */
+const SHOW_GALLERY_NAV_BUTTON = false
+const sectionTwoItems = [
+  { name: 'Sukienki', photo: sectionTwoSukienka },
+  { name: 'Marynarki', photo: sectionTwoMarynarka },
+  { name: 'Buty', photo: sectionTwoBut },
+  { name: 'Portfele', photo: sectionTwoPortfel },
+  { name: 'Czapki', photo: sectionTwoCzapka },
+  { name: 'Rękawiczki', photo: sectionTwoRekawiczki },
+  { name: 'Bony', photo: sectionTwoBony },
+  { name: 'Peruki', photo: sectionTwoPeruka },
+]
 
 function getStoredTab() {
   try {
@@ -399,7 +446,9 @@ watch(activeTab, (value) => {
   } catch {
     /* persist best-effort; ignore when storage unavailable */
   }
-  if (value === 'info') nextTick(() => updateHeroParallax())
+  if (value === 'info') {
+    nextTick(() => updateHeroIntroCtaPosition())
+  }
 })
 
 const photoList = ref([])
@@ -436,27 +485,60 @@ const lightboxHasNext = computed(
 )
 const panelSlideDirection = ref('left')
 const mainRef = ref(null)
-const heroWrapRefs = ref([null, null, null])
-const heroParallaxY = ref([0, 0, 0])
-const HERO_PARALLAX_FACTOR = 0.25
+const heroIntroRef = ref(null)
+const heroIntroCtaRef = ref(null)
+const heroIntroAfterRef = ref(null)
+const heroIntroAfterCtaRef = ref(null)
+const locationSectionRef = ref(null)
+const heroIntroCtaOffsetY = ref(0)
+const heroIntroAfterCtaOffsetY = ref(0)
+const heroIntroCtaVisible = ref(false)
 
-function setHeroWrapRef(el, i) {
-  if (el) heroWrapRefs.value[i] = el
+function scrollToLocationSection() {
+  locationSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-function heroParallaxStyle(i) {
-  return { transform: `translateY(${heroParallaxY.value[i] ?? 0}px)` }
+function clampValue(value, min, max) {
+  return Math.min(Math.max(value, min), max)
 }
 
-function updateHeroParallax() {
-  if (activeTab.value !== 'info') return
-  heroWrapRefs.value.forEach((el, i) => {
-    if (!el) return
-    const rect = el.getBoundingClientRect()
-    const viewportCenter = window.innerHeight * 0.5
-    const offset = (rect.top - viewportCenter) * HERO_PARALLAX_FACTOR
-    heroParallaxY.value[i] = offset
-  })
+function computeHeroIntroCtaOffsetY(heroElement, ctaElement) {
+  if (!heroElement || !ctaElement) return null
+  const heroRect = heroElement.getBoundingClientRect()
+  if (heroRect.height <= 0) return null
+
+  const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+  const ctaHeight = ctaElement.offsetHeight || 47
+  const edgeGap = 20
+  const minOffset = edgeGap
+  const maxOffset = Math.max(edgeGap, heroRect.height - ctaHeight - edgeGap)
+  const viewportAnchor = viewportHeight - ctaHeight - edgeGap
+  const relativeOffset = viewportAnchor - heroRect.top
+  return clampValue(relativeOffset, minOffset, maxOffset)
+}
+
+function updateHeroIntroCtaPosition() {
+  const top = computeHeroIntroCtaOffsetY(heroIntroRef.value, heroIntroCtaRef.value)
+  if (top !== null) heroIntroCtaOffsetY.value = top
+  const after = computeHeroIntroCtaOffsetY(heroIntroAfterRef.value, heroIntroAfterCtaRef.value)
+  if (after !== null) heroIntroAfterCtaOffsetY.value = after
+}
+
+function setupHeroIntroCtaTracking(on) {
+  if (on) {
+    window.addEventListener('scroll', updateHeroIntroCtaPosition, { passive: true })
+    window.addEventListener('resize', updateHeroIntroCtaPosition)
+  } else {
+    window.removeEventListener('scroll', updateHeroIntroCtaPosition)
+    window.removeEventListener('resize', updateHeroIntroCtaPosition)
+  }
+}
+
+function onHeroIntroImageLoad() {
+  updateHeroIntroCtaPosition()
+  if (!heroIntroCtaVisible.value) {
+    heroIntroCtaVisible.value = true
+  }
 }
 
 function goToGallery() {
@@ -485,29 +567,6 @@ const photoListWithUrls = computed(() =>
     urlWithCache: getApiUrl(p.url) + '&t=' + cacheBust.value,
   })),
 )
-
-const mainPhotos = computed(() => {
-  const files = import.meta.glob('../assets/Main photos/*.{jpg,jpeg,png,webp,gif}', {
-    eager: true,
-    as: 'url',
-  })
-  return Object.values(files)
-})
-
-const sectionFifthPhoto = computed(() => {
-  const photos = mainPhotos.value
-  return photos[4] ?? photos[photos.length - 1] ?? photos[0]
-})
-
-const heroSections = computed(() => {
-  const photos = mainPhotos.value
-  return [
-    { title: 'STYL i ELEGANCJA', subtitle: 'na co dzień i na wieczór', photo: photos[0], alt: 'AM Moda' },
-    { title: 'Sukienki', photo: photos[2], alt: 'Sukienki' },
-    { title: 'Buty', photo: sectionFifthPhoto.value, alt: 'Buty' },
-    { title: 'Portfele', photo: photos[1], alt: 'Portfele' },
-  ]
-})
 
 const productPhotos = computed(() => {
   const files = import.meta.glob('../assets/Product photos/*.{jpg,jpeg,png,webp,gif}', {
@@ -688,20 +747,26 @@ watch(lightboxOpen, (open) => {
 })
 onMounted(async () => {
   loadPhotos()
-  window.addEventListener('scroll', updateHeroParallax, { passive: true })
-  nextTick(() => updateHeroParallax())
+  await nextTick()
+  setupHeroIntroCtaTracking(true)
+  updateHeroIntroCtaPosition()
+  window.setTimeout(() => {
+    updateHeroIntroCtaPosition()
+    heroIntroCtaVisible.value = true
+  }, 300)
 })
 onUnmounted(() => {
   setupLightboxKeyboard(false)
-  window.removeEventListener('scroll', updateHeroParallax)
+  setupHeroIntroCtaTracking(false)
 })
 </script>
 
 <style scoped>
 .index-page {
-  background: #ffffff;
+  background: rgb(0, 0, 0);
+  color: rgba(255, 255, 255, 0.92);
   min-height: 100vh;
-  padding: 24px 0 48px;
+  padding: 0 0 48px;
   box-sizing: border-box;
 }
 
@@ -712,6 +777,28 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.index-page__brand-footer {
+  position: relative;
+  left: 50%;
+  width: 100dvw;
+  margin-left: -50dvw;
+  margin-top: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgb(0, 0, 0);
+}
+
+.index-page__brand-footer-logo {
+  width: min(100dvw, 1460px);
+  max-height: clamp(82px, 15vw, 220px);
+  object-fit: contain;
+  display: block;
+  /* Uniform white mark from single-color / tinted artwork */
+  filter: brightness(0) invert(1);
 }
 
 /* Invisible, not shown in UI – remains focusable for keyboard input */
@@ -748,8 +835,8 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   max-width: 100%;
-  background: #ffffff;
-  border-radius: 16px;
+  background: rgb(0, 0, 0);
+  border-radius: 0;
   overflow: visible;
 }
 
@@ -778,7 +865,7 @@ onUnmounted(() => {
   background: transparent;
   border: none;
   cursor: pointer;
-  font-family: 'Dancing Script', cursive;
+  font-family: 'Poppins', sans-serif;
   font-size: 1.55rem;
   letter-spacing: 0.02em;
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -833,8 +920,8 @@ onUnmounted(() => {
 .index-page__panels {
   position: relative;
   left: 50%;
-  width: 100vw;
-  margin-left: -50vw;
+  width: 100dvw;
+  margin-left: -50dvw;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -842,7 +929,7 @@ onUnmounted(() => {
 .index-page__panels-inner {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 16px 6px 24px;
+  padding: 0 6px 24px;
   box-sizing: border-box;
 }
 
@@ -853,9 +940,9 @@ onUnmounted(() => {
 .index-page__slide-right-leave-active {
   position: absolute;
   left: 50%;
-  margin-left: -50vw;
+  margin-left: -50dvw;
   top: 0;
-  width: 100vw;
+  width: 100dvw;
   transition: transform 0.3s ease;
 }
 
@@ -901,268 +988,216 @@ onUnmounted(() => {
   transform: translateX(100%);
 }
 
-/* First hero: full-width grey bg, left content (rating + text + button), right = picture */
+/* First hero: full-width image with full height visible */
 .index-page__hero-intro {
   position: relative;
-  margin-bottom: 48px;
+  margin-top: 0;
+  margin-bottom: 0;
   left: 50%;
-  width: 100vw;
-  margin-left: -50vw;
-  background: linear-gradient(145deg, #f8f8f8 0%, #f0f0f0 35%, #e8e8e8 70%, #e5e5e5 100%);
+  width: 100dvw;
+  margin-left: -50dvw;
+  background: rgb(0, 0, 0);
   box-sizing: border-box;
   overflow: visible;
 }
-.index-page__hero-intro-inner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
-  row-gap: 20px;
-  align-items: start;
-  max-width: 1400px;
-  margin: 0 auto;
-  overflow: visible;
-}
-/* Desktop: left = Google Reviews on top, then title + button (compact); right = photo */
-.index-page__hero-intro-reviews {
-  grid-column: 1;
-  grid-row: 1;
-  padding: 24px 40px 0 56px;
-  align-self: start;
-}
-.index-page__hero-intro-content {
-  grid-column: 1;
-  grid-row: 2;
-  padding-left: 56px;
-  padding-right: 40px;
-  align-self: start;
-}
 .index-page__hero-intro-photo {
-  grid-column: 2;
-  grid-row: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
   overflow: visible;
-  min-height: 0;
 }
 .index-page__hero-intro-photo-img {
-  max-width: 100%;
+  width: 100%;
   height: auto;
   display: block;
-  transform: scale(1.1);
+  object-fit: contain;
 }
-.index-page__hero-intro-content {
+
+.index-page__hero-intro-sticky-cta {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.index-page__hero-intro-cta-block {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding: 0 40px 32px;
-  padding-left: 56px;
-}
-.index-page__google-reviews {
-  margin-bottom: 24px;
-}
-.index-page__google-reviews-header {
-  display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: clamp(7px, 1.5vw, 11px);
+  max-width: min(92vw, 560px);
+  pointer-events: none;
 }
-.index-page__google-logo-wrap {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid #dadce0;
-  background: #fff;
-  display: flex;
+
+.index-page__hero-intro-address {
+  margin: 0;
+  padding: 0 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.82rem, 2.35vw, 1.08rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: #ffffff;
+  text-transform: none;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.45s ease 0.05s,
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
+}
+
+.index-page__hero-intro-address--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.index-page__hero-intro-cta-btn {
+  pointer-events: auto;
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  flex-shrink: 0;
+  min-width: 140px;
+  min-height: 47px;
+  padding: 8px 15px;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: transparent;
+  border: none;
+  isolation: isolate;
+  --cta-inset-x: 0px;
+  --cta-inset-y: 0px;
+  opacity: 0;
+  transform: scale(0.94);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.35s ease,
+              --cta-inset-x 0.6s ease,
+              --cta-inset-y 0.6s ease;
 }
-.index-page__google-logo-wrap::after {
+
+.index-page__hero-intro-cta-btn::before {
   content: '';
   position: absolute;
-  right: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 6px solid transparent;
-  border-left-color: #dadce0;
-  border-right: 0;
+  inset: var(--cta-inset-y) var(--cta-inset-x);
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 4px;
+  transition: inset 0.6s ease, background 0.2s ease, border-color 0.2s ease;
+  z-index: -1;
 }
-.index-page__google-logo-wrap::before {
-  content: '';
-  position: absolute;
-  right: -5px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 5px solid transparent;
-  border-left-color: #fff;
-  border-right: 0;
-}
-.index-page__google-logo {
-  width: 22px;
-  height: 22px;
+
+.index-page__hero-intro-cta-label {
   position: relative;
   z-index: 1;
 }
-.index-page__google-reviews-label {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #5f6368;
+
+.index-page__hero-intro-cta-btn--visible {
+  opacity: 1;
+  transform: scale(1);
 }
-.index-page__google-stars {
-  display: inline-flex;
-  gap: 2px;
-  margin-bottom: 6px;
+
+.index-page__hero-intro-cta-btn--visible:hover {
+  --cta-inset-x: 5px;
+  --cta-inset-y: 2px;
 }
-.index-page__google-star {
-  color: #fbbc04;
-  font-size: 22px;
+
+.index-page__hero-intro-cta-btn--visible:hover::before {
+  background: rgba(0, 0, 0, 0.72);
+  border-color: rgba(255, 255, 255, 0.9);
 }
-.index-page__google-rating-summary {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #3c4043;
+
+.index-page__hero-intro-cta-btn--visible:active {
+  --cta-inset-x: 7px;
+  --cta-inset-y: 3px;
 }
-.index-page__google-rating-light {
+
+.index-page__section-two {
+  position: relative;
+  left: 50%;
+  width: 100dvw;
+  margin-left: -50dvw;
+  margin-top: 0;
+  margin-bottom: 0;
+  background: rgb(0, 0, 0);
+}
+
+.index-page__section-two-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+}
+
+.index-page__section-two-card {
+  min-width: 0;
+  background: rgb(0, 0, 0);
+}
+
+.index-page__section-two-img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}
+
+.index-page__section-two-caption {
+  min-height: 28px;
+  padding: 12px 12px 18px;
+  background: rgb(0, 0, 0);
+  color: #ffffff;
+  text-align: center;
+  font-size: clamp(0.8rem, 1.35vw, 1.15rem);
   font-weight: 400;
-}
-.index-page__hero-intro-title {
-  margin: 0px;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  font-weight: 700;
-  color: #1a1a1a;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-.index-page__hero-intro-subtitle {
-  margin: 0 0 20px;
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: #444444;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }
 
 @media (max-width: 768px) {
-  .index-page__hero-intro-inner {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
-    gap: 32px;
-  }
-  .index-page__hero-intro-content,
-  .index-page__hero-intro-reviews,
-  .index-page__hero-intro-photo {
-    grid-column: 1;
-    grid-row: auto;
-  }
-  /* Order: title + subtitle + button above photo, then photo, then reviews below */
-  .index-page__hero-intro-content {
-    order: -1;
-    padding: 20px 20px 8px;
-    margin-bottom: 0;
-    text-align: center;
-    align-items: center;
-  }
-  .index-page__hero-intro-photo {
-    order: 0;
-  }
-  .index-page__hero-intro-reviews {
-    order: 1;
-    padding: 0 20px 28px;
-    padding-top: 0;
+  .index-page__hero-intro {
     margin-top: 0;
   }
+
+  .index-page__hero-intro-photo {
+    height: 75vh;
+    overflow: hidden;
+  }
+
   .index-page__hero-intro-photo-img {
-    transform: scale(1.2);
-    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
   }
-  .index-page__hero-intro-reviews .index-page__google-reviews {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+
+  .index-page__hero-intro-sticky-cta {
+    padding: 0 12px;
   }
-  .index-page__google-reviews-header {
-    justify-content: center;
-  }
-  .index-page__hero-intro-content .index-page__hero-btn {
-    align-self: center;
+
+  .index-page__hero-intro-cta-btn {
+    min-height: 40px;
+    min-width: 124px;
+    font-size: 0.65rem;
+    padding: 6px 11px;
+    letter-spacing: 0.06em;
   }
 }
 
-/* Hero blocks: photo with side margins, max-height 60vh, title + "Odwiedź nas" overlay, parallax */
-.index-page__hero-block {
-  position: relative;
-  margin-bottom: 48px;
-  margin-left: 0;
-  margin-right: 0;
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-.index-page__hero-photo-wrap {
-  max-height: 60vh;
-  overflow: hidden;
-  position: relative;
-}
-.index-page__hero-img {
-  width: 100%;
-  min-height: 75vh;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  will-change: transform;
-}
-.index-page__hero-overlay {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 24px 32px;
-  max-width: 50%;
-  pointer-events: none;
-}
-.index-page__hero-overlay .index-page__hero-btn {
-  pointer-events: auto;
-}
-.index-page__hero-title {
-  margin: 0 0 8px;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  font-weight: 700;
-  color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  /* Shadow below text only: larger y-offset so blur does not darken the letters */
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-.index-page__hero-subtitle {
-  margin: 0 0 16px;
-  font-size: 1.2rem;
-  font-weight: 400;
-  color: #ffffff;
-  text-transform: none;
-  letter-spacing: 0.02em;
-  /* Shadow below text only: larger y-offset so blur does not darken the letters */
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-.index-page__hero-btn {
-  align-self: flex-start;
-  min-width: 140px;
-  padding: 10px 20px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #1a1a1a;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 6px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
-}
-.index-page__hero-btn:hover {
-  background: #f5f5f5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+@media (max-width: 750px) {
+  .index-page__section-two-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .index-page__split-section {
@@ -1204,6 +1239,7 @@ onUnmounted(() => {
 .index-page__split-content--center .index-page__split-heading {
   font-size: 1.5rem;
   font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .index-page__split-title {
@@ -1216,17 +1252,20 @@ onUnmounted(() => {
 .index-page__split-heading {
   margin: 0 0 8px;
   font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .index-page__split-address {
   margin: 0 0 12px;
   font-size: 0.98rem;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 /* Route button – same shape as Facebook, glassmorphic, pink */
 .index-page__route-btn {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
   padding: 10px 20px;
   text-decoration: none;
   color: #c41e5a;
@@ -1245,24 +1284,31 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
+.index-page__route-btn-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
 .index-page__split-text {
   margin: 0;
   font-size: 0.95rem;
-  color: #444444;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .index-page__split-media {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
   min-height: 200px;
-  background: #f3f3f3;
+  background: rgb(0, 0, 0);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Location: stacked – text and button first, map below */
 .index-page__split-section--location {
   grid-template-columns: 1fr;
   min-height: 0;
+  scroll-margin-top: clamp(88px, 18vw, 132px);
 }
 
 .index-page__split-section--location > .index-page__split-content {
@@ -1272,13 +1318,14 @@ onUnmounted(() => {
 .index-page__split-section--location .index-page__split-heading {
   font-weight: 400;
   font-size: 1.1rem;
-  color: #666666;
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .index-page__split-section--location .index-page__split-address {
   font-size: 1.75rem;
   font-weight: 600;
   line-height: 1.3;
+  color: rgba(255, 255, 255, 0.96);
 }
 
 .index-page__split-section--location > .index-page__split-media--map {
@@ -1329,13 +1376,13 @@ onUnmounted(() => {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.96);
 }
 .index-page__facebook-text {
   margin: 0;
   font-size: 1rem;
   line-height: 1.5;
-  color: #444444;
+  color: rgba(255, 255, 255, 0.72);
 }
 .index-page__facebook-link {
   display: inline-flex;
@@ -1377,16 +1424,16 @@ onUnmounted(() => {
 
 .index-page__dropzone {
   border-radius: 14px;
-  border: 2px dashed rgba(0, 0, 0, 0.15);
+  border: 2px dashed rgba(255, 255, 255, 0.22);
   padding: 18px 16px;
-  background: #fafafa;
+  background: rgba(255, 255, 255, 0.04);
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .index-page__dropzone--active {
   border-color: #e61971;
-  background: #fff0f6;
-  box-shadow: 0 0 0 2px rgba(230, 25, 113, 0.1);
+  background: rgba(230, 25, 113, 0.12);
+  box-shadow: 0 0 0 2px rgba(230, 25, 113, 0.15);
 }
 
 .index-page__dropzone-inner {
@@ -1401,7 +1448,7 @@ onUnmounted(() => {
 .index-page__dropzone-subtitle {
   margin: 0 0 8px;
   font-size: 0.9rem;
-  color: #777777;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .index-page__file-input {
@@ -1412,7 +1459,8 @@ onUnmounted(() => {
   margin-top: 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #f6f6f6;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .index-page__pending-header {
@@ -1421,6 +1469,7 @@ onUnmounted(() => {
   align-items: center;
   margin-bottom: 8px;
   font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .index-page__pending-list {
@@ -1437,6 +1486,7 @@ onUnmounted(() => {
   justify-content: space-between;
   font-size: 0.9rem;
   padding: 3px 0;
+  color: rgba(255, 255, 255, 0.88);
 }
 
 .index-page__pending-name {
@@ -1448,7 +1498,7 @@ onUnmounted(() => {
 }
 
 .index-page__pending-size {
-  color: #777777;
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.8rem;
 }
 
@@ -1464,6 +1514,7 @@ onUnmounted(() => {
 .index-page__section-heading {
   margin: 0 0 10px;
   font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .index-page__gallery {
@@ -1481,7 +1532,8 @@ onUnmounted(() => {
   position: relative;
   border-radius: 10px;
   overflow: hidden;
-  background: #f3f3f3;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
   min-height: 160px;
 }
@@ -1517,7 +1569,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.45);
   padding: 20px 0;
 }
 
@@ -1665,7 +1717,7 @@ onUnmounted(() => {
 
 @media (max-width: 600px) {
   .index-page {
-    padding: 16px 0 32px;
+    padding: 0 0 32px;
   }
 
   .index-page__shell {
@@ -1680,6 +1732,12 @@ onUnmounted(() => {
 
   .index-page__thumb-wrap {
     min-height: 120px;
+  }
+
+  .index-page__brand-footer {
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 </style>
