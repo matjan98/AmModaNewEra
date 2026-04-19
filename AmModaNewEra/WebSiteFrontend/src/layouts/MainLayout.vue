@@ -9,13 +9,13 @@
       }"
     >
       <div class="main-layout__header-inner" :class="{ 'main-layout__header-inner--scrolled': useSidesLayout }">
-        <!-- Logo: click scrolls to top, stays on current tab -->
+        <!-- Logo: link scrolls to top (same tab); not a <button> so image sizing stays plain img rules -->
         <div class="main-layout__brand" :class="{ 'main-layout__brand--center': useSidesLayout }">
-          <button
-            type="button"
-            class="main-layout__logo-btn"
+          <a
+            href="#"
+            class="main-layout__logo-link"
             aria-label="Przewiń na górę"
-            @click="onLogoClick"
+            @click.prevent="onLogoClick"
           >
             <img
               src="../assets/logo.png"
@@ -23,7 +23,7 @@
               class="main-layout__logo"
               :class="{ 'main-layout__logo--compact': useSidesLayout }"
             >
-          </button>
+          </a>
         </div>
         <!-- Contact below logo (when narrow: phones / not enough space) -->
         <div class="main-layout__contact main-layout__contact--below" :class="{ 'main-layout__contact--hidden': useSidesLayout }">
@@ -177,6 +177,7 @@
       <div class="main-layout__mobile-fab-hours">
         <div class="main-layout__mobile-fab-wrap">
           <button
+            ref="mobileHoursFabBtnRef"
             type="button"
             class="main-layout__mobile-fab-btn"
             :class="{ 'main-layout__mobile-fab-btn--active': hoursExpanded }"
@@ -192,15 +193,11 @@
             />
           </button>
           <div
+            ref="mobileHoursFabPanelRef"
             v-show="hoursExpanded"
             class="main-layout__mobile-fab-panel main-layout__hours-dropdown"
+            :class="{ 'main-layout__mobile-fab-panel--flip-up': mobileHoursFabPanelFlipUp }"
           >
-            <p class="main-layout__mobile-hours-summary">
-              <span v-if="isOpenToday">
-                Dzisiaj otwarte: {{ todayHours }}
-              </span>
-              <span v-else>Dzisiaj zamknięte</span>
-            </p>
             <div
               v-for="row in openingHours"
               :key="'mobile-' + row.label"
@@ -243,9 +240,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 
-const SMALL_SCREEN_MAX_WIDTH = 800
+/** Header phone + hours use icon/compact FAB below this width; side-by-side pills from this + 1 px up */
+const SMALL_SCREEN_MAX_WIDTH = 749
 const isSmallScreen = ref(false)
 const useSidesLayout = computed(() => !isSmallScreen.value)
 
@@ -266,6 +264,59 @@ const openingHours = [
 ]
 
 const hoursExpanded = ref(false)
+
+const mobileHoursFabBtnRef = ref(null)
+const mobileHoursFabPanelRef = ref(null)
+/** When true, hours panel opens above the clock (default is below; flip when no room under). */
+const mobileHoursFabPanelFlipUp = ref(false)
+const HOURS_FAB_PANEL_GAP_PX = 8
+
+function updateMobileHoursFabPanelPlacement() {
+  if (!hoursExpanded.value) return
+  const btn = mobileHoursFabBtnRef.value
+  const panel = mobileHoursFabPanelRef.value
+  if (!btn || !panel) return
+
+  const btnRect = btn.getBoundingClientRect()
+  const vv = window.visualViewport
+  const viewTop = vv?.offsetTop ?? 0
+  const viewBottom = vv ? vv.offsetTop + vv.height : window.innerHeight
+
+  const pr = panel.getBoundingClientRect()
+  let panelH = pr.height
+  if (panelH < 2) {
+    panelH = panel.scrollHeight
+  }
+
+  const gap = HOURS_FAB_PANEL_GAP_PX
+  const spaceAbove = btnRect.top - viewTop
+  const spaceBelow = viewBottom - btnRect.bottom
+  const need = panelH + gap
+
+  if (spaceBelow >= need) {
+    mobileHoursFabPanelFlipUp.value = false
+  } else if (spaceAbove >= need) {
+    mobileHoursFabPanelFlipUp.value = true
+  } else {
+    mobileHoursFabPanelFlipUp.value = spaceAbove > spaceBelow
+  }
+}
+
+function onMobileHoursFabPlacementLayout() {
+  if (hoursExpanded.value) updateMobileHoursFabPanelPlacement()
+}
+
+watch(hoursExpanded, (open) => {
+  if (!open) {
+    mobileHoursFabPanelFlipUp.value = false
+    return
+  }
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => updateMobileHoursFabPanelPlacement())
+    })
+  })
+})
 
 /** Wall-clock time for “today” / open-now checks (updates every minute). */
 const now = ref(new Date())
@@ -367,6 +418,11 @@ onMounted(() => {
   mediaQuery = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
   mediaQuery.addEventListener('change', updateSmallScreen)
   window.addEventListener('scroll', onWindowScroll, { passive: true })
+  window.addEventListener('resize', onMobileHoursFabPlacementLayout, { passive: true })
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', onMobileHoursFabPlacementLayout)
+    window.visualViewport.addEventListener('scroll', onMobileHoursFabPlacementLayout)
+  }
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
   facebookFabEnterTimer = window.setTimeout(() => {
     facebookFabEntered.value = true
@@ -379,6 +435,11 @@ onUnmounted(() => {
   }
   if (mediaQuery) mediaQuery.removeEventListener('change', updateSmallScreen)
   window.removeEventListener('scroll', onWindowScroll)
+  window.removeEventListener('resize', onMobileHoursFabPlacementLayout)
+  if (window.visualViewport) {
+    window.visualViewport.removeEventListener('resize', onMobileHoursFabPlacementLayout)
+    window.visualViewport.removeEventListener('scroll', onMobileHoursFabPlacementLayout)
+  }
   document.removeEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
   if (facebookFabEnterTimer != null) {
     window.clearTimeout(facebookFabEnterTimer)
@@ -439,8 +500,8 @@ onUnmounted(() => {
   min-height: 52px;
 }
 
-@media (min-width: 800px) {
-  /* Big screens only: reduce header height by ~5px (small screens stay unchanged) */
+@media (min-width: 750px) {
+  /* Wide header: reduce height slightly (narrow uses compact rules below 750px) */
   .main-layout__header-inner {
     gap: 11px;
     min-height: 113px;
@@ -467,14 +528,14 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0;
   width: auto;
-  max-width: 350px;
+  max-width: min(480px, calc(100vw - 24px));
   margin: 0;
   flex-shrink: 0;
   pointer-events: auto;
 }
 
-.main-layout__logo-btn {
-  display: block;
+.main-layout__logo-link {
+  display: inline-block;
   padding: 0;
   margin: 0;
   border: none;
@@ -482,15 +543,27 @@ onUnmounted(() => {
   cursor: pointer;
   font: inherit;
   line-height: 0;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.main-layout__logo-link:focus-visible {
+  outline: 2px solid rgba(230, 25, 113, 0.85);
+  outline-offset: 4px;
+  border-radius: 8px;
 }
 
 .main-layout__logo--compact {
-  height: 36px;
+  max-height: 40px;
 }
 
 .main-layout__logo {
-  height: clamp(32px, 8vw, 48px);
+  display: block;
+  min-width: 280px;
   width: auto;
+  height: auto;
+  max-height: 52px;
   max-width: 100%;
   object-fit: contain;
   border-radius: 6px;
@@ -523,12 +596,12 @@ onUnmounted(() => {
   margin-bottom: 0;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 749px) {
   .main-layout__header :deep(.q-header__content) {
     padding: 10px 16px;
   }
   .main-layout__header-inner {
-    min-height: 70px;
+    min-height: 76px;
     gap: 10px;
   }
   .main-layout__brand {
@@ -771,7 +844,7 @@ onUnmounted(() => {
   color: #121212;
 }
 
-@media (min-width: 800px) {
+@media (min-width: 750px) {
   .main-layout__phone-link,
   .main-layout__open-status {
     font-size: 1.05rem;
@@ -813,15 +886,18 @@ onUnmounted(() => {
   .main-layout__fab-column {
     top: calc(50% - 30vh);
     bottom: auto;
-    transform: translateY(-50%);
+    /* Slightly below optical center */
+    transform: translateY(calc(-50% + 20px));
   }
 }
 
 @media (min-width: 751px) {
   .main-layout__fab-column {
     top: auto;
-    bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    bottom: max(18px, env(safe-area-inset-bottom, 0px));
     transform: none;
+    /* Facebook-only column: inset a bit more from the viewport edge than on mobile */
+    right: max(40px, env(safe-area-inset-right, 0px));
   }
 }
 
@@ -862,14 +938,14 @@ onUnmounted(() => {
   }
 
   .main-layout__facebook-fab {
-    width: 64px;
-    height: 48px;
-    border-radius: 3px;
+    width: 42px;
+    height: 42px;
+    border-radius: 99px;
   }
 
   .main-layout__facebook-fab-icon {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
   }
 }
 
@@ -878,24 +954,27 @@ onUnmounted(() => {
     display: none !important;
   }
 
+  /* Phone + clock FABs only on small viewports (must live here so base rules never override desktop display:none). */
+  .main-layout__mobile-fab-stack {
+    position: relative;
+    z-index: 6201;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
   .main-layout__mobile-fab-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: 99px;
   }
 
   .main-layout__facebook-fab {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: 99px;
   }
-}
-
-.main-layout__mobile-fab-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
 }
 
 .main-layout__mobile-fab-wrap {
@@ -907,12 +986,12 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   margin: 0;
   border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 2px;
+  border-radius: 99px;
   background: #000000;
   color: #ffffff;
   cursor: pointer;
@@ -942,12 +1021,19 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
+/* Hours: default below clock FAB; flip up only when there is no room underneath. */
 .main-layout__mobile-fab-panel.main-layout__hours-dropdown {
-  top: auto;
+  top: calc(100% + 8px);
+  bottom: auto;
   margin-top: 0;
   left: auto;
   min-width: min(280px, calc(100vw - 48px));
   max-width: calc(100vw - 24px);
+}
+
+.main-layout__mobile-fab-panel.main-layout__hours-dropdown.main-layout__mobile-fab-panel--flip-up {
+  top: auto;
+  bottom: calc(100% + 8px);
 }
 
 .main-layout__mobile-fab-panel--phone {
@@ -997,27 +1083,19 @@ onUnmounted(() => {
   text-decoration: underline;
 }
 
-.main-layout__mobile-hours-summary {
-  margin: 0 0 10px;
-  padding: 0 4px 10px;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #141414;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
 .main-layout__facebook-fab {
   position: relative;
+  z-index: 6199;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   margin: 0;
   background: #1877f2;
   border: 1px solid rgba(255, 255, 255, 0.38);
-  border-radius: 2px;
+  border-radius: 99px;
   color: #ffffff;
   text-decoration: none;
   box-sizing: border-box;
