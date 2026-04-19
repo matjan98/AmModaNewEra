@@ -5,7 +5,8 @@
       class="main-layout__header"
       unelevated
       :class="{
-        'main-layout__header--scrolled': useSidesLayout
+        'main-layout__header--scrolled': useSidesLayout,
+        'main-layout__header--solid': headerSolidBarActive
       }"
     >
       <div class="main-layout__header-inner" :class="{ 'main-layout__header-inner--scrolled': useSidesLayout }">
@@ -35,7 +36,7 @@
             <button
               type="button"
               class="main-layout__open-status"
-              :class="[isOpenToday ? 'main-layout__open-status--open' : 'main-layout__open-status--closed', { 'main-layout__open-status--expanded': hoursExpanded }]"
+              :class="{ 'main-layout__open-status--expanded': hoursExpanded }"
               @click="hoursExpanded = !hoursExpanded"
             >
               <span>
@@ -91,7 +92,7 @@
             <button
               type="button"
               class="main-layout__open-status"
-              :class="[isOpenToday ? 'main-layout__open-status--open' : 'main-layout__open-status--closed', { 'main-layout__open-status--expanded': hoursExpanded }]"
+              :class="{ 'main-layout__open-status--expanded': hoursExpanded }"
               @click="hoursExpanded = !hoursExpanded"
             >
               <span>
@@ -249,8 +250,25 @@ const useSidesLayout = computed(() => !isSmallScreen.value)
 
 let mediaQuery = null
 
+function clearHeaderSolidState() {
+  if (headerSolidifyTimer != null) {
+    clearTimeout(headerSolidifyTimer)
+    headerSolidifyTimer = null
+  }
+  headerSolid.value = false
+}
+
 function updateSmallScreen() {
-  isSmallScreen.value = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`).matches
+  const next = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`).matches
+  const prev = isSmallScreen.value
+  isSmallScreen.value = next
+  if (!next) {
+    clearHeaderSolidState()
+  } else if (!prev && next) {
+    nextTick(() => {
+      updateHeaderSolidFromScroll()
+    })
+  }
 }
 
 const openingHours = [
@@ -345,6 +363,72 @@ const isStoreOpenNow = computed(() => {
 const headerRef = ref(null)
 provide('layoutHeaderRef', headerRef)
 
+/** Black header bar after leaving the top (narrow viewports only; driven by scroll). */
+const headerSolid = ref(false)
+/** Solid bar applies only below 750px — wide layouts stay transparent. */
+const headerSolidBarActive = computed(() => headerSolid.value && isSmallScreen.value)
+let headerSolidifyTimer = null
+const HEADER_SOLID_DELAY_MS = 100
+/** Treat sub-pixel noise / rubber-banding as still "top". */
+const HEADER_TOP_SCROLL_EPSILON_PX = 2
+
+/** Quasar often scrolls `.q-page` / `.q-page-container` instead of `window` (desktop). */
+let headerScrollRootListeners = []
+
+function getEffectiveScrollY() {
+  let y = window.scrollY ?? window.pageYOffset ?? 0
+  const use = (v) => {
+    if (typeof v === 'number' && !Number.isNaN(v)) y = Math.max(y, v)
+  }
+  use(document.documentElement?.scrollTop)
+  use(document.body?.scrollTop)
+  if (document.scrollingElement) use(document.scrollingElement.scrollTop)
+  document.querySelectorAll('.main-layout .q-page-container, .main-layout .q-page').forEach((node) => {
+    if (node instanceof HTMLElement) use(node.scrollTop)
+  })
+  return y
+}
+
+function refreshHeaderScrollRootListeners() {
+  headerScrollRootListeners.forEach(({ el, handler }) => {
+    el.removeEventListener('scroll', handler)
+  })
+  headerScrollRootListeners = []
+  const handler = () => {
+    onWindowScroll()
+  }
+  document.querySelectorAll('.main-layout .q-page-container, .main-layout .q-page').forEach((node) => {
+    if (!(node instanceof HTMLElement)) return
+    node.addEventListener('scroll', handler, { passive: true })
+    headerScrollRootListeners.push({ el: node, handler })
+  })
+}
+
+function updateHeaderSolidFromScroll() {
+  if (!isSmallScreen.value) {
+    clearHeaderSolidState()
+    return
+  }
+  const y = getEffectiveScrollY()
+  if (y <= HEADER_TOP_SCROLL_EPSILON_PX) {
+    clearHeaderSolidState()
+    return
+  }
+  if (headerSolid.value) return
+  if (headerSolidifyTimer != null) return
+  headerSolidifyTimer = window.setTimeout(() => {
+    headerSolidifyTimer = null
+    if (!isSmallScreen.value) {
+      clearHeaderSolidState()
+      return
+    }
+    const y2 = getEffectiveScrollY()
+    if (y2 > HEADER_TOP_SCROLL_EPSILON_PX) {
+      headerSolid.value = true
+    }
+  }, HEADER_SOLID_DELAY_MS)
+}
+
 function closeHoursDropdown() {
   hoursExpanded.value = false
 }
@@ -354,6 +438,7 @@ function closePhoneFab() {
 }
 
 function onWindowScroll() {
+  updateHeaderSolidFromScroll()
   if (hoursExpanded.value) closeHoursDropdown()
   if (phoneFabExpanded.value) closePhoneFab()
 }
@@ -397,6 +482,11 @@ function toggleHoursFab() {
 }
 
 function scrollToTop() {
+  document.querySelectorAll('.main-layout .q-page-container, .main-layout .q-page').forEach((node) => {
+    if (node instanceof HTMLElement) {
+      node.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  })
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -418,6 +508,10 @@ onMounted(() => {
   mediaQuery = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
   mediaQuery.addEventListener('change', updateSmallScreen)
   window.addEventListener('scroll', onWindowScroll, { passive: true })
+  nextTick(() => {
+    refreshHeaderScrollRootListeners()
+    updateHeaderSolidFromScroll()
+  })
   window.addEventListener('resize', onMobileHoursFabPlacementLayout, { passive: true })
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', onMobileHoursFabPlacementLayout)
@@ -434,6 +528,14 @@ onUnmounted(() => {
     openStatusTickTimer = null
   }
   if (mediaQuery) mediaQuery.removeEventListener('change', updateSmallScreen)
+  if (headerSolidifyTimer != null) {
+    clearTimeout(headerSolidifyTimer)
+    headerSolidifyTimer = null
+  }
+  headerScrollRootListeners.forEach(({ el, handler }) => {
+    el.removeEventListener('scroll', handler)
+  })
+  headerScrollRootListeners = []
   window.removeEventListener('scroll', onWindowScroll)
   window.removeEventListener('resize', onMobileHoursFabPlacementLayout)
   if (window.visualViewport) {
@@ -461,7 +563,13 @@ onUnmounted(() => {
   -webkit-backdrop-filter: none;
   border-bottom: 1px solid transparent;
   overflow: visible;
-  transition: none;
+  transition: background-color 0.5s ease, border-bottom-color 0.5s ease;
+}
+
+/* Double class beats Quasar `.q-layout__section--marginal` primary background on wide layouts */
+.main-layout__header.main-layout__header--solid {
+  background: rgb(0, 0, 0);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .main-layout__page-container {
@@ -469,13 +577,16 @@ onUnmounted(() => {
 }
 
 .main-layout__header :deep(.q-header__content) {
-  padding: 16px;
+  display: flex;
+  align-items: center;
+  padding: 13px;
   transition: padding 0.3s ease;
   overflow: visible;
+  min-height: 0;
 }
 
 .main-layout__header--scrolled :deep(.q-header__content) {
-  padding: 16px;
+  padding: 13px;
 }
 
 .main-layout__header-inner {
@@ -485,42 +596,42 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 13px;
   width: 100%;
-  min-height: 118px;
   transition: min-height 0.35s ease, gap 0.35s ease;
   overflow: visible;
 }
 
+/* Stacked layout only — do not force this min-height on the compact row bar */
+.main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
+  min-height: 94px;
+}
+
 .main-layout__header-inner--scrolled {
-  flex-direction: row;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 12px;
-  min-height: 52px;
+  column-gap: 10px;
+  min-height: unset;
 }
 
 @media (min-width: 750px) {
-  /* Wide header: reduce height slightly (narrow uses compact rules below 750px) */
-  .main-layout__header-inner {
-    gap: 11px;
-    min-height: 113px;
-  }
-  .main-layout__header-inner--scrolled {
-    min-height: 60px;
+  .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
+    gap: 9px;
+    min-height: 90px;
   }
   .main-layout__contact--below {
-    margin-top: 67px;
+    margin-top: 59px;
   }
   .main-layout__contact--below.main-layout__contact--hidden {
-    top: 67px;
+    top: 59px;
   }
 }
 
-/* Logo fixed in place – same position whether scrolled or not */
+/* Stacked (narrow): logo absolutely centered horizontally; row layout uses grid (logo static, vertically centered) */
 .main-layout__brand {
   position: absolute;
-  top: 8px;
+  top: 6px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -529,9 +640,25 @@ onUnmounted(() => {
   gap: 0;
   width: auto;
   max-width: min(480px, calc(100vw - 24px));
-  margin: 0;
+  margin: 5px 0 0;
   flex-shrink: 0;
   pointer-events: auto;
+}
+
+.main-layout__header-inner--scrolled .main-layout__brand {
+  position: static;
+  left: auto;
+  top: auto;
+  transform: none;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+}
+
+.main-layout__header-inner--scrolled .main-layout__contact--below.main-layout__contact--hidden {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  justify-self: stretch;
 }
 
 .main-layout__logo-link {
@@ -555,15 +682,15 @@ onUnmounted(() => {
 }
 
 .main-layout__logo--compact {
-  max-height: 40px;
+  max-height: 32px;
 }
 
 .main-layout__logo {
   display: block;
-  min-width: 280px;
+  min-width: 224px;
   width: auto;
   height: auto;
-  max-height: 52px;
+  max-height: 42px;
   max-width: 100%;
   object-fit: contain;
   border-radius: 6px;
@@ -576,20 +703,20 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 13px;
 }
 
 /* Contact below logo: visible when not scrolled, fades out when scrolled */
 .main-layout__contact--below {
   opacity: 1;
-  /* Reserve space for fixed logo above (8px + logo height + 16px gap) */
-  margin-top: 72px;
+  /* Reserve space for fixed logo above (scaled with shorter header) */
+  margin-top: 63px;
 }
 .main-layout__contact--below.main-layout__contact--hidden {
   position: absolute;
   left: 0;
   right: 0;
-  top: 72px;
+  top: 63px;
   opacity: 0;
   pointer-events: none;
   margin-top: 0;
@@ -598,18 +725,18 @@ onUnmounted(() => {
 
 @media (max-width: 749px) {
   .main-layout__header :deep(.q-header__content) {
-    padding: 10px 16px;
+    padding: 8px 16px;
   }
-  .main-layout__header-inner {
-    min-height: 76px;
-    gap: 10px;
+  .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
+    min-height: 50px;
+    gap: 8px;
   }
   .main-layout__brand {
-    top: 6px;
+    top: 5px;
   }
   .main-layout__contact--below {
-    margin-top: 46px;
-    margin-bottom: 6px;
+    margin-top: 42px;
+    margin-bottom: 5px;
     flex-direction: row;
     justify-content: center;
   }
@@ -620,7 +747,7 @@ onUnmounted(() => {
     order: 2;
   }
   .main-layout__contact--below.main-layout__contact--hidden {
-    top: 40px;
+    top: 37px;
   }
 }
 
@@ -649,9 +776,18 @@ onUnmounted(() => {
   opacity: 1;
   pointer-events: auto;
 }
-.main-layout__header-inner--scrolled .main-layout__contact--left,
-.main-layout__header-inner--scrolled .main-layout__contact--right {
-  flex: 0 1 auto;
+.main-layout__header-inner--scrolled .main-layout__contact--left.main-layout__contact--visible {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.main-layout__header-inner--scrolled .main-layout__contact--right.main-layout__contact--visible {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  min-width: 0;
   margin-bottom: 0;
 }
 .main-layout__contact--left {
@@ -666,9 +802,9 @@ onUnmounted(() => {
 .main-layout__phone-link {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 38px;
-  padding: 8px 16px;
+  gap: 8px;
+  min-height: 30px;
+  padding: 6px 13px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(14px) saturate(1.2);
@@ -700,10 +836,10 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  min-height: 42px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.72);
@@ -745,9 +881,9 @@ onUnmounted(() => {
 .main-layout__open-status {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 38px;
-  padding: 8px 14px;
+  gap: 5px;
+  min-height: 30px;
+  padding: 6px 11px;
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 500;
@@ -758,34 +894,41 @@ onUnmounted(() => {
   transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.main-layout__open-status--open {
-  background: rgba(255, 255, 255, 0.78);
+/*
+ * Hours pill: match `.main-layout__phone-link` glass chip (same frosted white + hover).
+ */
+.main-layout__header .main-layout__open-status,
+.main-layout__header button.main-layout__open-status {
+  padding: 6px 13px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.78) !important;
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  border-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
   box-shadow:
     0 4px 18px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  color: #141414;
+  color: #141414 !important;
+  -webkit-text-fill-color: #141414;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 
-.main-layout__open-status--open:hover {
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.main-layout__open-status--closed {
-  background: rgba(22, 22, 22, 0.62);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border-color: rgba(255, 255, 255, 0.22);
+.main-layout__header .main-layout__open-status:hover,
+.main-layout__header button.main-layout__open-status:hover {
+  background: rgba(255, 255, 255, 0.92) !important;
   box-shadow:
-    0 4px 18px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.94);
+    0 6px 22px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
-.main-layout__open-status--closed:hover {
-  background: rgba(30, 30, 30, 0.72);
+.main-layout__header .main-layout__open-status span {
+  color: inherit !important;
+}
+
+.main-layout__header .main-layout__open-status :deep(.q-icon),
+.main-layout__header .main-layout__open-status .main-layout__hours-chevron {
+  color: #141414 !important;
+  opacity: 1 !important;
 }
 
 .main-layout__hours-chevron {
@@ -951,6 +1094,11 @@ onUnmounted(() => {
 
 @media (max-width: 750px) {
   .main-layout__contact--below {
+    display: none !important;
+  }
+
+  /* Hide fixed right-edge FAB column (phone, hours, Facebook) on small viewports */
+  .main-layout__fab-column {
     display: none !important;
   }
 

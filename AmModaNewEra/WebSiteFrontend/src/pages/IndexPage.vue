@@ -55,7 +55,7 @@
                 >
               </div>
               <div
-                class="index-page__hero-intro-sticky-cta"
+                class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--first"
                 :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroCtaFloated }"
               >
                 <div ref="heroIntroCtaRef" class="index-page__hero-intro-cta-block">
@@ -70,13 +70,51 @@
                   <div class="index-page__hero-intro-btn-row">
                     <button
                       type="button"
-                      class="index-page__hero-intro-cta-btn"
+                      class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--solid"
                       :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
                       @click="scrollToLocationSection"
                     >
                       Odwiedź nas
                     </button>
                   </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="index-page__quick-info" aria-label="Kontakt i skróty">
+              <div class="index-page__quick-info-inner">
+                <div class="index-page__quick-info-row">
+                  <span class="index-page__quick-info-label">Kontakt:</span>
+                  <a
+                    href="tel:+48503115446"
+                    class="index-page__quick-info-value index-page__quick-info-link"
+                  >
+                    503 115 446
+                  </a>
+                </div>
+                <div class="index-page__quick-info-row">
+                  <span class="index-page__quick-info-label">Dziś:</span>
+                  <span class="index-page__quick-info-value">
+                    <span class="index-page__quick-info-today-pill">{{ quickInfoTodayLine }}</span>
+                  </span>
+                </div>
+                <div class="index-page__quick-info-row index-page__quick-info-row--gallery">
+                  <span class="index-page__quick-info-label">Galeria:</span>
+                  <a
+                    :href="facebookUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="index-page__facebook-cta-btn index-page__quick-info-fb"
+                    aria-label="Facebook — otwiera się w nowej karcie"
+                  >
+                    Facebook
+                    <q-icon
+                      name="fa-brands fa-facebook"
+                      size="15px"
+                      class="index-page__facebook-cta-btn-icon index-page__quick-info-fb-brand-icon"
+                      aria-hidden="true"
+                    />
+                  </a>
                 </div>
               </div>
             </section>
@@ -278,7 +316,10 @@
               </div>
               <div
                 class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--facebook-shop"
-                :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroFacebookCtaFloated }"
+                :class="{
+                  'index-page__hero-intro-sticky-cta--floated': heroIntroFacebookCtaFloated,
+                  'index-page__hero-intro-sticky-cta--facebook-float-pop': facebookShopFloatPop,
+                }"
               >
                 <div
                   ref="heroIntroFacebookCtaRef"
@@ -503,9 +544,6 @@
         >
       </div>
     </div>
-    <section class="index-page__brand-footer" aria-label="Logo AM Moda">
-      <img :src="footerLogo" alt="AM Moda Damska" class="index-page__brand-footer-logo">
-    </section>
   </q-page>
 </template>
 
@@ -522,7 +560,6 @@ import sectionTwoPeruka from '../assets/Main photos/section 2/peruka.jpg'
 import sectionTwoPortfel from '../assets/Main photos/section 2/portfel.jpg'
 import sectionTwoRekawiczki from '../assets/Main photos/section 2/rekawiczki.jpg'
 import sectionTwoSukienka from '../assets/Main photos/section 2/sukienka.jpg'
-import footerLogo from '../assets/logo.png'
 import facebookShopPhoto from '../assets/Main photos/shop.png'
 import googleMapsPinImg from '../assets/google-maps.png'
 
@@ -702,6 +739,9 @@ const heroIntroAfterCtaFloated = ref(false)
 const heroIntroThirdCtaFloated = ref(false)
 /** Shop photo: float until image vertical midpoint meets the viewport-bottom bar; then center + scale. After scroll-past, never float again. */
 const heroIntroFacebookCtaFloated = ref(false)
+/** True for one paint cycle: fixed bar matches hero overlay size, then CSS settles to compact (see `--facebook-float-pop`). */
+const facebookShopFloatPop = ref(false)
+let facebookShopFloatSettleTimer = null
 const facebookShopCtaPassedOnce = ref(false)
 const heroIntroCtaVisible = ref(false)
 const storeHoursExpanded = ref(false)
@@ -855,6 +895,20 @@ function updateFacebookShopSectionPassed() {
   }
 }
 
+function scheduleFacebookShopFloatSettle() {
+  if (typeof window === 'undefined') return
+  if (facebookShopFloatSettleTimer != null) {
+    clearTimeout(facebookShopFloatSettleTimer)
+    facebookShopFloatSettleTimer = null
+  }
+  nextTick(() => {
+    facebookShopFloatSettleTimer = window.setTimeout(() => {
+      facebookShopFloatPop.value = false
+      facebookShopFloatSettleTimer = null
+    }, 48)
+  })
+}
+
 function updateHeroCtaModes() {
   heroIntroCtaFloated.value = computeHeroCtaFloated(heroIntroPhotoRef.value, heroIntroRef.value)
   heroIntroAfterCtaFloated.value = computeHeroCtaFloated(
@@ -865,10 +919,27 @@ function updateHeroCtaModes() {
     heroIntroThirdPhotoRef.value,
     heroIntroThirdRef.value,
   )
+  const prevFbFloat = heroIntroFacebookCtaFloated.value
   heroIntroFacebookCtaFloated.value = computeHeroFacebookCtaFloated(
     heroIntroFacebookPhotoRef.value,
     heroIntroFacebookRef.value,
   )
+
+  if (!heroIntroFacebookCtaFloated.value) {
+    if (typeof window !== 'undefined' && facebookShopFloatSettleTimer != null) {
+      clearTimeout(facebookShopFloatSettleTimer)
+      facebookShopFloatSettleTimer = null
+    }
+    facebookShopFloatPop.value = false
+  } else if (!prevFbFloat && heroIntroFacebookCtaFloated.value) {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      facebookShopFloatPop.value = false
+    } else {
+      facebookShopFloatPop.value = true
+      scheduleFacebookShopFloatSettle()
+    }
+  }
+
   updateFacebookShopSectionPassed()
 }
 
@@ -1035,6 +1106,14 @@ function getApiUrl(path) {
 }
 
 const todayStoreDayIndex = computed(() => new Date().getDay())
+
+/** Today’s hours line for quick-info strip under first hero (same calendar as STORE_OPENING_HOURS). */
+const quickInfoTodayLine = computed(() => {
+  const row = STORE_OPENING_HOURS.find((h) => h.dayIndex === todayStoreDayIndex.value)
+  if (!row) return '—'
+  if (row.hours === 'Zamknięte') return 'Zamknięte'
+  return `Otwarte ${row.hours}`
+})
 
 const storeHoursHeadingLabel = computed(() =>
   todayStoreDayIndex.value === 0 ? 'Godziny otwarcia' : 'dziś otwarte!',
@@ -1256,6 +1335,10 @@ onUnmounted(() => {
   setupRevealZoomObserver(false)
   setupStoreHoursIntroObserver(false)
   window.removeEventListener('resize', onRevealZoomWindowResize)
+  if (facebookShopFloatSettleTimer != null) {
+    clearTimeout(facebookShopFloatSettleTimer)
+    facebookShopFloatSettleTimer = null
+  }
 })
 </script>
 
@@ -1268,7 +1351,8 @@ onUnmounted(() => {
   background: rgb(0, 0, 0);
   color: rgba(255, 255, 255, 0.92);
   min-height: 100vh;
-  padding: 0 0 16px;
+  /* Shop photo is the last visible element; no bottom padding */
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -1279,29 +1363,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 24px;
-}
-
-.index-page__brand-footer {
-  position: relative;
-  left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
-  margin-top: -20px;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgb(0, 0, 0);
-}
-
-.index-page__brand-footer-logo {
-  width: 100%;
-  max-width: 500px;
-  max-height: clamp(82px, 15vw, 220px);
-  object-fit: contain;
-  display: block;
-  /* Uniform white mark from single-color / tinted artwork */
-  filter: brightness(0) invert(1);
 }
 
 /* Invisible, not shown in UI – remains focusable for keyboard input */
@@ -1326,10 +1387,9 @@ onUnmounted(() => {
   pointer-events: auto;
 }
 
+/* Keep the hidden unlock input focusable but out of layout flow so nothing renders below the shop photo */
 .index-page__aux-wrap--bottom {
-  position: static;
-  left: auto;
-  margin-top: 24px;
+  margin-top: 0;
   padding: 0;
 }
 
@@ -1609,6 +1669,11 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
+/* Extra breathing room under the first hero CTA cluster (anchored layout only). */
+.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
+  padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
+}
+
 .index-page__hero-intro-sticky-cta--floated {
   position: fixed;
   top: auto;
@@ -1625,6 +1690,122 @@ onUnmounted(() => {
   padding-bottom: 0;
   padding-left: 16px;
   z-index: 1500;
+}
+
+/*
+ * Shop Nawiguj bar: when it switches to fixed (`--floated`), `--facebook-float-pop` holds one paint at the
+ * same typography + scale as the in-photo hero overlay; JS clears it → CSS settles to the compact bar.
+ */
+.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
+  .index-page__hero-intro-cta-block--facebook-shop {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+
+.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
+  .index-page__hero-intro-address-row {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+
+@media (min-width: 750px) {
+  /* Compact fixed bar: extra space under address so small copy clears Nawiguj */
+  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
+      .index-page__hero-intro-sticky-cta--facebook-float-pop
+    )
+    .index-page__hero-intro-cta-block--facebook-shop {
+    gap: 10px;
+  }
+}
+
+.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
+    .index-page__hero-intro-sticky-cta--facebook-float-pop
+  )
+  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  white-space: nowrap;
+  font-size: clamp(calc(0.68rem + 2px), calc(2.2vw + 2px), calc(0.98rem + 2px));
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.88),
+    0 2px 10px rgba(0, 0, 0, 0.55);
+  transform: translateY(0);
+  /* Shorter than enlarge: this is the “decrease into bar” settle */
+  transition:
+    font-size 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+    line-height 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.26s ease;
+}
+
+@media (max-width: 749px) {
+  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
+      .index-page__hero-intro-sticky-cta--facebook-float-pop
+    )
+    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+    font-size: clamp(calc(0.56rem + 2px), calc(2.65vw + 2px), calc(0.82rem + 2px));
+    line-height: 1.22;
+  }
+}
+
+.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
+    .index-page__hero-intro-sticky-cta--facebook-float-pop
+  )
+  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 0.26s ease,
+    transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
+  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  white-space: nowrap;
+  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
+  line-height: 1.15;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.95),
+    0 1px 3px rgba(0, 0, 0, 0.9),
+    0 2px 14px rgba(0, 0, 0, 0.78),
+    0 4px 28px rgba(0, 0, 0, 0.55),
+    0 0 48px rgba(0, 0, 0, 0.35);
+  transition: none;
+}
+
+@media (max-width: 749px) {
+  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
+    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
+    line-height: 1.18;
+    letter-spacing: 0.05em;
+  }
+}
+
+@media (min-width: 750px) {
+  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
+    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+    transform: translateY(-20px);
+  }
+}
+
+.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
+  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
+  transform: translateY(0) scale(1.07);
+  transition: none;
 }
 
 /* Last hero (shop photo): dock address + Nawiguj at vertical center of the image when not floated; enlarge Nawiguj + address. */
@@ -1650,9 +1831,11 @@ onUnmounted(() => {
   padding-bottom: 0;
 }
 
+/* Shop address on photo: enlarge 0.38s; decrease uses :not(.--visible) rule (shorter) */
 .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
   .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-  font-size: clamp(2.15rem, 6.5vw, 3.05rem);
+  white-space: nowrap;
+  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
   line-height: 1.15;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1666,18 +1849,36 @@ onUnmounted(() => {
     0 4px 28px rgba(0, 0, 0, 0.55),
     0 0 48px rgba(0, 0, 0, 0.35);
   transition:
-    font-size 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    line-height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.45s ease 0.05s,
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
+    font-size 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    line-height 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.38s ease 0.03s,
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
+}
+
+.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page__hero-intro-address--facebook-shop-last:not(.index-page__hero-intro-address--visible) {
+  /* Slightly larger “small” form before hero enlargement (~+2px) */
+  font-size: clamp(calc(0.82rem + 2px), calc(2.35vw + 2px), calc(1.08rem + 2px));
+  transition:
+    font-size 0.26s cubic-bezier(0.42, 0, 0.58, 1),
+    line-height 0.26s cubic-bezier(0.42, 0, 0.58, 1),
+    opacity 0.26s ease 0.02s,
+    transform 0.26s cubic-bezier(0.42, 0, 0.58, 1) 0.02s;
 }
 
 @media (max-width: 749px) {
   .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
     .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    font-size: clamp(1.64rem, 4.7vw, 2.16rem);
+    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
     line-height: 1.18;
     letter-spacing: 0.05em;
+  }
+}
+
+@media (min-width: 750px) {
+  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+    transform: translateY(-20px);
   }
 }
 
@@ -1685,8 +1886,8 @@ onUnmounted(() => {
   .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
   transform: translateY(0) scale(1.07);
   transition:
-    opacity 0.4s ease 0.08s,
-    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+    opacity 0.38s ease 0.03s,
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
     background 0.22s ease,
     border-color 0.22s ease,
     box-shadow 0.22s ease;
@@ -1695,13 +1896,23 @@ onUnmounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
     .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    transition: opacity 0.45s ease 0.05s, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
+    transition: opacity 0.38s ease 0.03s, transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
+  }
+
+  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page__hero-intro-address--facebook-shop-last:not(.index-page__hero-intro-address--visible) {
+    transition: opacity 0.26s ease 0.02s, transform 0.26s cubic-bezier(0.16, 1, 0.3, 1) 0.02s;
   }
 
   .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
     .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
     transform: translateY(0) scale(1);
     transition: none;
+  }
+
+  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page__facebook-cta-btn--hero-overlay:not(.index-page__facebook-cta-btn--visible) {
+    transition: opacity 0.26s ease, transform 0.26s ease;
   }
 }
 
@@ -1764,7 +1975,9 @@ onUnmounted(() => {
   justify-content: center;
   box-sizing: border-box;
   width: 100%;
+  min-width: 0;
   height: 100%;
+  white-space: nowrap;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.45s ease 0.05s,
@@ -1821,13 +2034,36 @@ button.index-page__hero-intro-cta-btn {
   -webkit-appearance: none;
 }
 
+/* First hero only: flat white, black text (no glass / blur). */
+.index-page__hero-intro-cta-btn--solid {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: #141414;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.2);
+}
+
+.index-page__hero-intro-cta-btn--solid.index-page__hero-intro-cta-btn--visible:hover {
+  background: #f3f3f3;
+  border-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
+}
+
+.index-page__hero-intro-cta-btn--solid.index-page__hero-intro-cta-btn--visible:active {
+  background: #e8e8e8;
+}
+
 /* Narrow viewports: lighter hero chrome — roomier CTA pill, tighter address↔button gap (Odwiedź nas heroes only; not Facebook/Nawiguj). */
 @media (max-width: 749px) {
   .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop) {
-    /* Address row sized for slightly larger type above the pill (40 + 50 = stack) */
+    /* Shorter rows + smaller stack (~half prior slack between address line and pill) */
     --hero-cta-stack-height: 90px;
-    --hero-cta-address-row-height: 40px;
-    --hero-cta-button-row-height: 50px;
+    --hero-cta-address-row-height: 34px;
+    --hero-cta-button-row-height: 56px;
   }
 
   .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop)
@@ -1835,26 +2071,37 @@ button.index-page__hero-intro-cta-btn {
     align-items: flex-end;
   }
 
+  .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop)
+    .index-page__hero-intro-btn-row {
+    align-items: flex-start;
+  }
+
   .index-page__hero-intro-address:not(.index-page__hero-intro-address--facebook-shop-last) {
-    font-size: clamp(0.96rem, 3.45vw, 1.14rem);
+    /* One line on narrow screens: lower min so clamp can shrink with viewport */
+    font-size: clamp(0.68rem, 3.45vw, 1.14rem);
     line-height: 1.18;
   }
 
   .index-page__hero-intro-cta-btn {
     min-width: 130px;
-    padding: 9px 17px;
+    padding: 14px 17px;
     font-size: 0.72rem;
     border-radius: 4px;
   }
 
+  .index-page__hero-intro-cta-btn--solid {
+    font-size: 0.84rem;
+    font-weight: 500;
+  }
+
   .index-page__hero-intro-cta-btn--visible:hover {
     min-width: 118px;
-    padding: 7px 13px;
+    padding: 12px 15px;
   }
 
   .index-page__hero-intro-cta-btn--visible:active {
     min-width: 114px;
-    padding: 6px 12px;
+    padding: 11px 14px;
   }
 }
 
@@ -2036,6 +2283,158 @@ button.index-page__hero-intro-cta-btn {
   color: #ffffff;
 }
 
+/* Quick info strip: only viewports strictly below 750px */
+.index-page__quick-info {
+  display: none;
+  position: relative;
+  left: 50%;
+  width: 100dvw;
+  margin-left: -50dvw;
+  margin-top: 0;
+  padding: 20px 16px;
+  box-sizing: border-box;
+  height: 150px;
+  background: rgb(0, 0, 0);
+}
+
+@media (max-width: 749px) {
+  .index-page__quick-info {
+    display: block;
+  }
+}
+
+.index-page__quick-info-inner {
+  min-width: 270px;
+  max-width: min(320px, 100%);
+  width: 100%;
+  height: 100%;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.index-page__quick-info-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 28px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.index-page__quick-info-row--gallery {
+  align-items: center;
+}
+
+.index-page__quick-info-label {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.index-page__quick-info-value {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: right;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Same pink glass chip as `.index-page__store-hours-row--today`, wrapped to text only */
+.index-page__quick-info-today-pill {
+  display: inline-block;
+  padding: 5px 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+  vertical-align: baseline;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  color: #ffffff;
+  border-radius: 8px;
+  background: rgba(255, 105, 180, 0.14);
+  backdrop-filter: blur(12px) saturate(1.35);
+  -webkit-backdrop-filter: blur(12px) saturate(1.35);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 170, 210, 0.5),
+    0 1px 12px rgba(255, 120, 180, 0.12);
+}
+
+.index-page__quick-info-row > .index-page__quick-info-link {
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: right;
+}
+
+.index-page__quick-info-row--gallery > .index-page__quick-info-fb {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.index-page__quick-info-link {
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 600;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.index-page__quick-info-link:hover {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.index-page__quick-info-link:focus-visible {
+  outline: 2px solid rgba(255, 170, 210, 0.85);
+  outline-offset: 3px;
+}
+
+.index-page__facebook-cta-btn.index-page__quick-info-fb {
+  gap: 8px;
+  padding: 5px 10px;
+  font-size: clamp(0.76rem, 1.92vw, 0.86rem);
+  font-weight: 500;
+  line-height: 1.25;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(
+    145deg,
+    rgba(59, 142, 255, 0.38) 0%,
+    rgba(24, 119, 242, 0.28) 45%,
+    rgba(14, 88, 196, 0.34) 100%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(200, 228, 255, 0.5),
+    0 1px 12px rgba(24, 119, 242, 0.14);
+  backdrop-filter: blur(12px) saturate(1.35);
+  -webkit-backdrop-filter: blur(12px) saturate(1.35);
+}
+
+.index-page__quick-info-fb-brand-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  opacity: 0.92;
+}
+
+.index-page__facebook-cta-btn.index-page__quick-info-fb:hover {
+  background: linear-gradient(
+    145deg,
+    rgba(82, 158, 255, 0.46) 0%,
+    rgba(36, 136, 255, 0.4) 45%,
+    rgba(22, 105, 220, 0.46) 100%
+  );
+  border: 0;
+  box-shadow:
+    inset 0 0 0 1px rgba(228, 240, 255, 0.58),
+    0 1px 12px rgba(24, 119, 242, 0.22);
+}
+
 .index-page__section-two {
   position: relative;
   left: 50%;
@@ -2107,6 +2506,10 @@ button.index-page__hero-intro-cta-btn {
     padding: 0 12px max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
   }
 
+  .index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
+    padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
+  }
+
   .index-page__hero-intro-sticky-cta--floated {
     padding: 0 12px;
   }
@@ -2138,6 +2541,17 @@ button.index-page__hero-intro-cta-btn {
   transition:
     opacity 0.4s ease 0.08s,
     transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+/* Shop hero: shorter than enlarge (button hiding / scale down) */
+.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page__facebook-cta-btn--hero-overlay:not(.index-page__facebook-cta-btn--visible) {
+  transition:
+    opacity 0.26s ease 0.02s,
+    transform 0.26s cubic-bezier(0.42, 0, 0.58, 1) 0.02s,
     background 0.22s ease,
     border-color 0.22s ease,
     box-shadow 0.22s ease;
@@ -2252,7 +2666,7 @@ button.index-page__hero-intro-cta-btn {
   align-items: center;
 }
 
-/* “Przejdź na Facebook” above shop hero — blue glass + pulsating outer glow only */
+/* “Przejdź na Facebook” above shop hero — blue glass + soft outer glow pulse */
 .index-page__facebook-cta-btn--below {
   position: relative;
   overflow: hidden;
@@ -2275,7 +2689,6 @@ button.index-page__hero-intro-cta-btn {
 }
 
 @keyframes index-page-facebook-below-shine-glow {
-  /* Same swell as the original 3s pulse (dim → bright → dim), then a quiet pause before repeat. */
   0%,
   52%,
   100% {
@@ -2304,7 +2717,9 @@ button.index-page__hero-intro-cta-btn {
   }
 }
 
-.index-page__facebook-cta-btn:not(.index-page__facebook-cta-btn--below):hover {
+.index-page__facebook-cta-btn:not(.index-page__facebook-cta-btn--below):not(
+    .index-page__quick-info-fb
+  ):hover {
   background: rgba(26, 26, 32, 0.88);
   border-color: rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
@@ -2322,7 +2737,6 @@ button.index-page__hero-intro-cta-btn {
   );
   border-color: rgba(210, 235, 255, 0.55);
   transform: translateY(-1px);
-  /* box-shadow left to the glow keyframes so the pulse keeps running */
 }
 
 .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
@@ -2643,12 +3057,6 @@ button.index-page__hero-intro-cta-btn {
 
   .index-page__thumb-wrap {
     min-height: 120px;
-  }
-
-  .index-page__brand-footer {
-    margin-top: -24px;
-    padding-top: 0;
-    padding-bottom: 0;
   }
 }
 </style>
