@@ -68,12 +68,12 @@
               >
                 <div ref="heroIntroCtaRef" class="index-page__hero-intro-cta-block">
                   <div class="index-page__hero-intro-address-row">
-                    <p
-                      class="index-page__hero-intro-address"
-                      :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
+                    <div
+                      class="index-page__hero-intro-google-mini"
+                      :class="{ 'index-page__hero-intro-google-mini--visible': heroIntroCtaVisible }"
                     >
-                      Kozy, ul. Bielska 166
-                    </p>
+                      <GoogleReviewsCard variant="mini" :with-margin="false" />
+                    </div>
                   </div>
                   <div class="index-page__hero-intro-btn-row">
                     <button
@@ -105,6 +105,24 @@
                   <span class="index-page__quick-info-value">
                     <span class="index-page__quick-info-today-pill">{{ quickInfoTodayLine }}</span>
                   </span>
+                </div>
+                <div class="index-page__quick-info-row index-page__quick-info-row--gallery">
+                  <span class="index-page__quick-info-label">Galeria:</span>
+                  <a
+                    :href="facebookUrl"
+                    target="_blank"
+                    rel="noopener"
+                    class="index-page__facebook-cta-btn index-page__quick-info-fb"
+                    aria-label="Otwórz galerię na Facebooku AM Moda Damska w nowej karcie"
+                  >
+                    Facebook
+                    <q-icon
+                      name="fa-brands fa-facebook"
+                      size="18px"
+                      class="index-page__facebook-cta-btn-icon index-page__quick-info-fb-brand-icon"
+                      aria-hidden="true"
+                    />
+                  </a>
                 </div>
               </div>
             </section>
@@ -183,7 +201,7 @@
                 <div ref="heroIntroAfterCtaRef" class="index-page__hero-intro-cta-block">
                   <div class="index-page__hero-intro-address-row">
                     <p
-                      class="index-page__hero-intro-address"
+                      class="index-page__hero-intro-address index-page__hero-intro-address--second"
                       :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
                     >
                       Kozy, ul. Bielska 166
@@ -275,7 +293,11 @@
                       class="index-page__hero-intro-address"
                       :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
                     >
-                      Kozy, ul. Bielska 166
+                      <span class="index-page__hero-intro-quote">
+                        <span class="index-page__hero-intro-quote-text">”Najlepszy taki sklep w okolicy“</span>
+                        <br>
+                        <span class="index-page__hero-intro-quote-signature">~Jakub Pilarz</span>
+                      </span>
                     </p>
                   </div>
                   <div class="index-page__hero-intro-btn-row">
@@ -1378,21 +1400,20 @@ onUnmounted(() => {
 
 .index-page__fixed-bottom-photo {
   position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
+  inset: 0;
+  width: 100dvw;
   height: 100dvh;
-  width: auto;
+  overflow: hidden;
   z-index: -1;
   pointer-events: none;
 }
 
 .index-page__fixed-bottom-photo-img {
-  width: auto;
+  width: 100%;
   height: 100%;
-  max-width: none;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center center;
 }
 
 .index-page__shell {
@@ -2049,9 +2070,50 @@ onUnmounted(() => {
               transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
 }
 
+.index-page__hero-intro-google-mini {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.45s ease 0.05s,
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
+  pointer-events: auto;
+}
+
+.index-page__hero-intro-google-mini--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .index-page__hero-intro-address--visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+.index-page__hero-intro-quote {
+  text-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.92),
+    0 0 18px rgba(0, 0, 0, 0.55);
+}
+
+.index-page__hero-intro-quote-text {
+  display: inline;
+}
+
+.index-page__hero-intro-quote-signature {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.82em;
+  letter-spacing: 0.03em;
+  opacity: 0.92;
+}
+
+@media (min-width: 1000px) {
+  .index-page__hero-intro-address--second {
+    font-size: clamp(0.86rem, 2.45vw, 1.14rem);
+  }
 }
 
 /* Odwiedź nas: dark glass pill + scale-in reveal */
@@ -2411,7 +2473,21 @@ button.index-page__hero-intro-cta-btn {
   padding: 20px 16px;
   box-sizing: border-box;
   height: 150px;
-  background: transparent;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 38%,
+      rgba(0, 0, 0, 0.06) 100%
+    ),
+    rgba(10, 10, 14, 0.9);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 60px rgba(0, 0, 0, 0.38);
 }
 
 @media (max-width: 749px) {
@@ -3124,6 +3200,12 @@ button.index-page__hero-intro-cta-btn {
   margin-top: 10vh;
 }
 
+@media (max-width: 600px) {
+  .index-page__section--gallery {
+    margin-top: 4vh;
+  }
+}
+
 /* Gallery tab: glass background behind content (full-bleed). */
 .index-page__panels--gallery {
   background: rgba(255, 255, 255, 0.06);
@@ -3348,6 +3430,11 @@ button.index-page__hero-intro-cta-btn {
   .index-page__shell {
     padding: 0 10px;
     gap: 16px;
+  }
+
+  .index-page__gallery-heading {
+    margin-top: 16px;
+    margin-bottom: 32px;
   }
 
   .index-page__gallery {
