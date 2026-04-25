@@ -28,6 +28,21 @@ dotnet user-secrets set "Deployment:SmtpPassword" "twoje-haslo-smtp"
 * `Deployment:RemoteBasePath` - katalog docelowy dla frontendu (np. `public_html/subfolder`)
 * `Deployment:SmtpPassword` - opcjonalne; hasło SMTP wstrzykiwane do `config/smtp.php` przy deployu (gdy plik istnieje)
 
+### Konfiguracja prod (opcjonalne)
+
+Drugi cel deploya (np. produkcja `ammoda.pl`) konfiguruje się w sekcji `DeploymentProd`. Wszystkie pola, których nie ustawisz w `DeploymentProd`, są dziedziczone z `Deployment` (ścieżki frontend/backend, build output, prefiks tagu git itd.).
+
+```bash
+dotnet user-secrets set "DeploymentProd:FtpHost" "ftp.prod.example.com"
+dotnet user-secrets set "DeploymentProd:FtpPort" "21"
+dotnet user-secrets set "DeploymentProd:FtpUsername" "deploy_prod_user"
+dotnet user-secrets set "DeploymentProd:FtpPassword" "InneHasloProd!"
+dotnet user-secrets set "DeploymentProd:RemoteBasePath" "ammoda.pl"
+dotnet user-secrets set "DeploymentProd:SmtpPassword" "haslo-smtp-prod"
+```
+
+W razie potrzeby możesz nadpisać też pozostałe pola, np. `DeploymentProd:GitTagPrefix` aby tagi prod miały inny prefiks niż `deploy-`.
+
 ### Opcjonalne ustawienia ścieżek
 
 ```bash
@@ -56,13 +71,15 @@ dotnet run --project AmModaNewEra/AmModaDeployMacVersion  # macOS
 
 Po starcie zobaczysz menu:
 
-1. Deploy – wykona:
+1. Deploy – wykona deploy na środowisko z sekcji `Deployment` (dev):
    - Build frontendu (`npx quasar build`)
    - Upload frontendu do głównego katalogu
    - Upload backendu do podkatalogu `server/`
-2. Show git statistics – pokaże statystyki repozytorium
-3. Test connection – sprawdzi połączenie FTP
-4. Exit – zakończy program
+2. Deploy (prod) – ten sam proces, ale używa konfiguracji z sekcji `DeploymentProd` (produkcja).
+3. Test connection – sprawdzi połączenie FTP dla configu dev (`Deployment`).
+4. Test connection (prod) – sprawdzi połączenie FTP dla configu prod (`DeploymentProd`).
+5. Show git statistics – pokaże statystyki repozytorium.
+6. Exit – zakończy program.
 
 Podczas działania możesz użyć `Ctrl+C`, aby przerwać aktualny proces.
 
