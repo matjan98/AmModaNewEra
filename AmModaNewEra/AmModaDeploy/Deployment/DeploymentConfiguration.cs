@@ -31,6 +31,8 @@ public class DeploymentConfiguration
 
     public bool CreateGitTagOnDeploy { get; set; } = true;
 
+    public DeploymentConfiguration Clone() => (DeploymentConfiguration)MemberwiseClone();
+
     public IEnumerable<string> Validate()
     {
         if (string.IsNullOrWhiteSpace(FtpHost))

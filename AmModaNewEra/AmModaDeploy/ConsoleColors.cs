@@ -18,6 +18,9 @@ public static class ConsoleColors
     /// <summary>ANSI escape code for yellow foreground.</summary>
     public const string Yellow = "\x1b[33m";
 
+    /// <summary>ANSI escape code for bright/light yellow (used e.g. for prod deployment warning).</summary>
+    public const string BrightYellow = "\x1b[93m";
+
     /// <summary>ANSI escape code for blue foreground.</summary>
     public const string Blue = "\x1b[34m";
 

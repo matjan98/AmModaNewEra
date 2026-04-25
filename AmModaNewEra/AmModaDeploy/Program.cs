@@ -31,15 +31,24 @@ if (deploymentSettings is null)
     return;
 }
 
-var deploymentService = new DeploymentService(deploymentSettings, new ProcessRunner(), new FtpUploader());
+var prodSettings = deploymentSettings.Clone();
+configuration.GetSection("DeploymentProd").Bind(prodSettings);
+
+var processRunner = new ProcessRunner();
+var ftpUploader = new FtpUploader();
+
+var deploymentService = new DeploymentService(deploymentSettings, processRunner, ftpUploader);
+var deploymentServiceProd = new DeploymentService(prodSettings, processRunner, ftpUploader);
 
 while (true)
 {
     ConsoleColors.WriteLine(ConsoleColors.Cyan, "AmModa Deploy Tool");
     Console.WriteLine("1 - Deploy");
-    Console.WriteLine("2 - Test connection");
-    Console.WriteLine("3 - Show git statistics");
-    Console.WriteLine("4 - Exit");
+    Console.WriteLine("2 - Deploy (prod)");
+    Console.WriteLine("3 - Test connection");
+    Console.WriteLine("4 - Test connection (prod)");
+    Console.WriteLine("5 - Show git statistics");
+    Console.WriteLine("6 - Exit");
     ConsoleColors.Write(ConsoleColors.Yellow, "Your choice > ");
 
     var choice = Console.ReadLine();
@@ -59,13 +68,31 @@ while (true)
             Console.WriteLine();
             break;
         case "2":
-            await deploymentService.TestConnectionAsync();
+            ConsoleColors.WriteLine(ConsoleColors.BrightYellow, $"PROD deployment - target: {prodSettings.RemoteBasePath}");
+            try
+            {
+                await deploymentServiceProd.RunAsync();
+            }
+            catch (Exception ex)
+            {
+                ConsoleColors.WriteLine(ConsoleColors.Red, $"Deployment failed: {ex.Message}");
+            }
+
             Console.WriteLine();
             break;
         case "3":
-            await GitStatistics.ShowGitStatisticsAsync();
+            await deploymentService.TestConnectionAsync();
+            Console.WriteLine();
             break;
         case "4":
+            ConsoleColors.WriteLine(ConsoleColors.BrightYellow, $"PROD connection test - target: {prodSettings.FtpHost}");
+            await deploymentServiceProd.TestConnectionAsync();
+            Console.WriteLine();
+            break;
+        case "5":
+            await GitStatistics.ShowGitStatisticsAsync();
+            break;
+        case "6":
             return;
         default:
             ConsoleColors.WriteLine(ConsoleColors.Red, "Invalid choice. Try again.\n");
