@@ -30,15 +30,16 @@
       <span class="google-reviews-card__name">A&amp;M Moda Damska</span>
 
       <div class="google-reviews-card__row">
-        <span class="google-reviews-card__rating">4,7</span>
+        <span class="google-reviews-card__rating">{{ ratingDisplay }}</span>
         <span class="google-reviews-card__stars" aria-hidden="true">
-          <q-icon name="star" size="16px" />
-          <q-icon name="star" size="16px" />
-          <q-icon name="star" size="16px" />
-          <q-icon name="star" size="16px" />
-          <q-icon name="star_half" size="16px" />
+          <q-icon
+            v-for="(icon, idx) in starIcons"
+            :key="idx"
+            :name="icon"
+            size="16px"
+          />
         </span>
-        <span class="google-reviews-card__count">171 opinii</span>
+        <span class="google-reviews-card__count">{{ ratingCount }} {{ opinionsLabel }}</span>
         <q-icon name="info" size="16px" class="google-reviews-card__info" aria-hidden="true" />
       </div>
     </div>
@@ -46,11 +47,68 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from 'vue'
+
 defineProps({
   withMargin: {
     type: Boolean,
     default: true,
   },
+})
+
+const FALLBACK_RATING = 4.7
+const FALLBACK_RATING_COUNT = 171
+
+const rating = ref(FALLBACK_RATING)
+const ratingCount = ref(FALLBACK_RATING_COUNT)
+
+const API_BASE = import.meta.env.VITE_API_BASE ?? ''
+const API_SUBPATH = 'server'
+
+function getApiUrl(path) {
+  const base = API_BASE.replace(/\/$/, '')
+  if (base) return `${base}/${path}`
+  return `${API_SUBPATH}/${path}`
+}
+
+const ratingDisplay = computed(() => rating.value.toFixed(1).replace('.', ','))
+
+const starIcons = computed(() => {
+  const value = rating.value
+  const full = Math.floor(value)
+  const fractional = value - full
+  const hasHalf = fractional >= 0.25 && fractional < 0.75
+  const fullCount = fractional >= 0.75 ? full + 1 : full
+  const icons = []
+  for (let i = 0; i < fullCount; i += 1) icons.push('star')
+  if (hasHalf) icons.push('star_half')
+  while (icons.length < 5) icons.push('star_border')
+  return icons.slice(0, 5)
+})
+
+const opinionsLabel = computed(() => {
+  const n = ratingCount.value
+  const abs = Math.abs(n)
+  const lastTwo = abs % 100
+  const last = abs % 10
+  if (abs === 1) return 'opinia'
+  if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return 'opinie'
+  return 'opinii'
+})
+
+onMounted(async () => {
+  try {
+    const res = await fetch(getApiUrl('api/reviews.php'))
+    if (!res.ok) return
+    const data = await res.json()
+    if (!data || data.ok !== true) return
+    const fetchedRating = Number(data.rating)
+    const fetchedCount = Number(data.ratingCount)
+    if (Number.isFinite(fetchedRating) && fetchedRating > 0) rating.value = fetchedRating
+    if (Number.isFinite(fetchedCount) && fetchedCount >= 0) ratingCount.value = fetchedCount
+  } catch {
+    // fallback values pozostaja
+  }
 })
 </script>
 
