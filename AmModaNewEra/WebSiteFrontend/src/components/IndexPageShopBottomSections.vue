@@ -1,22 +1,22 @@
 <template>
-  <div class="index-page-shop-bottom">
+  <div class="index-page-shop-bottom-sections index-page-shop-bottom-sections__root">
     <!-- 1) Facebook CTA above shop block -->
-    <section class="index-page__facebook-shop-follow" aria-label="Facebook AM Moda Damska">
-      <p class="index-page__facebook-shop-follow-text">
+    <section class="index-page-shop-bottom-sections__facebook-shop-follow" aria-label="Facebook AM Moda Damska">
+      <p class="index-page-shop-bottom-sections__facebook-shop-follow-text">
         Zobacz nasze najnowsze kolekcje na Facebooku:
       </p>
       <a
         :href="facebookUrl"
         target="_blank"
         rel="noopener"
-        class="index-page__facebook-cta-btn index-page__facebook-cta-btn--below"
+        class="index-page-shop-bottom-sections__facebook-cta-btn index-page-shop-bottom-sections__facebook-cta-btn--below"
         aria-label="Otwórz profil AM Moda Damska na Facebooku"
       >
         Przejdź na Facebook
         <q-icon
           name="fa-brands fa-facebook"
           size="20px"
-          class="index-page__facebook-cta-btn-icon index-page__facebook-cta-btn-icon--external"
+          class="index-page-shop-bottom-sections__facebook-cta-btn-icon index-page-shop-bottom-sections__facebook-cta-btn-icon--external"
           aria-hidden="true"
         />
       </a>
@@ -25,53 +25,53 @@
     <!-- 2) Address + Google Maps (sticky / float, matches fixed shop photo) -->
     <section
       ref="heroIntroFacebookRef"
-      class="index-page__hero-intro index-page__hero-intro--facebook-fixed-bg"
+      class="index-page-shop-bottom-sections__hero-intro index-page-shop-bottom-sections__hero-intro--facebook-fixed-bg"
       :style="ctaCssVars"
       aria-label="Sklep — zdjęcie i nawigacja"
     >
       <div
         ref="heroIntroFacebookPhotoRef"
-        class="index-page__hero-intro-photo index-page__hero-intro-photo--facebook-spacer"
+        class="index-page-shop-bottom-sections__hero-intro-photo index-page-shop-bottom-sections__hero-intro-photo--facebook-spacer"
         aria-hidden="true"
       />
       <div
-        class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--facebook-shop"
+        class="index-page-shop-bottom-sections__hero-intro-sticky-cta index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop"
         :class="{
-          'index-page__hero-intro-sticky-cta--floated': heroIntroFacebookCtaFloated,
-          'index-page__hero-intro-sticky-cta--facebook-float-pop': facebookShopFloatPop,
+          'index-page-shop-bottom-sections__hero-intro-sticky-cta--floated': heroIntroFacebookCtaFloated,
+          'index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop': facebookShopFloatPop,
         }"
       >
         <div
           ref="heroIntroFacebookCtaRef"
-          class="index-page__hero-intro-cta-block index-page__hero-intro-cta-block--facebook-shop"
+          class="index-page-shop-bottom-sections__hero-intro-cta-block index-page-shop-bottom-sections__hero-intro-cta-block--facebook-shop"
         >
-          <div class="index-page__hero-intro-address-row">
+          <div class="index-page-shop-bottom-sections__hero-intro-address-row">
             <p
-              class="index-page__hero-intro-address index-page__hero-intro-address--facebook-shop-last"
-              :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
+              class="index-page-shop-bottom-sections__hero-intro-address index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last"
+              :class="{ 'index-page-shop-bottom-sections__hero-intro-address--visible': heroIntroCtaVisible }"
             >
               Kozy, ul. Bielska 166
             </p>
           </div>
-          <div class="index-page__hero-intro-btn-row">
+          <div class="index-page-shop-bottom-sections__hero-intro-btn-row">
             <a
               :href="mapsUrl"
               target="_blank"
               rel="noopener"
-              class="index-page__facebook-cta-btn index-page__facebook-cta-btn--hero-overlay"
-              :class="{ 'index-page__facebook-cta-btn--visible': heroIntroCtaVisible }"
+              class="index-page-shop-bottom-sections__facebook-cta-btn index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay"
+              :class="{ 'index-page-shop-bottom-sections__facebook-cta-btn--visible': heroIntroCtaVisible }"
               aria-label="Otwórz nawigację do sklepu w Google Maps"
             >
-              <span class="index-page__facebook-cta-btn-textstack">
-                <span class="index-page__facebook-cta-btn-label">Nawiguj</span>
-                <span class="index-page__facebook-cta-btn-subline">Google Maps</span>
+              <span class="index-page-shop-bottom-sections__facebook-cta-btn-textstack">
+                <span class="index-page-shop-bottom-sections__facebook-cta-btn-label">Nawiguj</span>
+                <span class="index-page-shop-bottom-sections__facebook-cta-btn-subline">Google Maps</span>
               </span>
               <img
                 :src="googleMapsPinImg"
                 alt=""
                 width="26"
                 height="36"
-                class="index-page__facebook-cta-btn-maps-pin"
+                class="index-page-shop-bottom-sections__facebook-cta-btn-maps-pin"
                 aria-hidden="true"
                 decoding="async"
               />
@@ -81,7 +81,7 @@
       </div>
     </section>
 
-    <GoogleReviewsCard class="index-page__google-reviews" />
+    <GoogleReviewsCard class="index-page-shop-bottom-sections__google-reviews" />
   </div>
 </template>
 
@@ -129,7 +129,7 @@ defineExpose({
 </script>
 
 <style scoped>
-.index-page-shop-bottom {
+.index-page-shop-bottom-sections__root {
   --index-address-above-cta-shadow:
     0 1px 2px rgba(0, 0, 0, 0.75),
     0 2px 12px rgba(0, 0, 0, 0.55),
@@ -148,7 +148,7 @@ defineExpose({
   overflow-y: hidden;
 }
 
-.index-page__hero-intro--facebook-fixed-bg {
+.index-page-shop-bottom-sections__hero-intro--facebook-fixed-bg {
   background: transparent;
   flex: 1 1 0;
   min-height: 0;
@@ -157,13 +157,13 @@ defineExpose({
   flex-direction: column;
 }
 
-.index-page__hero-intro-photo--facebook-spacer {
+.index-page-shop-bottom-sections__hero-intro-photo--facebook-spacer {
   width: 100%;
   flex: 1 1 auto;
   min-height: 0;
 }
 
-.index-page__hero-intro {
+.index-page-shop-bottom-sections__hero-intro {
   position: relative;
   margin-top: 0;
   margin-bottom: 0;
@@ -173,7 +173,7 @@ defineExpose({
   overflow: visible;
 }
 
-.index-page__hero-intro-sticky-cta {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta {
   position: absolute;
   top: 0;
   left: 0;
@@ -193,7 +193,7 @@ defineExpose({
   pointer-events: none;
 }
 
-.index-page__hero-intro-sticky-cta--floated {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated {
   position: fixed;
   top: auto;
   bottom: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
@@ -215,33 +215,33 @@ defineExpose({
  * Shop Nawiguj bar: when it switches to fixed (`--floated`), `--facebook-float-pop` holds one paint at the
  * same typography + scale as the in-photo hero overlay; JS clears it → CSS settles to the compact bar.
  */
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
-  .index-page__hero-intro-cta-block--facebook-shop {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
+  .index-page-shop-bottom-sections__hero-intro-cta-block--facebook-shop {
   height: auto;
   min-height: 0;
   max-height: none;
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
-  .index-page__hero-intro-address-row {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
+  .index-page-shop-bottom-sections__hero-intro-address-row {
   height: auto;
   min-height: 0;
   max-height: none;
 }
 
 @media (min-width: 750px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-      .index-page__hero-intro-sticky-cta--facebook-float-pop
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
+      .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     )
-    .index-page__hero-intro-cta-block--facebook-shop {
+    .index-page-shop-bottom-sections__hero-intro-cta-block--facebook-shop {
     gap: 10px;
   }
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-    .index-page__hero-intro-sticky-cta--facebook-float-pop
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
+    .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
   )
-  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
   white-space: nowrap;
   font-size: clamp(calc(0.68rem + 2px), calc(2.2vw + 2px), calc(0.98rem + 2px));
   line-height: 1.2;
@@ -262,19 +262,19 @@ defineExpose({
 }
 
 @media (max-width: 749px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-      .index-page__hero-intro-sticky-cta--facebook-float-pop
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
+      .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     )
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     font-size: clamp(calc(0.56rem + 2px), calc(2.65vw + 2px), calc(0.82rem + 2px));
     line-height: 1.22;
   }
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-    .index-page__hero-intro-sticky-cta--facebook-float-pop
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
+    .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
   )
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
   transform: translateY(0) scale(1);
   transition:
     opacity 0.26s ease,
@@ -284,8 +284,8 @@ defineExpose({
     box-shadow 0.22s ease;
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
   white-space: nowrap;
   font-size: clamp(0.72rem, 5.25vw, 3.05rem);
   line-height: 1.15;
@@ -304,8 +304,8 @@ defineExpose({
 }
 
 @media (max-width: 749px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     font-size: clamp(0.65rem, 5.8vw, 2.16rem);
     line-height: 1.18;
     letter-spacing: 0.05em;
@@ -313,42 +313,42 @@ defineExpose({
 }
 
 @media (min-width: 750px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     transform: translateY(-20px);
   }
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
   transform: translateY(0) scale(1.07);
   transition: none;
 }
 
 /* Last hero (shop photo): dock address + Nawiguj at vertical center of the image when not floated; enlarge Nawiguj + address. */
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated) {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated) {
   align-items: center;
   padding-top: max(8px, env(safe-area-inset-top, 0px));
   padding-bottom: max(22px, env(safe-area-inset-bottom, 0px));
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-cta-block--facebook-shop {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__hero-intro-cta-block--facebook-shop {
   height: auto;
   min-height: var(--hero-cta-stack-height, 96px);
   max-height: none;
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-address-row {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__hero-intro-address-row {
   height: auto;
   min-height: var(--hero-cta-address-row-height, 49px);
   max-height: none;
   padding-bottom: 0;
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
   white-space: nowrap;
   font-size: clamp(0.72rem, 5.25vw, 3.05rem);
   line-height: 1.15;
@@ -370,8 +370,8 @@ defineExpose({
     transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-address--facebook-shop-last:not(.index-page__hero-intro-address--visible) {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last:not(.index-page-shop-bottom-sections__hero-intro-address--visible) {
   font-size: clamp(calc(0.82rem + 2px), calc(2.35vw + 2px), calc(1.08rem + 2px));
   transition:
     font-size 0.26s cubic-bezier(0.42, 0, 0.58, 1),
@@ -381,8 +381,8 @@ defineExpose({
 }
 
 @media (max-width: 749px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     font-size: clamp(0.65rem, 5.8vw, 2.16rem);
     line-height: 1.18;
     letter-spacing: 0.05em;
@@ -390,14 +390,14 @@ defineExpose({
 }
 
 @media (min-width: 750px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     transform: translateY(-20px);
   }
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
   transform: translateY(0) scale(1.07);
   transition:
     opacity 0.38s ease 0.03s,
@@ -408,29 +408,29 @@ defineExpose({
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     transition: opacity 0.38s ease 0.03s, transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
   }
 
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last:not(.index-page__hero-intro-address--visible) {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last:not(.index-page-shop-bottom-sections__hero-intro-address--visible) {
     transition: opacity 0.26s ease 0.02s, transform 0.26s cubic-bezier(0.16, 1, 0.3, 1) 0.02s;
   }
 
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
     transform: translateY(0) scale(1);
     transition: none;
   }
 
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__facebook-cta-btn--hero-overlay:not(.index-page__facebook-cta-btn--visible) {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay:not(.index-page-shop-bottom-sections__facebook-cta-btn--visible) {
     transition: opacity 0.26s ease, transform 0.26s ease;
   }
 }
 
-.index-page__hero-intro-cta-block {
+.index-page-shop-bottom-sections__hero-intro-cta-block {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -446,7 +446,7 @@ defineExpose({
   pointer-events: none;
 }
 
-.index-page__hero-intro-address-row {
+.index-page-shop-bottom-sections__hero-intro-address-row {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -459,7 +459,7 @@ defineExpose({
   flex-shrink: 0;
 }
 
-.index-page__hero-intro-btn-row {
+.index-page-shop-bottom-sections__hero-intro-btn-row {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -472,7 +472,7 @@ defineExpose({
   flex-shrink: 0;
 }
 
-.index-page__hero-intro-address {
+.index-page-shop-bottom-sections__hero-intro-address {
   margin: 0;
   padding: 0 8px;
   font-family: 'Poppins', sans-serif;
@@ -499,22 +499,22 @@ defineExpose({
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
 }
 
-.index-page__hero-intro-address--visible {
+.index-page-shop-bottom-sections__hero-intro-address--visible {
   opacity: 1;
   transform: translateY(0);
 }
 
 @media (max-width: 768px) {
-  .index-page__hero-intro-sticky-cta--floated {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--floated {
     padding: 0 12px;
   }
 
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated) {
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated) {
     padding-left: 12px;
     padding-right: 12px;
   }
 
-  .index-page__hero-intro-btn-row {
+  .index-page-shop-bottom-sections__hero-intro-btn-row {
     height: auto;
     min-height: var(--hero-cta-button-row-height, 47px);
     max-height: none;
@@ -522,7 +522,7 @@ defineExpose({
 }
 
 /* Nawiguj on shop hero */
-.index-page__facebook-cta-btn--hero-overlay {
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
   pointer-events: auto;
   opacity: 0;
   transform: translateY(8px) scale(0.96);
@@ -536,8 +536,8 @@ defineExpose({
     box-shadow 0.22s ease;
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__facebook-cta-btn--hero-overlay:not(.index-page__facebook-cta-btn--visible) {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay:not(.index-page-shop-bottom-sections__facebook-cta-btn--visible) {
   transition:
     opacity 0.26s ease 0.02s,
     transform 0.26s cubic-bezier(0.42, 0, 0.58, 1) 0.02s,
@@ -546,24 +546,24 @@ defineExpose({
     box-shadow 0.22s ease;
 }
 
-.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .index-page__facebook-cta-btn--hero-overlay {
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
     opacity: 1;
     transform: none;
     transition: none;
   }
 
-  .index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay {
+  .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
     transition: none;
   }
 }
 
-.index-page__facebook-cta-btn--hero-overlay .index-page__facebook-cta-btn-textstack {
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -573,13 +573,13 @@ defineExpose({
   transform: translateY(-2px);
 }
 
-.index-page__facebook-cta-btn--hero-overlay .index-page__facebook-cta-btn-label {
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-label {
   letter-spacing: 0.08em;
   font-size: clamp(1.05rem, 2.75vw, 1.22rem);
   font-weight: 600;
 }
 
-.index-page__facebook-cta-btn--hero-overlay .index-page__facebook-cta-btn-subline {
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-subline {
   font-size: clamp(0.52rem, 1.65vw, 0.62rem);
   font-weight: 500;
   letter-spacing: 0.06em;
@@ -588,7 +588,7 @@ defineExpose({
   line-height: 1.05;
 }
 
-.index-page__facebook-cta-btn-maps-pin {
+.index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
   flex-shrink: 0;
   display: block;
   width: 26px;
@@ -597,7 +597,7 @@ defineExpose({
   object-position: center;
 }
 
-.index-page__facebook-shop-follow {
+.index-page-shop-bottom-sections__facebook-shop-follow {
   position: relative;
   width: 100%;
   margin-top: -10px;
@@ -617,10 +617,10 @@ defineExpose({
   align-items: center;
   text-align: center;
   gap: clamp(16px, 3vw, 28px);
-  padding-top: 10vh;
+  padding-top: 11vh;
 }
 
-.index-page__facebook-shop-follow-text {
+.index-page-shop-bottom-sections__facebook-shop-follow-text {
   margin: 0;
   margin-top: 0;
   max-width: min(520px, 92vw);
@@ -633,7 +633,7 @@ defineExpose({
   color: #ffffff;
 }
 
-.index-page__facebook-cta-btn {
+.index-page-shop-bottom-sections__facebook-cta-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -657,7 +657,7 @@ defineExpose({
     box-shadow 0.22s ease;
 }
 
-.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay {
+.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
   gap: 20px;
   padding: 12px 22px 12px 30px;
   align-items: center;
@@ -670,16 +670,16 @@ defineExpose({
     gap 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
+.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
   transform: translateY(0) scale(0.97);
 }
 
-.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:active {
+.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:active {
   transform: translateY(0) scale(0.95);
 }
 
 /* “Przejdź na Facebook” above shop hero */
-.index-page__facebook-cta-btn--below {
+.index-page-shop-bottom-sections__facebook-cta-btn--below {
   position: relative;
   overflow: hidden;
   gap: 15px;
@@ -720,7 +720,7 @@ defineExpose({
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .index-page__facebook-cta-btn--below {
+  .index-page-shop-bottom-sections__facebook-cta-btn--below {
     animation: none;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.28),
@@ -729,7 +729,7 @@ defineExpose({
   }
 }
 
-.index-page__facebook-cta-btn:not(.index-page__facebook-cta-btn--below):not(.index-page__quick-info-fb):hover {
+.index-page-shop-bottom-sections__facebook-cta-btn:not(.index-page-shop-bottom-sections__facebook-cta-btn--below):not(.index-page-shop-bottom-sections__quick-info-fb):hover {
   background: rgba(26, 26, 32, 0.88);
   border-color: rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
@@ -738,7 +738,7 @@ defineExpose({
     0 14px 36px rgba(0, 0, 0, 0.5);
 }
 
-.index-page__facebook-cta-btn--below:hover {
+.index-page-shop-bottom-sections__facebook-cta-btn--below:hover {
   background: linear-gradient(
     145deg,
     rgba(88, 230, 255, 0.58) 0%,
@@ -749,27 +749,27 @@ defineExpose({
   transform: translateY(-1px);
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
   transform: translateY(0) scale(1.03);
 }
 
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
+.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
   transform: translateY(0) scale(0.97);
 }
 
-.index-page__facebook-cta-btn:focus-visible {
+.index-page-shop-bottom-sections__facebook-cta-btn:focus-visible {
   outline: 2px solid rgba(230, 25, 113, 0.65);
   outline-offset: 3px;
 }
 
-.index-page__facebook-cta-btn-icon {
+.index-page-shop-bottom-sections__facebook-cta-btn-icon {
   flex-shrink: 0;
   opacity: 0.95;
 }
 
-.index-page__google-reviews {
+.index-page-shop-bottom-sections__google-reviews {
   flex: 0 0 auto;
   height: 5vh;
   min-height: 0;
