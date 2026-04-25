@@ -144,7 +144,6 @@
 
     <div
       class="main-layout__fab-column"
-      :class="{ 'main-layout__fab-column--entered': facebookFabEntered }"
     >
       <div class="main-layout__mobile-fab-stack">
       <div class="main-layout__mobile-fab-phone">
@@ -212,30 +211,6 @@
         </div>
       </div>
       </div>
-      <a
-      :href="facebookUrl"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="main-layout__facebook-fab"
-      aria-label="Facebook — AM Moda Damska"
-    >
-      <svg
-        class="main-layout__facebook-fab-icon"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <path
-          fill="currentColor"
-          d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-        />
-      </svg>
-      <span
-        v-if="!isStoreOpenNow"
-        class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-fb"
-        aria-hidden="true"
-      />
-    </a>
     </div>
   </q-layout>
 </template>
@@ -462,10 +437,6 @@ function onDocumentPointerDownOutsideHours(event) {
 const galleryUploadUnlocked = ref(false)
 const showAuxInput = ref(false)
 
-const facebookUrl = 'https://www.facebook.com/AMModaDamska/'
-const facebookFabEntered = ref(false)
-let facebookFabEnterTimer = null
-const FACEBOOK_FAB_ENTER_DELAY_MS = 2000
 const OPEN_STATUS_TICK_MS = 60_000
 
 const phoneFabExpanded = ref(false)
@@ -518,9 +489,6 @@ onMounted(() => {
     window.visualViewport.addEventListener('scroll', onMobileHoursFabPlacementLayout)
   }
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
-  facebookFabEnterTimer = window.setTimeout(() => {
-    facebookFabEntered.value = true
-  }, FACEBOOK_FAB_ENTER_DELAY_MS)
 })
 onUnmounted(() => {
   if (openStatusTickTimer != null) {
@@ -543,17 +511,13 @@ onUnmounted(() => {
     window.visualViewport.removeEventListener('scroll', onMobileHoursFabPlacementLayout)
   }
   document.removeEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
-  if (facebookFabEnterTimer != null) {
-    window.clearTimeout(facebookFabEnterTimer)
-    facebookFabEnterTimer = null
-  }
 })
 </script>
 
 <style scoped>
 .main-layout {
   min-height: 100vh;
-  background: rgb(0, 0, 0);
+  background: transparent;
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -568,7 +532,7 @@ onUnmounted(() => {
 
 /* Double class beats Quasar `.q-layout__section--marginal` primary background on wide layouts */
 .main-layout__header.main-layout__header--solid {
-  background: rgb(0, 0, 0);
+  background: transparent;
   border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
@@ -805,7 +769,7 @@ onUnmounted(() => {
   gap: 8px;
   min-height: 30px;
   padding: 6px 13px;
-  border-radius: 4px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(14px) saturate(1.2);
   -webkit-backdrop-filter: blur(14px) saturate(1.2);
@@ -887,7 +851,7 @@ onUnmounted(() => {
   font-family: inherit;
   font-size: 0.9rem;
   font-weight: 500;
-  border-radius: 4px;
+  border-radius: 10px;
   border: 1px solid transparent;
   cursor: pointer;
   background: transparent;
@@ -1140,7 +1104,7 @@ onUnmounted(() => {
   margin: 0;
   border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 99px;
-  background: #000000;
+  background: transparent;
   color: #ffffff;
   cursor: pointer;
   box-sizing: border-box;

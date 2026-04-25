@@ -1,5 +1,13 @@
 <template>
   <q-page class="index-page">
+    <div class="index-page__fixed-bottom-photo" aria-hidden="true">
+      <img
+        :src="facebookShopPhoto"
+        alt=""
+        class="index-page__fixed-bottom-photo-img"
+        decoding="async"
+      >
+    </div>
     <!-- Fixed at one height, stuck to screen edges (not container) -->
     <div class="index-page__nav-buttons-fixed">
       <button
@@ -98,24 +106,6 @@
                     <span class="index-page__quick-info-today-pill">{{ quickInfoTodayLine }}</span>
                   </span>
                 </div>
-                <div class="index-page__quick-info-row index-page__quick-info-row--gallery">
-                  <span class="index-page__quick-info-label">Galeria:</span>
-                  <a
-                    :href="facebookUrl"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="index-page__facebook-cta-btn index-page__quick-info-fb"
-                    aria-label="Facebook — otwiera się w nowej karcie"
-                  >
-                    Facebook
-                    <q-icon
-                      name="fa-brands fa-facebook"
-                      size="15px"
-                      class="index-page__facebook-cta-btn-icon index-page__quick-info-fb-brand-icon"
-                      aria-hidden="true"
-                    />
-                  </a>
-                </div>
               </div>
             </section>
 
@@ -130,6 +120,8 @@
                     v-for="item in row"
                     :key="item.name"
                     class="index-page__section-two-card"
+                    :class="{ 'index-page__section-two-card--active': activeSectionTwoName === item.name }"
+                    @click="toggleSectionTwoOverlay(item.name)"
                   >
                     <div class="index-page__section-two-photo-wrap">
                       <img
@@ -139,6 +131,29 @@
                         loading="lazy"
                         @load="onRevealSectionTwoImageLoad"
                       >
+                      <div class="index-page__section-two-overlay" aria-hidden="true">
+                        <div class="index-page__section-two-overlay-inner">
+                          <div class="index-page__section-two-overlay-title">
+                            Sprawdź aktualności:
+                          </div>
+                          <a
+                            :href="facebookUrl"
+                            target="_blank"
+                            rel="noopener"
+                            class="index-page__facebook-cta-btn index-page__facebook-cta-btn--below index-page__facebook-cta-btn--section-two-overlay"
+                            aria-label="Otwórz Facebook AM Moda Damska w nowej karcie"
+                            @click.stop
+                          >
+                            Przejdź na Facebook
+                            <q-icon
+                              name="fa-brands fa-facebook"
+                              size="18px"
+                              class="index-page__facebook-cta-btn-icon index-page__facebook-cta-btn-icon--external"
+                              aria-hidden="true"
+                            />
+                          </a>
+                        </div>
+                      </div>
                     </div>
                     <div class="index-page__section-two-caption">
                       {{ item.name }}
@@ -302,18 +317,15 @@
             <!-- Shop photo — overlay: address + Nawiguj -->
             <section
               ref="heroIntroFacebookRef"
-              class="index-page__hero-intro"
+              class="index-page__hero-intro index-page__hero-intro--facebook-fixed-bg"
               :style="heroIntroCtaCssVars"
               aria-label="Sklep — zdjęcie i nawigacja"
             >
-              <div ref="heroIntroFacebookPhotoRef" class="index-page__hero-intro-photo index-page__reveal-media">
-                <img
-                  :src="facebookShopPhoto"
-                  alt=""
-                  class="index-page__hero-intro-photo-img index-page__reveal-media-img"
-                  @load="onHeroIntroImageLoad"
-                >
-              </div>
+              <div
+                ref="heroIntroFacebookPhotoRef"
+                class="index-page__hero-intro-photo index-page__hero-intro-photo--facebook-spacer"
+                aria-hidden="true"
+              />
               <div
                 class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--facebook-shop"
                 :class="{
@@ -360,9 +372,11 @@
                 </div>
               </div>
             </section>
+
+            <GoogleReviewsCard />
             </div>
           </div>
-          <div v-else key="gallery" class="index-page__panels">
+          <div v-else key="gallery" class="index-page__panels index-page__panels--gallery">
             <div class="index-page__panels-inner">
             <section v-if="galleryUploadUnlocked" class="index-page__section index-page__section--upload">
               <div
@@ -441,6 +455,7 @@
             </section>
 
             <section class="index-page__section index-page__section--gallery">
+              <h2 class="index-page__gallery-heading">Galeria</h2>
               <div v-if="galleryUploadUnlocked" class="index-page__gallery">
                 <template v-if="photoListWithUrls.length">
                   <div
@@ -486,6 +501,8 @@
                   >
                 </div>
               </div>
+
+              <GoogleReviewsCard />
             </section>
             </div>
           </div>
@@ -549,32 +566,49 @@
 
 <script setup>
 import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import GoogleReviewsCard from '../components/GoogleReviewsCard.vue'
 import heroIntroFirstImage from '../assets/Main photos/main2.png'
 import heroIntroSecondImage from '../assets/Main photos/atf_photo.png'
 import heroIntroThirdImage from '../assets/Main photos/main3.png'
-import sectionTwoBony from '../assets/Main photos/section 2/bony.jpg'
-import sectionTwoBut from '../assets/Main photos/section 2/but.jpg'
-import sectionTwoCzapka from '../assets/Main photos/section 2/czapka.jpg'
-import sectionTwoMarynarka from '../assets/Main photos/section 2/marynarka.jpg'
-import sectionTwoPeruka from '../assets/Main photos/section 2/peruka.jpg'
-import sectionTwoPortfel from '../assets/Main photos/section 2/portfel.jpg'
-import sectionTwoRekawiczki from '../assets/Main photos/section 2/rekawiczki.jpg'
-import sectionTwoSukienka from '../assets/Main photos/section 2/sukienka.jpg'
+import productsBizuteria from '../assets/Main photos/Products/biżuteria.jpg'
+import productsBluzka from '../assets/Main photos/Products/bluzka.jpg'
+import productsBonPodarunkowy from '../assets/Main photos/Products/bon_podarunkowy.jpg'
+import productsButy from '../assets/Main photos/Products/buty.jpg'
+import productsCzapka from '../assets/Main photos/Products/czapka.jpg'
+import productsKardigan from '../assets/Main photos/Products/kardigan.jpg'
+import productsKomplet from '../assets/Main photos/Products/komplet.jpg'
+import productsKurtka from '../assets/Main photos/Products/kurtka.jpg'
+import productsMarynarka from '../assets/Main photos/Products/marynarka.jpg'
+import productsPeruka from '../assets/Main photos/Products/peruka.jpg'
+import productsPlaszcz from '../assets/Main photos/Products/plaszcz.jpg'
+import productsPortfel from '../assets/Main photos/Products/portfel.jpg'
+import productsRajstopy from '../assets/Main photos/Products/rajstopy.jpg'
+import productsSpodnie from '../assets/Main photos/Products/spodnie.jpg'
+import productsSukienka from '../assets/Main photos/Products/sukienka.jpg'
+import productsTorebka from '../assets/Main photos/Products/torebka.jpg'
 import facebookShopPhoto from '../assets/Main photos/shop.png'
 import googleMapsPinImg from '../assets/google-maps.png'
 
 const TAB_STORAGE_KEY = 'index-page-active-tab'
 /** Toggle to show the fixed "Galeria" shortcut in the corner again. */
-const SHOW_GALLERY_NAV_BUTTON = false
-const sectionTwoItems = [
-  { name: 'Sukienki', photo: sectionTwoSukienka },
-  { name: 'Marynarki', photo: sectionTwoMarynarka },
-  { name: 'Buty', photo: sectionTwoBut },
-  { name: 'Portfele', photo: sectionTwoPortfel },
-  { name: 'Czapki', photo: sectionTwoCzapka },
-  { name: 'Rękawiczki', photo: sectionTwoRekawiczki },
-  { name: 'Bony', photo: sectionTwoBony },
-  { name: 'Peruki', photo: sectionTwoPeruka },
+const SHOW_GALLERY_NAV_BUTTON = true
+const sectionTwoItems = [ 
+  { name: 'Biżuteria', photo: productsBizuteria },
+  { name: 'Bony podarunkowe', photo: productsBonPodarunkowy },
+  { name: 'Torebki', photo: productsTorebka },
+  { name: 'Buty', photo: productsButy },
+  { name: 'Sukienki', photo: productsSukienka },
+  { name: 'Bluzki', photo: productsBluzka },
+  { name: 'Spodnie', photo: productsSpodnie },
+  { name: 'Komplety', photo: productsKomplet },
+  { name: 'Peruki', photo: productsPeruka },
+  { name: 'Portfele', photo: productsPortfel },
+  { name: 'Rajstopy', photo: productsRajstopy },
+  { name: 'Czapki', photo: productsCzapka },
+  { name: 'Kardigany', photo: productsKardigan },
+  { name: 'Kurtki', photo: productsKurtka },
+  { name: 'Marynarki', photo: productsMarynarka },
+  { name: 'Plaszcze', photo: productsPlaszcz },
 ]
 
 /** Matches `.index-page__section-two-row` grid: 4 cols desktop, 2 cols mobile. */
@@ -700,6 +734,7 @@ const pendingFiles = ref([])
 const lightboxOpen = ref(false)
 const lightboxIndex = ref(0)
 const lightboxTouchStartX = ref(0)
+const activeSectionTwoName = ref(null)
 
 const lightboxPhotoList = computed(() => {
   const urls = []
@@ -746,7 +781,7 @@ const facebookShopCtaPassedOnce = ref(false)
 const heroIntroCtaVisible = ref(false)
 const storeHoursExpanded = ref(false)
 
-const storeHoursIntroRevealed = ref(false)
+const storeHoursIntroRevealed = ref(true)
 let storeHoursIntroObserver = null
 
 /** Distance of anchored / fixed CTA from the photo or viewport bottom (CSS only); dock threshold uses photo bottom vs visible viewport bottom (no gap in JS — avoids double-counting jump). */
@@ -785,57 +820,13 @@ function scrollToLocationSection() {
 /**
  * When Main 3 (photo) first crosses the bottom edge of the viewport, reveal the store-hours block above with a staggered fade-in.
  */
-function setupStoreHoursIntroObserver(on) {
-  if (!on) {
-    if (storeHoursIntroObserver) {
-      storeHoursIntroObserver.disconnect()
-      storeHoursIntroObserver = null
-    }
-    storeHoursIntroRevealed.value = false
-    return
+function setupStoreHoursIntroObserver() {
+  if (storeHoursIntroObserver) {
+    storeHoursIntroObserver.disconnect()
+    storeHoursIntroObserver = null
   }
-
-  if (typeof window === 'undefined') return
-
-  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-    storeHoursIntroRevealed.value = true
-    return
-  }
-
-  storeHoursIntroRevealed.value = false
-
-  nextTick(() => {
-    const target = heroIntroThirdPhotoRef.value ?? heroIntroThirdRef.value
-    if (!target || typeof IntersectionObserver === 'undefined') {
-      storeHoursIntroRevealed.value = true
-      return
-    }
-
-    if (storeHoursIntroObserver) {
-      storeHoursIntroObserver.disconnect()
-      storeHoursIntroObserver = null
-    }
-
-    const onIntersect = (entries) => {
-      const e = entries[0]
-      if (!e?.isIntersecting) return
-      const top = e.boundingClientRect.top
-      const vb = getViewportBottomClientY()
-      if (top > vb + 1) return
-      storeHoursIntroRevealed.value = true
-      if (storeHoursIntroObserver) {
-        storeHoursIntroObserver.disconnect()
-        storeHoursIntroObserver = null
-      }
-    }
-
-    storeHoursIntroObserver = new IntersectionObserver(onIntersect, {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0,
-    })
-    storeHoursIntroObserver.observe(target)
-  })
+  // Store hours should render immediately without reveal animation.
+  storeHoursIntroRevealed.value = true
 }
 
 /**
@@ -1255,6 +1246,27 @@ function openPhoto(url) {
   lightboxOpen.value = true
 }
 
+function toggleSectionTwoOverlay(name) {
+  activeSectionTwoName.value = activeSectionTwoName.value === name ? null : name
+}
+
+function closeSectionTwoOverlay() {
+  activeSectionTwoName.value = null
+}
+
+function onSectionTwoOverlayDocumentPointerDown(e) {
+  if (!activeSectionTwoName.value) return
+  const target = e.target
+  if (!(target instanceof Element)) return
+  const insideActive = target.closest('.index-page__section-two-card--active')
+  if (!insideActive) closeSectionTwoOverlay()
+}
+
+function onSectionTwoOverlayKeydown(e) {
+  if (!activeSectionTwoName.value) return
+  if (e.key === 'Escape') closeSectionTwoOverlay()
+}
+
 function lightboxGoPrev() {
   if (lightboxHasPrev.value) lightboxIndex.value--
 }
@@ -1310,6 +1322,10 @@ watch(lightboxOpen, (open) => {
 onMounted(async () => {
   updateSectionTwoWindowWidth()
   loadPhotos()
+  document.addEventListener('pointerdown', onSectionTwoOverlayDocumentPointerDown, {
+    passive: true,
+  })
+  window.addEventListener('keydown', onSectionTwoOverlayKeydown)
   await nextTick()
   if (activeTab.value === 'info') {
     setupHeroCtaIntersection(true)
@@ -1335,6 +1351,8 @@ onUnmounted(() => {
   setupRevealZoomObserver(false)
   setupStoreHoursIntroObserver(false)
   window.removeEventListener('resize', onRevealZoomWindowResize)
+  document.removeEventListener('pointerdown', onSectionTwoOverlayDocumentPointerDown)
+  window.removeEventListener('keydown', onSectionTwoOverlayKeydown)
   if (facebookShopFloatSettleTimer != null) {
     clearTimeout(facebookShopFloatSettleTimer)
     facebookShopFloatSettleTimer = null
@@ -1348,12 +1366,33 @@ onUnmounted(() => {
     0 1px 2px rgba(0, 0, 0, 0.75),
     0 2px 12px rgba(0, 0, 0, 0.55),
     0 4px 24px rgba(0, 0, 0, 0.4);
-  background: rgb(0, 0, 0);
+  background: transparent;
   color: rgba(255, 255, 255, 0.92);
   min-height: 100vh;
   /* Shop photo is the last visible element; no bottom padding */
   padding: 0;
   box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+}
+
+.index-page__fixed-bottom-photo {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  height: 100dvh;
+  width: auto;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.index-page__fixed-bottom-photo-img {
+  width: auto;
+  height: 100%;
+  max-width: none;
+  display: block;
+  object-fit: contain;
 }
 
 .index-page__shell {
@@ -1363,6 +1402,22 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.index-page__nav-buttons-fixed {
+  position: relative;
+  z-index: 3;
+}
+
+.index-page__hero-intro--facebook-fixed-bg {
+  background: transparent;
+}
+
+.index-page__hero-intro-photo--facebook-spacer {
+  width: 100%;
+  height: 65vh;
 }
 
 /* Invisible, not shown in UI – remains focusable for keyboard input */
@@ -1398,7 +1453,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   max-width: 100%;
-  background: rgb(0, 0, 0);
+  background: transparent;
   border-radius: 0;
   overflow: visible;
 }
@@ -1421,22 +1476,30 @@ onUnmounted(() => {
 .index-page__nav-btn {
   position: fixed;
   top: 100px;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  background: transparent;
-  border: none;
+  padding: 4px 18px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.28),
+    0 2px 10px rgba(0, 0, 0, 0.18);
   cursor: pointer;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Dancing Script', cursive;
   font-size: 1.55rem;
   letter-spacing: 0.02em;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .index-page__nav-btn:hover {
   opacity: 0.9;
   transform: scale(1.02);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.32),
+    0 3px 12px rgba(0, 0, 0, 0.22);
 }
 
 .index-page__nav-btn--right {
@@ -1452,8 +1515,24 @@ onUnmounted(() => {
 @media (min-width: 800px) {
   .index-page__nav-btn {
     font-size: 1.9rem;
-    padding: 10px 18px;
+    padding: 4px 18px;
     gap: 10px;
+  }
+
+  .index-page__nav-btn--right {
+    right: 32px;
+  }
+
+  .index-page__nav-btn--left {
+    left: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .index-page__nav-btn {
+    font-size: 1.15rem;
+    padding: 3px 14px;
+    gap: 6px;
   }
 }
 
@@ -1496,7 +1575,7 @@ onUnmounted(() => {
   margin: 0 auto;
   padding: 0 6px 0;
   box-sizing: border-box;
-  background: #000000;
+  background: transparent;
 }
 
 /* Slide transition: both panels overlap so one hides just behind the other (no white gap) */
@@ -1554,29 +1633,15 @@ onUnmounted(() => {
   transform: translateX(100%);
 }
 
-@keyframes index-page-store-hours-line-in {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Store hours: render immediately (no intro animation). */
+.index-page__store-open-banner {
+  pointer-events: auto;
 }
 
-.index-page__store-open-banner:not(.index-page__store-open-banner--intro-visible) {
-  pointer-events: none;
-}
-
-.index-page__store-open-banner:not(.index-page__store-open-banner--intro-visible) .index-page__store-hours-reveal-line {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.index-page__store-open-banner--intro-visible .index-page__store-hours-reveal-line {
-  animation: index-page-store-hours-line-in 0.92s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+.index-page__store-hours-reveal-line {
+  opacity: 1;
+  transform: none;
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1599,7 +1664,7 @@ onUnmounted(() => {
   left: 50%;
   width: 100dvw;
   margin-left: -50dvw;
-  background: rgb(0, 0, 0);
+  background: transparent;
   box-sizing: border-box;
   overflow: visible;
 }
@@ -1630,13 +1695,13 @@ onUnmounted(() => {
 }
 
 .index-page__reveal-media:not(.index-page__reveal-media--in) .index-page__reveal-media-img {
-  transform: scale(1.08);
+  transform: scale(1.15);
   transform-origin: center center;
 }
 
 .index-page__reveal-media--in .index-page__reveal-media-img {
   transform: scale(1);
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.5s;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1831,7 +1896,7 @@ onUnmounted(() => {
   padding-bottom: 0;
 }
 
-/* Shop address on photo: enlarge 0.38s; decrease uses :not(.--visible) rule (shorter) */
+/* Shop address on photo: enlarge 0.38s; decrease uses the non-visible selector (shorter) */
 .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
   .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
   white-space: nowrap;
@@ -2004,8 +2069,8 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 4px;
   font-family: inherit;
-  font-size: 0.875rem;
-  font-weight: 300;
+  font-size: 1.1rem;
+  font-weight: 500;
   letter-spacing: normal;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.96);
@@ -2084,8 +2149,8 @@ button.index-page__hero-intro-cta-btn {
 
   .index-page__hero-intro-cta-btn {
     min-width: 130px;
-    padding: 14px 17px;
-    font-size: 0.72rem;
+    padding: 12px 17px;
+    font-size: 0.8rem;
     border-radius: 4px;
   }
 
@@ -2154,10 +2219,29 @@ button.index-page__hero-intro-cta-btn {
 }
 
 .index-page__store-open-banner {
+  position: relative;
+  left: 50%;
+  width: 100dvw;
   margin: 0;
+  margin-left: -50dvw;
   padding: clamp(11px, 2.35vw, 17px) clamp(11px, 2.65vw, 19px);
   text-align: center;
-  background: transparent;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 38%,
+      rgba(0, 0, 0, 0.06) 100%
+    ),
+    rgba(10, 10, 14, 0.48);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 18px 60px rgba(0, 0, 0, 0.38);
+  box-sizing: border-box;
 }
 
 .index-page__store-hours-heading {
@@ -2193,12 +2277,28 @@ button.index-page__hero-intro-cta-btn {
   padding: 4px;
   border: none;
   border-radius: 8px;
-  background: transparent;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.03) 40%,
+      rgba(0, 0, 0, 0.06) 100%
+    ),
+    rgba(10, 10, 14, 0.46);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ffffff;
   cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 44px rgba(0, 0, 0, 0.42);
   transition:
     opacity 0.25s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    background 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .index-page__store-hours-toggle:hover {
@@ -2229,6 +2329,22 @@ button.index-page__hero-intro-cta-btn {
   font-size: clamp(0.88rem, 2.4vw, 1rem);
   color: #ffffff;
   border-radius: 8px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.12) 0%,
+      rgba(255, 255, 255, 0.04) 42%,
+      rgba(0, 0, 0, 0.08) 100%
+    ),
+    rgba(8, 8, 12, 0.44);
+  background-clip: padding-box;
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 16px 52px rgba(0, 0, 0, 0.32);
   opacity: 1;
   transition:
     max-height 0.48s cubic-bezier(0.4, 0, 0.2, 1),
@@ -2261,6 +2377,7 @@ button.index-page__hero-intro-cta-btn {
   background: rgba(255, 105, 180, 0.14);
   backdrop-filter: blur(12px) saturate(1.35);
   -webkit-backdrop-filter: blur(12px) saturate(1.35);
+  border-color: rgba(255, 170, 210, 0.5);
   box-shadow:
     inset 0 0 0 1px rgba(255, 170, 210, 0.5),
     0 1px 12px rgba(255, 120, 180, 0.12);
@@ -2272,7 +2389,7 @@ button.index-page__hero-intro-cta-btn {
 }
 
 .index-page__store-hours-day {
-  text-transform: capitalize;
+  text-transform: uppercase;
   font-weight: 400;
 }
 
@@ -2294,12 +2411,38 @@ button.index-page__hero-intro-cta-btn {
   padding: 20px 16px;
   box-sizing: border-box;
   height: 150px;
-  background: rgb(0, 0, 0);
+  background: transparent;
 }
 
 @media (max-width: 749px) {
   .index-page__quick-info {
     display: block;
+  }
+
+  .index-page__store-open-banner {
+    padding: 22px 18px;
+  }
+
+  .index-page__store-hours-heading {
+    margin-bottom: 16px;
+    font-size: 1.15rem;
+    letter-spacing: 0.1em;
+  }
+
+  .index-page__store-hours-list {
+    max-width: min(520px, 100%);
+  }
+
+  .index-page__store-hours-row {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 1.08rem;
+  }
+
+  .index-page__store-hours-toggle {
+    margin-top: 18px;
+    padding: 8px 10px;
+    border-radius: 12px;
   }
 }
 
@@ -2442,7 +2585,7 @@ button.index-page__hero-intro-cta-btn {
   margin-left: -50dvw;
   margin-top: 0;
   margin-bottom: 0;
-  background: rgb(0, 0, 0);
+  background: transparent;
 }
 
 .index-page__section-two-grid {
@@ -2462,7 +2605,99 @@ button.index-page__hero-intro-cta-btn {
 
 .index-page__section-two-card {
   min-width: 0;
-  background: rgb(0, 0, 0);
+  background: transparent;
+  cursor: pointer;
+}
+
+.index-page__section-two-photo-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.index-page__section-two-photo-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.44);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.index-page__section-two-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 2.2vw, 18px);
+  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.22s ease,
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.index-page__section-two-overlay-inner {
+  width: 100%;
+  max-width: min(320px, 92%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.index-page__section-two-overlay-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(0.82rem, 1.65vw, 1.05rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+.index-page__facebook-cta-btn--section-two-overlay {
+  /* Prevent tapping an invisible link when the overlay is hidden (opacity: 0). */
+  pointer-events: none;
+  padding: 10px 16px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: 12px;
+  gap: 10px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .index-page__section-two-card:hover .index-page__section-two-photo-wrap::before {
+    opacity: 1;
+  }
+
+  .index-page__section-two-card:hover .index-page__section-two-overlay {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .index-page__section-two-card:hover .index-page__facebook-cta-btn--section-two-overlay {
+    pointer-events: auto;
+  }
+}
+
+.index-page__section-two-card--active .index-page__section-two-photo-wrap::before {
+  opacity: 1;
+}
+
+.index-page__section-two-card--active .index-page__section-two-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.index-page__section-two-card--active .index-page__facebook-cta-btn--section-two-overlay {
+  pointer-events: auto;
 }
 
 .index-page__section-two-img {
@@ -2470,12 +2705,20 @@ button.index-page__hero-intro-cta-btn {
   aspect-ratio: 3 / 4;
   object-fit: cover;
   display: block;
+  transition: transform 0.2s ease;
+}
+
+.index-page__section-two-card:hover .index-page__section-two-img {
+  transform: scale(1.02);
 }
 
 .index-page__section-two-caption {
   min-height: 28px;
   padding: 12px 12px 18px;
-  background: rgb(0, 0, 0);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   color: #ffffff;
   text-align: center;
   font-size: clamp(0.8rem, 1.35vw, 1.15rem);
@@ -2541,6 +2784,8 @@ button.index-page__hero-intro-cta-btn {
   transition:
     opacity 0.4s ease 0.08s,
     transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.55s cubic-bezier(0.22, 1, 0.36, 1),
     background 0.22s ease,
     border-color 0.22s ease,
     box-shadow 0.22s ease;
@@ -2566,6 +2811,10 @@ button.index-page__hero-intro-cta-btn {
   .index-page__facebook-cta-btn--hero-overlay {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+
+  .index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay {
     transition: none;
   }
 }
@@ -2612,9 +2861,16 @@ button.index-page__hero-intro-cta-btn {
   margin-left: -50dvw;
   /* Slightly higher on the page + more vertical room around the block */
   margin-top: -10px;
-  padding: clamp(40px, 7vw, 52px) 16px clamp(40px, 8vw, 64px);
+  padding: clamp(40px, 7vw, 52px) 16px clamp(40px, 8vw, 24px);
   box-sizing: border-box;
-  background: rgb(0, 0, 0);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 34px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2625,6 +2881,7 @@ button.index-page__hero-intro-cta-btn {
 /* Match .index-page__store-hours-heading (“Godziny otwarcia” between Main 2 & Main 3) */
 .index-page__facebook-shop-follow-text {
   margin: 0;
+  margin-top: 10vh;
   max-width: min(520px, 92vw);
   font-family: 'Poppins', sans-serif;
   font-size: clamp(0.85rem, 2.2vw, 1rem);
@@ -2664,6 +2921,21 @@ button.index-page__hero-intro-cta-btn {
   gap: 20px;
   padding: 12px 22px 12px 30px;
   align-items: center;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.18s ease,
+    box-shadow 0.22s ease,
+    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
+  transform: translateY(0) scale(0.97);
+}
+
+.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:active {
+  transform: translateY(0) scale(0.95);
 }
 
 /* “Przejdź na Facebook” above shop hero — blue glass + soft outer glow pulse */
@@ -2674,16 +2946,16 @@ button.index-page__hero-intro-cta-btn {
   color: #ffffff;
   background: linear-gradient(
     145deg,
-    rgba(59, 142, 255, 0.42) 0%,
-    rgba(24, 119, 242, 0.32) 45%,
-    rgba(14, 88, 196, 0.38) 100%
+    rgba(46, 210, 255, 0.54) 0%,
+    rgba(0, 176, 255, 0.44) 45%,
+    rgba(0, 142, 235, 0.48) 100%
   );
   backdrop-filter: blur(18px) saturate(1.45);
   -webkit-backdrop-filter: blur(18px) saturate(1.45);
-  border: 1px solid rgba(170, 215, 255, 0.42);
+  border: 1px solid rgba(185, 245, 255, 0.6);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 10px 34px rgba(24, 119, 242, 0.38),
+    0 10px 34px rgba(0, 176, 255, 0.42),
     0 12px 40px rgba(0, 0, 0, 0.42);
   animation: index-page-facebook-below-shine-glow 6s ease-in-out infinite;
 }
@@ -2731,17 +3003,22 @@ button.index-page__hero-intro-cta-btn {
 .index-page__facebook-cta-btn--below:hover {
   background: linear-gradient(
     145deg,
-    rgba(82, 158, 255, 0.52) 0%,
-    rgba(36, 136, 255, 0.46) 45%,
-    rgba(22, 105, 220, 0.52) 100%
+    rgba(88, 230, 255, 0.58) 0%,
+    rgba(28, 198, 255, 0.52) 45%,
+    rgba(0, 160, 245, 0.58) 100%
   );
-  border-color: rgba(210, 235, 255, 0.55);
+  border-color: rgba(210, 250, 255, 0.66);
   transform: translateY(-1px);
 }
 
 .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
   .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
-  transform: translateY(-1px) scale(1.07);
+  transform: translateY(0) scale(1.03);
+}
+
+.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
+  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
+  transform: translateY(0) scale(0.97);
 }
 
 .index-page__facebook-cta-btn:focus-visible {
@@ -2844,12 +3121,34 @@ button.index-page__hero-intro-cta-btn {
 }
 
 .index-page__section--gallery {
-  margin-top: 8px;
+  margin-top: 10vh;
+}
+
+/* Gallery tab: glass background behind content (full-bleed). */
+.index-page__panels--gallery {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 34px rgba(0, 0, 0, 0.35);
 }
 
 .index-page__section-heading {
   margin: 0 0 10px;
   font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.index-page__gallery-heading {
+  margin: 0 0 14px;
+  font-size: clamp(1.35rem, 4.2vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -2862,6 +3161,7 @@ button.index-page__hero-intro-cta-btn {
 
 .index-page__gallery--products {
   margin-top: 8px;
+  margin-bottom: 4vh;
 }
 
 .index-page__thumb-wrap {
