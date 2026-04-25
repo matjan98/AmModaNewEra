@@ -1,16 +1,17 @@
 {
   "name": "ammoda",
   "version": "0.0.1",
-  "description": "A&M Moda Damska - strona sklepu",
-  "productName": "AmModa",
+  "description": "A&M Moda Damska – butik online z modą damską. Nowe kolekcje, sukienki, komplety, bluzki i dodatki. Sprawdź nowości i promocje.",
+  "productName": "A&M Moda Damska",
   "author": "Mateusz <mateusz@urmate.ai>",
   "type": "module",
   "private": true,
   "scripts": {
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{js,cjs,mjs,vue}\"",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev",
-    "build": "quasar build",
+    "sync:favicon": "node ./scripts/sync-favicon.mjs",
+    "dev": "npm run sync:favicon && quasar dev",
+    "build": "npm run sync:favicon && quasar build",
     "postinstall": "quasar prepare"
   },
   "dependencies": {
