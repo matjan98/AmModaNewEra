@@ -1,5 +1,12 @@
 <template>
-  <div class="google-reviews-card" :class="{ 'google-reviews-card--with-margin': withMargin }" aria-label="Ocena Google">
+  <div
+    class="google-reviews-card"
+    :class="{
+      'google-reviews-card--with-margin': withMargin,
+      'google-reviews-card--full-container': variant !== 'mini',
+    }"
+    aria-label="Ocena Google"
+  >
     <div v-if="variant === 'mini'" class="google-reviews-card__mini">
       <div class="google-reviews-card__mini-inner">
         <svg
@@ -79,7 +86,15 @@
           <q-icon name="star_half" size="16px" />
         </span>
         <span class="google-reviews-card__count">{{ reviewsCountText }}</span>
-        <q-icon name="info" size="16px" class="google-reviews-card__info" aria-hidden="true" />
+        <a
+          class="google-reviews-card__external-link"
+          :href="externalUrl"
+          target="_blank"
+          rel="noopener"
+          aria-label="Otwórz opinie Google w nowej karcie"
+        >
+          <q-icon name="open_in_new" size="16px" class="google-reviews-card__info" aria-hidden="true" />
+        </a>
       </div>
     </div>
   </div>
@@ -108,6 +123,11 @@ defineProps({
     type: String,
     default: '171 opinii',
   },
+  externalUrl: {
+    type: String,
+    default:
+      'https://www.google.com/search?q=ammoda&oq=ammoda&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGDwyBggCEEUYPDILCAMQABgKGBMYgAQyCQgEEC4YExiABDILCAUQABgKGBMYgAQyCwgGEAAYChgTGIAEMgYIBxBFGDzSAQgyMTgzajBqN6gCALACAA&sourceid=chrome&ie=UTF-8',
+  },
 })
 </script>
 
@@ -116,6 +136,12 @@ defineProps({
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+.google-reviews-card--full-container {
+  height: 10vh;
+  align-items: center;
+  justify-content: center;
 }
 
 .google-reviews-card--with-margin {
@@ -303,6 +329,18 @@ defineProps({
 
 .google-reviews-card__info {
   opacity: 0.8;
+}
+
+.google-reviews-card__external-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.google-reviews-card__external-link:hover .google-reviews-card__info {
+  opacity: 1;
 }
 </style>
 

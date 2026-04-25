@@ -314,88 +314,15 @@
               </div>
             </section>
 
-            <!-- Above shop photo: Facebook invite -->
-            <section class="index-page__facebook-shop-follow" aria-label="Facebook AM Moda Damska">
-              <p class="index-page__facebook-shop-follow-text">
-                Zobacz nasze najnowsze kolekcje na Facebooku:
-              </p>
-              <a
-                :href="facebookUrl"
-                target="_blank"
-                rel="noopener"
-                class="index-page__facebook-cta-btn index-page__facebook-cta-btn--below"
-                aria-label="Otwórz profil AM Moda Damska na Facebooku"
-              >
-                Przejdź na Facebook
-                <q-icon
-                  name="fa-brands fa-facebook"
-                  size="20px"
-                  class="index-page__facebook-cta-btn-icon index-page__facebook-cta-btn-icon--external"
-                  aria-hidden="true"
-                />
-              </a>
-            </section>
-
-            <!-- Shop photo — overlay: address + Nawiguj -->
-            <section
-              ref="heroIntroFacebookRef"
-              class="index-page__hero-intro index-page__hero-intro--facebook-fixed-bg"
-              :style="heroIntroCtaCssVars"
-              aria-label="Sklep — zdjęcie i nawigacja"
-            >
-              <div
-                ref="heroIntroFacebookPhotoRef"
-                class="index-page__hero-intro-photo index-page__hero-intro-photo--facebook-spacer"
-                aria-hidden="true"
-              />
-              <div
-                class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--facebook-shop"
-                :class="{
-                  'index-page__hero-intro-sticky-cta--floated': heroIntroFacebookCtaFloated,
-                  'index-page__hero-intro-sticky-cta--facebook-float-pop': facebookShopFloatPop,
-                }"
-              >
-                <div
-                  ref="heroIntroFacebookCtaRef"
-                  class="index-page__hero-intro-cta-block index-page__hero-intro-cta-block--facebook-shop"
-                >
-                  <div class="index-page__hero-intro-address-row">
-                    <p
-                      class="index-page__hero-intro-address index-page__hero-intro-address--facebook-shop-last"
-                      :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
-                    >
-                      Kozy, ul. Bielska 166
-                    </p>
-                  </div>
-                  <div class="index-page__hero-intro-btn-row">
-                    <a
-                      :href="mapsUrl"
-                      target="_blank"
-                      rel="noopener"
-                      class="index-page__facebook-cta-btn index-page__facebook-cta-btn--hero-overlay"
-                      :class="{ 'index-page__facebook-cta-btn--visible': heroIntroCtaVisible }"
-                      aria-label="Otwórz nawigację do sklepu w Google Maps"
-                    >
-                      <span class="index-page__facebook-cta-btn-textstack">
-                        <span class="index-page__facebook-cta-btn-label">Nawiguj</span>
-                        <span class="index-page__facebook-cta-btn-subline">Google Maps</span>
-                      </span>
-                      <img
-                        :src="googleMapsPinImg"
-                        alt=""
-                        width="26"
-                        height="36"
-                        class="index-page__facebook-cta-btn-maps-pin"
-                        aria-hidden="true"
-                        decoding="async"
-                      />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <GoogleReviewsCard />
+            <IndexPageShopBottomSections
+              ref="shopBottomSectionsRef"
+              :cta-css-vars="heroIntroCtaCssVars"
+              :hero-intro-cta-visible="heroIntroCtaVisible"
+              :hero-intro-facebook-cta-floated="heroIntroFacebookCtaFloated"
+              :facebook-shop-float-pop="facebookShopFloatPop"
+              :facebook-url="facebookUrl"
+              :maps-url="mapsUrl"
+            />
             </div>
           </div>
           <div v-else key="gallery" class="index-page__panels index-page__panels--gallery">
@@ -524,7 +451,7 @@
                 </div>
               </div>
 
-              <GoogleReviewsCard />
+              <GoogleReviewsCard class="index-page__google-reviews" />
             </section>
             </div>
           </div>
@@ -589,6 +516,7 @@
 <script setup>
 import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import GoogleReviewsCard from '../components/GoogleReviewsCard.vue'
+import IndexPageShopBottomSections from '../components/IndexPageShopBottomSections.vue'
 import heroIntroFirstImage from '../assets/Main photos/main2.png'
 import heroIntroSecondImage from '../assets/Main photos/atf_photo.png'
 import heroIntroThirdImage from '../assets/Main photos/main3.png'
@@ -609,7 +537,6 @@ import productsSpodnie from '../assets/Main photos/Products/spodnie.jpg'
 import productsSukienka from '../assets/Main photos/Products/sukienka.jpg'
 import productsTorebka from '../assets/Main photos/Products/torebka.jpg'
 import facebookShopPhoto from '../assets/Main photos/shop.png'
-import googleMapsPinImg from '../assets/google-maps.png'
 
 const TAB_STORAGE_KEY = 'index-page-active-tab'
 /** Toggle to show the fixed "Galeria" shortcut in the corner again. */
@@ -787,9 +714,7 @@ const heroIntroAfterCtaRef = ref(null)
 const heroIntroThirdRef = ref(null)
 const heroIntroThirdPhotoRef = ref(null)
 const heroIntroThirdCtaRef = ref(null)
-const heroIntroFacebookRef = ref(null)
-const heroIntroFacebookPhotoRef = ref(null)
-const heroIntroFacebookCtaRef = ref(null)
+const shopBottomSectionsRef = ref(null)
 /** True while CTA tracks viewport bottom (`position: fixed`); false = anchored at photo bottom. */
 const heroIntroCtaFloated = ref(false)
 const heroIntroAfterCtaFloated = ref(false)
@@ -836,7 +761,10 @@ function getViewportBottomClientY() {
 }
 
 function scrollToLocationSection() {
-  heroIntroFacebookRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  shopBottomSectionsRef.value?.heroIntroFacebookRef?.value?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
 }
 
 /**
@@ -900,7 +828,7 @@ function computeHeroFacebookCtaFloated(photoEl, sectionFallbackEl) {
 
 function updateFacebookShopSectionPassed() {
   if (facebookShopCtaPassedOnce.value) return
-  const section = heroIntroFacebookRef.value
+  const section = shopBottomSectionsRef.value?.heroIntroFacebookRef?.value
   if (!section) return
   const r = section.getBoundingClientRect()
   if (r.bottom < 0) {
@@ -933,9 +861,10 @@ function updateHeroCtaModes() {
     heroIntroThirdRef.value,
   )
   const prevFbFloat = heroIntroFacebookCtaFloated.value
+  const shop = shopBottomSectionsRef.value
   heroIntroFacebookCtaFloated.value = computeHeroFacebookCtaFloated(
-    heroIntroFacebookPhotoRef.value,
-    heroIntroFacebookRef.value,
+    shop?.heroIntroFacebookPhotoRef?.value ?? null,
+    shop?.heroIntroFacebookRef?.value ?? null,
   )
 
   if (!heroIntroFacebookCtaFloated.value) {
@@ -1010,7 +939,7 @@ function setupHeroCtaIntersection(on) {
     heroIntroRef.value,
     heroIntroAfterRef.value,
     heroIntroThirdRef.value,
-    heroIntroFacebookRef.value,
+    shopBottomSectionsRef.value?.heroIntroFacebookRef?.value,
   ]
   for (const el of sections) {
     if (el) heroCtaIntersectionObserver.observe(el)
@@ -1432,15 +1361,6 @@ onUnmounted(() => {
   z-index: 3;
 }
 
-.index-page__hero-intro--facebook-fixed-bg {
-  background: transparent;
-}
-
-.index-page__hero-intro-photo--facebook-spacer {
-  width: 100%;
-  height: 65vh;
-}
-
 /* Invisible, not shown in UI – remains focusable for keyboard input */
 .index-page__aux-wrap {
   position: absolute;
@@ -1585,9 +1505,14 @@ onUnmounted(() => {
   left: 50%;
   width: 100dvw;
   margin-left: -50dvw;
-  /* Clip horizontal slide only; vertical overflow must stay visible for IntersectionObserver with full-bleed sections. */
-  overflow-x: hidden;
-  overflow-y: visible;
+  /*
+   * IMPORTANT:
+   * `overflow-x: hidden` + `overflow-y: visible` is not reliably respected across browsers and can end up clipping
+   * vertical effects (e.g. drop-shadows) as well. We need horizontal clipping for the slide animation without
+   * hiding vertical overflow.
+   */
+  overflow: visible;
+  overflow-x: clip;
   box-sizing: border-box;
 }
 
@@ -1760,6 +1685,41 @@ onUnmounted(() => {
   padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
 }
 
+/* First hero: Google reviews mini should sit clearly above the button (use natural height + a real gap). */
+.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page__hero-intro-cta-block {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  gap: 10px;
+}
+
+.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page__hero-intro-address-row,
+.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page__hero-intro-btn-row {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+
+.index-page__hero-intro-sticky-cta--first.index-page__hero-intro-sticky-cta--floated
+  .index-page__hero-intro-cta-block {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  gap: 8px;
+}
+
+.index-page__hero-intro-sticky-cta--first.index-page__hero-intro-sticky-cta--floated
+  .index-page__hero-intro-address-row,
+.index-page__hero-intro-sticky-cta--first.index-page__hero-intro-sticky-cta--floated
+  .index-page__hero-intro-btn-row {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+
 .index-page__hero-intro-sticky-cta--floated {
   position: fixed;
   top: auto;
@@ -1776,230 +1736,6 @@ onUnmounted(() => {
   padding-bottom: 0;
   padding-left: 16px;
   z-index: 1500;
-}
-
-/*
- * Shop Nawiguj bar: when it switches to fixed (`--floated`), `--facebook-float-pop` holds one paint at the
- * same typography + scale as the in-photo hero overlay; JS clears it → CSS settles to the compact bar.
- */
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
-  .index-page__hero-intro-cta-block--facebook-shop {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
-  .index-page__hero-intro-address-row {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-}
-
-@media (min-width: 750px) {
-  /* Compact fixed bar: extra space under address so small copy clears Nawiguj */
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-      .index-page__hero-intro-sticky-cta--facebook-float-pop
-    )
-    .index-page__hero-intro-cta-block--facebook-shop {
-    gap: 10px;
-  }
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-    .index-page__hero-intro-sticky-cta--facebook-float-pop
-  )
-  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-  white-space: nowrap;
-  font-size: clamp(calc(0.68rem + 2px), calc(2.2vw + 2px), calc(0.98rem + 2px));
-  line-height: 1.2;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.88),
-    0 2px 10px rgba(0, 0, 0, 0.55);
-  transform: translateY(0);
-  /* Shorter than enlarge: this is the “decrease into bar” settle */
-  transition:
-    font-size 0.26s cubic-bezier(0.4, 0, 0.2, 1),
-    line-height 0.26s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.26s ease;
-}
-
-@media (max-width: 749px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-      .index-page__hero-intro-sticky-cta--facebook-float-pop
-    )
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    font-size: clamp(calc(0.56rem + 2px), calc(2.65vw + 2px), calc(0.82rem + 2px));
-    line-height: 1.22;
-  }
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated:not(
-    .index-page__hero-intro-sticky-cta--facebook-float-pop
-  )
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
-  transform: translateY(0) scale(1);
-  transition:
-    opacity 0.26s ease,
-    transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-  white-space: nowrap;
-  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
-  line-height: 1.15;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  text-shadow:
-    0 0 2px rgba(0, 0, 0, 0.95),
-    0 1px 3px rgba(0, 0, 0, 0.9),
-    0 2px 14px rgba(0, 0, 0, 0.78),
-    0 4px 28px rgba(0, 0, 0, 0.55),
-    0 0 48px rgba(0, 0, 0, 0.35);
-  transition: none;
-}
-
-@media (max-width: 749px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
-    line-height: 1.18;
-    letter-spacing: 0.05em;
-  }
-}
-
-@media (min-width: 750px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    transform: translateY(-20px);
-  }
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated.index-page__hero-intro-sticky-cta--facebook-float-pop
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
-  transform: translateY(0) scale(1.07);
-  transition: none;
-}
-
-/* Last hero (shop photo): dock address + Nawiguj at vertical center of the image when not floated; enlarge Nawiguj + address. */
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated) {
-  align-items: center;
-  /* Less top / more bottom so the centered block sits slightly higher (optical balance vs. the photo). */
-  padding-top: max(8px, env(safe-area-inset-top, 0px));
-  padding-bottom: max(22px, env(safe-area-inset-bottom, 0px));
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-cta-block--facebook-shop {
-  height: auto;
-  min-height: var(--hero-cta-stack-height, 96px);
-  max-height: none;
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-address-row {
-  height: auto;
-  min-height: var(--hero-cta-address-row-height, 49px);
-  max-height: none;
-  padding-bottom: 0;
-}
-
-/* Shop address on photo: enlarge 0.38s; decrease uses the non-visible selector (shorter) */
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-  white-space: nowrap;
-  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
-  line-height: 1.15;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  text-shadow:
-    0 0 2px rgba(0, 0, 0, 0.95),
-    0 1px 3px rgba(0, 0, 0, 0.9),
-    0 2px 14px rgba(0, 0, 0, 0.78),
-    0 4px 28px rgba(0, 0, 0, 0.55),
-    0 0 48px rgba(0, 0, 0, 0.35);
-  transition:
-    font-size 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-    line-height 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.38s ease 0.03s,
-    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-address--facebook-shop-last:not(.index-page__hero-intro-address--visible) {
-  /* Slightly larger “small” form before hero enlargement (~+2px) */
-  font-size: clamp(calc(0.82rem + 2px), calc(2.35vw + 2px), calc(1.08rem + 2px));
-  transition:
-    font-size 0.26s cubic-bezier(0.42, 0, 0.58, 1),
-    line-height 0.26s cubic-bezier(0.42, 0, 0.58, 1),
-    opacity 0.26s ease 0.02s,
-    transform 0.26s cubic-bezier(0.42, 0, 0.58, 1) 0.02s;
-}
-
-@media (max-width: 749px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
-    line-height: 1.18;
-    letter-spacing: 0.05em;
-  }
-}
-
-@media (min-width: 750px) {
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    transform: translateY(-20px);
-  }
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
-  transform: translateY(0) scale(1.07);
-  transition:
-    opacity 0.38s ease 0.03s,
-    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last.index-page__hero-intro-address--visible {
-    transition: opacity 0.38s ease 0.03s, transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
-  }
-
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__hero-intro-address--facebook-shop-last:not(.index-page__hero-intro-address--visible) {
-    transition: opacity 0.26s ease 0.02s, transform 0.26s cubic-bezier(0.16, 1, 0.3, 1) 0.02s;
-  }
-
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
-    transform: translateY(0) scale(1);
-    transition: none;
-  }
-
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-    .index-page__facebook-cta-btn--hero-overlay:not(.index-page__facebook-cta-btn--visible) {
-    transition: opacity 0.26s ease, transform 0.26s ease;
-  }
 }
 
 .index-page__hero-intro-cta-block {
@@ -2103,11 +1839,15 @@ onUnmounted(() => {
 }
 
 .index-page__hero-intro-quote-signature {
-  display: inline-block;
-  margin-top: 6px;
+  display: block;
+  width: 100%;
+  text-align: right;
+  margin-top: 2px;
+  line-height: 1.05;
   font-size: 0.82em;
   letter-spacing: 0.03em;
-  opacity: 0.92;
+  color: #ffffff;
+  opacity: 1;
 }
 
 @media (min-width: 1000px) {
@@ -2496,11 +2236,11 @@ button.index-page__hero-intro-cta-btn {
   }
 
   .index-page__store-open-banner {
-    padding: 22px 18px;
+    padding: 14px 18px;
   }
 
   .index-page__store-hours-heading {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     font-size: 1.15rem;
     letter-spacing: 0.1em;
   }
@@ -2509,14 +2249,14 @@ button.index-page__hero-intro-cta-btn {
     max-width: min(520px, 100%);
   }
 
-  .index-page__store-hours-row {
+  .index-page__store-hours-row:not(.index-page__store-hours-row--collapsed-hide) {
     padding: 12px 14px;
     border-radius: 12px;
     font-size: 1.08rem;
   }
 
   .index-page__store-hours-toggle {
-    margin-top: 18px;
+    margin-top: 12px;
     padding: 8px 10px;
     border-radius: 12px;
   }
@@ -2622,17 +2362,19 @@ button.index-page__hero-intro-cta-btn {
   line-height: 1.25;
   border: 0;
   border-radius: 8px;
+  color: #ffffff;
   background: linear-gradient(
     145deg,
-    rgba(59, 142, 255, 0.38) 0%,
-    rgba(24, 119, 242, 0.28) 45%,
-    rgba(14, 88, 196, 0.34) 100%
+    rgba(46, 210, 255, 0.54) 0%,
+    rgba(0, 176, 255, 0.44) 45%,
+    rgba(0, 142, 235, 0.48) 100%
   );
+  backdrop-filter: blur(18px) saturate(1.45);
+  -webkit-backdrop-filter: blur(18px) saturate(1.45);
   box-shadow:
-    inset 0 0 0 1px rgba(200, 228, 255, 0.5),
-    0 1px 12px rgba(24, 119, 242, 0.14);
-  backdrop-filter: blur(12px) saturate(1.35);
-  -webkit-backdrop-filter: blur(12px) saturate(1.35);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 10px 34px rgba(0, 176, 255, 0.42),
+    0 12px 40px rgba(0, 0, 0, 0.42);
 }
 
 .index-page__quick-info-fb-brand-icon {
@@ -2644,14 +2386,11 @@ button.index-page__hero-intro-cta-btn {
 .index-page__facebook-cta-btn.index-page__quick-info-fb:hover {
   background: linear-gradient(
     145deg,
-    rgba(82, 158, 255, 0.46) 0%,
-    rgba(36, 136, 255, 0.4) 45%,
-    rgba(22, 105, 220, 0.46) 100%
+    rgba(88, 230, 255, 0.58) 0%,
+    rgba(28, 198, 255, 0.52) 45%,
+    rgba(0, 160, 245, 0.58) 100%
   );
-  border: 0;
-  box-shadow:
-    inset 0 0 0 1px rgba(228, 240, 255, 0.58),
-    0 1px 12px rgba(24, 119, 242, 0.22);
+  transform: translateY(-1px);
 }
 
 .index-page__section-two {
@@ -2833,11 +2572,6 @@ button.index-page__hero-intro-cta-btn {
     padding: 0 12px;
   }
 
-  .index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated) {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
   /* Row grows with pill; type is 0.875rem / 0.72rem (≤749px) on the CTA */
   .index-page__hero-intro-btn-row {
     height: auto;
@@ -2850,122 +2584,6 @@ button.index-page__hero-intro-cta-btn {
   .index-page__section-two-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-/* Nawiguj on shop hero (+ other glass links); Odwiedź nas uses .index-page__hero-intro-cta-btn */
-.index-page__facebook-cta-btn--hero-overlay {
-  pointer-events: auto;
-  opacity: 0;
-  transform: translateY(8px) scale(0.96);
-  transition:
-    opacity 0.4s ease 0.08s,
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
-    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    gap 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-/* Shop hero: shorter than enlarge (button hiding / scale down) */
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__facebook-cta-btn--hero-overlay:not(.index-page__facebook-cta-btn--visible) {
-  transition:
-    opacity 0.26s ease 0.02s,
-    transform 0.26s cubic-bezier(0.42, 0, 0.58, 1) 0.02s,
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .index-page__facebook-cta-btn--hero-overlay {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay {
-    transition: none;
-  }
-}
-
-.index-page__facebook-cta-btn--hero-overlay .index-page__facebook-cta-btn-textstack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  text-align: center;
-  /* Tall maps pin centers the flex row; nudge copy up slightly for even vertical rhythm. */
-  transform: translateY(-2px);
-}
-
-.index-page__facebook-cta-btn--hero-overlay .index-page__facebook-cta-btn-label {
-  letter-spacing: 0.08em;
-  font-size: clamp(1.05rem, 2.75vw, 1.22rem);
-  font-weight: 600;
-}
-
-.index-page__facebook-cta-btn--hero-overlay .index-page__facebook-cta-btn-subline {
-  font-size: clamp(0.52rem, 1.65vw, 0.62rem);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.72);
-  white-space: nowrap;
-  line-height: 1.05;
-}
-
-.index-page__facebook-cta-btn-maps-pin {
-  flex-shrink: 0;
-  display: block;
-  width: 26px;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
-}
-
-.index-page__facebook-shop-follow {
-  position: relative;
-  left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
-  /* Slightly higher on the page + more vertical room around the block */
-  margin-top: -10px;
-  padding: clamp(40px, 7vw, 52px) 16px clamp(40px, 8vw, 24px);
-  box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 34px rgba(0, 0, 0, 0.35);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: clamp(22px, 4.5vw, 34px);
-}
-
-/* Match .index-page__store-hours-heading (“Godziny otwarcia” between Main 2 & Main 3) */
-.index-page__facebook-shop-follow-text {
-  margin: 0;
-  margin-top: 10vh;
-  max-width: min(520px, 92vw);
-  font-family: 'Poppins', sans-serif;
-  font-size: clamp(0.85rem, 2.2vw, 1rem);
-  font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #ffffff;
 }
 
 .index-page__facebook-cta-btn {
@@ -2992,29 +2610,7 @@ button.index-page__hero-intro-cta-btn {
     box-shadow 0.22s ease;
 }
 
-/* After `.index-page__facebook-cta-btn { gap: 8px }` — needs higher specificity + later order, or gap never applies. */
-.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay {
-  gap: 20px;
-  padding: 12px 22px 12px 30px;
-  align-items: center;
-  transition:
-    background 0.22s ease,
-    border-color 0.22s ease,
-    transform 0.18s ease,
-    box-shadow 0.22s ease,
-    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    gap 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
-  transform: translateY(0) scale(0.97);
-}
-
-.index-page__facebook-cta-btn.index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:active {
-  transform: translateY(0) scale(0.95);
-}
-
-/* “Przejdź na Facebook” above shop hero — blue glass + soft outer glow pulse */
+/* “Przejdź na Facebook” (section-two overlay, quick-info uses quick-info-fb) — blue glass + soft outer glow pulse */
 .index-page__facebook-cta-btn--below {
   position: relative;
   overflow: hidden;
@@ -3085,16 +2681,6 @@ button.index-page__hero-intro-cta-btn {
   );
   border-color: rgba(210, 250, 255, 0.66);
   transform: translateY(-1px);
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
-  transform: translateY(0) scale(1.03);
-}
-
-.index-page__hero-intro-sticky-cta--facebook-shop.index-page__hero-intro-sticky-cta--floated
-  .index-page__facebook-cta-btn--hero-overlay.index-page__facebook-cta-btn--visible:hover {
-  transform: translateY(0) scale(0.97);
 }
 
 .index-page__facebook-cta-btn:focus-visible {
@@ -3225,7 +2811,7 @@ button.index-page__hero-intro-cta-btn {
 }
 
 .index-page__gallery-heading {
-  margin: 0 0 14px;
+  margin: 28px 0 32px;
   font-size: clamp(1.35rem, 4.2vw, 2.1rem);
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -3244,6 +2830,10 @@ button.index-page__hero-intro-cta-btn {
 .index-page__gallery--products {
   margin-top: 8px;
   margin-bottom: 4vh;
+}
+
+.index-page__google-reviews {
+height: 5vh;
 }
 
 .index-page__thumb-wrap {
@@ -3424,7 +3014,7 @@ button.index-page__hero-intro-cta-btn {
 
 @media (max-width: 600px) {
   .index-page {
-    padding: 0 0 32px;
+    padding: 0;
   }
 
   .index-page__shell {
@@ -3433,8 +3023,8 @@ button.index-page__hero-intro-cta-btn {
   }
 
   .index-page__gallery-heading {
-    margin-top: 16px;
-    margin-bottom: 32px;
+    margin-top: 30px;
+    margin-bottom: 46px;
   }
 
   .index-page__gallery {
