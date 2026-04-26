@@ -1,11 +1,14 @@
 <template>
-  <div
-    class="google-reviews-card"
+  <a
+    class="google-reviews-card google-reviews-card__link"
     :class="{
       'google-reviews-card--with-margin': withMargin,
       'google-reviews-card--full-container': variant !== 'mini',
     }"
     aria-label="Ocena Google"
+    :href="externalUrl"
+    target="_blank"
+    rel="noopener"
   >
     <div v-if="variant === 'mini'" class="google-reviews-card__mini">
       <div class="google-reviews-card__mini-inner">
@@ -49,6 +52,12 @@
     </div>
 
     <div v-else class="google-reviews-card__inner">
+      <q-icon
+        name="open_in_new"
+        size="16px"
+        class="google-reviews-card__corner-indicator"
+        aria-hidden="true"
+      />
       <span class="google-reviews-card__brand" aria-hidden="true">
         <svg
           class="google-reviews-card__google-g"
@@ -84,22 +93,13 @@
             v-for="(icon, idx) in starIcons"
             :key="idx"
             :name="icon"
-            size="16px"
+            size="19px"
           />
         </span>
         <span class="google-reviews-card__count">{{ ratingCount }} {{ opinionsLabel }}</span>
-        <a
-          class="google-reviews-card__external-link"
-          :href="externalUrl"
-          target="_blank"
-          rel="noopener"
-          aria-label="Otwórz opinie Google w nowej karcie"
-        >
-          <q-icon name="open_in_new" size="16px" class="google-reviews-card__info" aria-hidden="true" />
-        </a>
       </div>
     </div>
-  </div>
+  </a>
 </template>
 
 <script setup>
@@ -189,6 +189,19 @@ onMounted(async () => {
   width: 100%;
 }
 
+.google-reviews-card__link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.google-reviews-card__link:focus-visible {
+  outline: 2px solid rgba(170, 210, 255, 0.7);
+  outline-offset: 6px;
+  border-radius: 16px;
+}
+
 .google-reviews-card--full-container {
   height: 10vh;
   align-items: center;
@@ -213,6 +226,7 @@ onMounted(async () => {
 }
 
 .google-reviews-card__inner {
+  position: relative;
   width: fit-content;
   max-width: min(560px, 92vw);
   padding: 12px 16px;
@@ -229,6 +243,16 @@ onMounted(async () => {
   text-shadow:
     0 1px 1px rgba(0, 0, 0, 0.5),
     0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.google-reviews-card__corner-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  opacity: 0.75;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
 }
 
 .google-reviews-card__mini {
@@ -374,24 +398,10 @@ onMounted(async () => {
 
 .google-reviews-card__count {
   font-size: 1.05rem;
+  margin: 0 0 0 15px;
   font-weight: 500;
   color: rgba(170, 210, 255, 0.9);
 }
 
-.google-reviews-card__info {
-  opacity: 0.8;
-}
-
-.google-reviews-card__external-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: inherit;
-  text-decoration: none;
-}
-
-.google-reviews-card__external-link:hover .google-reviews-card__info {
-  opacity: 1;
-}
 </style>
 

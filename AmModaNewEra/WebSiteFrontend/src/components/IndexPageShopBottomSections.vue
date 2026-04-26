@@ -26,6 +26,7 @@
     <section
       ref="heroIntroFacebookRef"
       class="index-page-shop-bottom-sections__hero-intro index-page-shop-bottom-sections__hero-intro--facebook-fixed-bg"
+      :class="{ 'index-page-shop-bottom-sections__hero-intro--inview': heroIntroFacebookInView }"
       :style="ctaCssVars"
       aria-label="Sklep — zdjęcie i nawigacja"
     >
@@ -86,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 import googleMapsPinImg from '../assets/google-maps.png'
 
@@ -120,6 +121,33 @@ defineProps({
 const heroIntroFacebookRef = ref(null)
 const heroIntroFacebookPhotoRef = ref(null)
 const heroIntroFacebookCtaRef = ref(null)
+const heroIntroFacebookInView = ref(false)
+
+let heroIntroFacebookObserver = null
+
+onMounted(() => {
+  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
+  if (!heroIntroFacebookRef.value) return
+
+  heroIntroFacebookObserver = new IntersectionObserver(
+    (entries) => {
+      const [entry] = entries
+      heroIntroFacebookInView.value = Boolean(entry?.isIntersecting)
+    },
+    {
+      threshold: 0.35,
+    }
+  )
+
+  heroIntroFacebookObserver.observe(heroIntroFacebookRef.value)
+})
+
+onBeforeUnmount(() => {
+  if (heroIntroFacebookObserver) {
+    heroIntroFacebookObserver.disconnect()
+    heroIntroFacebookObserver = null
+  }
+})
 
 defineExpose({
   heroIntroFacebookRef,
@@ -243,7 +271,7 @@ defineExpose({
   )
   .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
   white-space: nowrap;
-  font-size: clamp(calc(0.68rem + 2px), calc(2.2vw + 2px), calc(0.98rem + 2px));
+  font-size: clamp(calc(0.34rem + 1px), calc(1.1vw + 1px), calc(0.49rem + 1px));
   line-height: 1.2;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -266,7 +294,7 @@ defineExpose({
       .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     )
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
-    font-size: clamp(calc(0.56rem + 2px), calc(2.65vw + 2px), calc(0.82rem + 2px));
+    font-size: clamp(calc(0.28rem + 1px), calc(1.325vw + 1px), calc(0.41rem + 1px));
     line-height: 1.22;
   }
 }
@@ -287,7 +315,7 @@ defineExpose({
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
   .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
   white-space: nowrap;
-  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
+  font-size: clamp(0.36rem, 2.625vw, 1.525rem);
   line-height: 1.15;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -306,7 +334,7 @@ defineExpose({
 @media (max-width: 749px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
-    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
+    font-size: clamp(0.325rem, 2.9vw, 1.08rem);
     line-height: 1.18;
     letter-spacing: 0.05em;
   }
@@ -350,7 +378,7 @@ defineExpose({
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
   .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
   white-space: nowrap;
-  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
+  font-size: clamp(0.36rem, 2.625vw, 1.525rem);
   line-height: 1.15;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -372,7 +400,7 @@ defineExpose({
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
   .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last:not(.index-page-shop-bottom-sections__hero-intro-address--visible) {
-  font-size: clamp(calc(0.82rem + 2px), calc(2.35vw + 2px), calc(1.08rem + 2px));
+  font-size: clamp(calc(0.41rem + 1px), calc(1.175vw + 1px), calc(0.54rem + 1px));
   transition:
     font-size 0.26s cubic-bezier(0.42, 0, 0.58, 1),
     line-height 0.26s cubic-bezier(0.42, 0, 0.58, 1),
@@ -383,7 +411,7 @@ defineExpose({
 @media (max-width: 749px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
-    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
+    font-size: clamp(0.325rem, 2.9vw, 1.08rem);
     line-height: 1.18;
     letter-spacing: 0.05em;
   }
@@ -476,7 +504,7 @@ defineExpose({
   margin: 0;
   padding: 0 8px;
   font-family: 'Poppins', sans-serif;
-  font-size: clamp(0.82rem, 2.35vw, 1.08rem);
+  font-size: clamp(0.41rem, 1.175vw, 0.54rem);
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: 0.04em;
@@ -496,7 +524,8 @@ defineExpose({
   transform: translateY(8px);
   transition:
     opacity 0.45s ease 0.05s,
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
+    font-size 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .index-page-shop-bottom-sections__hero-intro-address--visible {
@@ -575,17 +604,97 @@ defineExpose({
 
 .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-label {
   letter-spacing: 0.08em;
-  font-size: clamp(1.05rem, 2.75vw, 1.22rem);
+  font-size: clamp(0.525rem, 1.375vw, 0.61rem);
   font-weight: 600;
+  transition: font-size 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-subline {
-  font-size: clamp(0.52rem, 1.65vw, 0.62rem);
+  font-size: clamp(0.26rem, 0.825vw, 0.31rem);
   font-weight: 500;
   letter-spacing: 0.06em;
   color: rgba(255, 255, 255, 0.72);
   white-space: nowrap;
   line-height: 1.05;
+  transition: font-size 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* When the shop hero section is in viewport, enlarge typography back to previous sizes. */
+.index-page-shop-bottom-sections__hero-intro--inview .index-page-shop-bottom-sections__hero-intro-address {
+  font-size: clamp(0.82rem, 2.35vw, 1.08rem);
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
+    .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+  )
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
+  font-size: clamp(calc(0.68rem + 2px), calc(2.2vw + 2px), calc(0.98rem + 2px));
+  transition:
+    font-size 1s cubic-bezier(0.16, 1, 0.3, 1),
+    line-height 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: 0.5s;
+}
+
+@media (max-width: 749px) {
+  .index-page-shop-bottom-sections__hero-intro--inview
+    .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
+      .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+    )
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
+    font-size: clamp(calc(0.56rem + 2px), calc(2.65vw + 2px), calc(0.82rem + 2px));
+  }
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
+  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
+  transition-delay: 0.5s;
+}
+
+@media (max-width: 749px) {
+  .index-page-shop-bottom-sections__hero-intro--inview
+    .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
+    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
+  }
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
+  font-size: clamp(0.72rem, 5.25vw, 3.05rem);
+  transition-delay: 0.5s;
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last:not(.index-page-shop-bottom-sections__hero-intro-address--visible) {
+  font-size: clamp(calc(0.82rem + 2px), calc(2.35vw + 2px), calc(1.08rem + 2px));
+  transition-delay: 0.5s;
+}
+
+@media (max-width: 749px) {
+  .index-page-shop-bottom-sections__hero-intro--inview
+    .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
+    font-size: clamp(0.65rem, 5.8vw, 2.16rem);
+  }
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay
+  .index-page-shop-bottom-sections__facebook-cta-btn-label {
+  font-size: clamp(1.05rem, 2.75vw, 1.22rem);
+  transition-delay: 0.5s;
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay
+  .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+  font-size: clamp(0.52rem, 1.65vw, 0.62rem);
+  transition-delay: 0.5s;
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
