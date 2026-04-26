@@ -85,7 +85,7 @@
               v-for="photo in photoListWithUrls"
               :key="photo.id"
               class="index-page-gallery-panel__thumb-wrap index-page-gallery-panel__reveal-media"
-              @click="openPhoto(photo.urlWithCache)"
+              @click="onThumbClick(photo.urlWithCache, $event)"
             >
               <img
                 :src="photo.urlWithCache"
@@ -115,7 +115,7 @@
             v-for="photo in productPhotos"
             :key="photo"
             class="index-page-gallery-panel__thumb-wrap index-page-gallery-panel__reveal-media"
-            @click="openPhoto(photo)"
+            @click="onThumbClick(photo, $event)"
           >
             <img
               :src="photo"
@@ -128,51 +128,13 @@
         <GoogleReviewsCard class="index-page-gallery-panel__google-reviews" />
       </section>
     </div>
-
-    <q-dialog v-model="lightboxOpen" class="index-page-gallery-panel__lightbox-dialog">
-      <q-card class="index-page-gallery-panel__lightbox-card">
-        <button
-          v-if="lightboxHasPrev"
-          type="button"
-          class="index-page-gallery-panel__lightbox-arrow index-page-gallery-panel__lightbox-arrow--prev"
-          aria-label="Poprzednie zdjęcie"
-          @click="lightboxGoPrev"
-        >
-          <q-icon name="chevron_left" size="32px" />
-        </button>
-        <button
-          v-if="lightboxHasNext"
-          type="button"
-          class="index-page-gallery-panel__lightbox-arrow index-page-gallery-panel__lightbox-arrow--next"
-          aria-label="Następne zdjęcie"
-          @click="lightboxGoNext"
-        >
-          <q-icon name="chevron_right" size="30px" />
-        </button>
-        <div
-          class="index-page-gallery-panel__lightbox-inner"
-          @touchstart.passive="onLightboxTouchStart"
-          @touchend.passive="onLightboxTouchEnd"
-        >
-          <span class="index-page-gallery-panel__lightbox-img-wrap">
-            <img v-if="lightboxUrl" :src="lightboxUrl" alt="Podgląd zdjęcia" class="index-page-gallery-panel__lightbox-img">
-            <q-btn
-              round
-              dense
-              flat
-              icon="close"
-              class="index-page-gallery-panel__lightbox-close"
-              @click="lightboxOpen = false"
-            />
-          </span>
-        </div>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import PhotoSwipeLightbox from 'photoswipe/lightbox'
+import 'photoswipe/style.css'
+import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 
 const props = defineProps({
@@ -198,9 +160,8 @@ const cacheBust = ref(0)
 const dragActive = ref(false)
 const pendingFiles = ref([])
 
-const lightboxOpen = ref(false)
-const lightboxIndex = ref(0)
-const lightboxTouchStartX = ref(0)
+const photoDims = ref(new Map())
+const pswpLightbox = ref(null)
 
 function getApiUrl(path) {
   const base = API_BASE.replace(/\/$/, '')
@@ -247,13 +208,42 @@ const lightboxPhotoList = computed(() => {
   return urls
 })
 
-const lightboxUrl = computed(() => lightboxPhotoList.value[lightboxIndex.value] ?? '')
-const lightboxHasPrev = computed(() => lightboxIndex.value > 0)
-const lightboxHasNext = computed(
-  () =>
-    lightboxPhotoList.value.length > 0 &&
-    lightboxIndex.value < lightboxPhotoList.value.length - 1,
+const slides = computed(() =>
+  lightboxPhotoList.value.map((url) => {
+    const dims = photoDims.value.get(url)
+    return {
+      src: url,
+      width: dims?.width ?? 1600,
+      height: dims?.height ?? 1600,
+      alt: 'Zdjęcie',
+    }
+  }),
 )
+
+function setDims(url, width, height) {
+  if (!url || !width || !height) return
+  if (!Number.isFinite(width) || !Number.isFinite(height)) return
+  if (width < 2 || height < 2) return
+  const current = photoDims.value.get(url)
+  if (current && current.width === width && current.height === height) return
+  photoDims.value.set(url, { width, height })
+}
+
+function setDimsFromImgEl(url, imgEl) {
+  if (!imgEl) return
+  const w = imgEl.naturalWidth
+  const h = imgEl.naturalHeight
+  if (w && h) setDims(url, w, h)
+}
+
+function preloadDims(url) {
+  if (!url) return
+  if (photoDims.value.has(url)) return
+  const img = new Image()
+  img.decoding = 'async'
+  img.onload = () => setDims(url, img.naturalWidth, img.naturalHeight)
+  img.src = url
+}
 
 async function loadPhotos() {
   loading.value = true
@@ -367,44 +357,19 @@ async function deletePhoto(id) {
   }
 }
 
-function openPhoto(url) {
+function onThumbClick(url, ev) {
   const list = lightboxPhotoList.value
   const idx = list.indexOf(url)
-  lightboxIndex.value = idx >= 0 ? idx : 0
-  lightboxOpen.value = true
-}
+  const index = idx >= 0 ? idx : 0
 
-function lightboxGoPrev() {
-  if (lightboxHasPrev.value) lightboxIndex.value--
-}
+  const wrap = ev?.currentTarget
+  const imgEl = wrap?.querySelector?.('img') ?? null
+  setDimsFromImgEl(url, imgEl)
 
-function lightboxGoNext() {
-  if (lightboxHasNext.value) lightboxIndex.value++
-}
-
-function onLightboxTouchStart(e) {
-  lightboxTouchStartX.value = e.touches[0]?.clientX ?? 0
-}
-
-function onLightboxTouchEnd(e) {
-  const endX = e.changedTouches[0]?.clientX ?? 0
-  const delta = endX - lightboxTouchStartX.value
-  const threshold = 50
-  if (delta > threshold) lightboxGoPrev()
-  else if (delta < -threshold) lightboxGoNext()
-}
-
-function onLightboxKeydown(e) {
-  if (!lightboxOpen.value) return
-  if (e.key === 'ArrowLeft') {
-    e.preventDefault()
-    lightboxGoPrev()
-  } else if (e.key === 'ArrowRight') {
-    e.preventDefault()
-    lightboxGoNext()
-  } else if (e.key === 'Escape') {
-    lightboxOpen.value = false
-  }
+  const lb = pswpLightbox.value
+  if (!lb) return
+  lb.options.dataSource = slides.value
+  lb.loadAndOpen(index)
 }
 
 function formatSize(size) {
@@ -415,24 +380,23 @@ function formatSize(size) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function setupLightboxKeyboard(on) {
-  if (on) {
-    window.addEventListener('keydown', onLightboxKeydown)
-  } else {
-    window.removeEventListener('keydown', onLightboxKeydown)
-  }
-}
-
-watch(lightboxOpen, (open) => {
-  nextTick(() => setupLightboxKeyboard(open))
-})
-
 onMounted(() => {
   loadPhotos()
+  for (const url of lightboxPhotoList.value) preloadDims(url)
+
+  const lb = new PhotoSwipeLightbox({
+    dataSource: slides.value,
+    pswpModule: () => import('photoswipe'),
+    showHideAnimationType: 'zoom',
+    bgOpacity: 0.92,
+  })
+  lb.init()
+  pswpLightbox.value = lb
 })
 
 onUnmounted(() => {
-  setupLightboxKeyboard(false)
+  pswpLightbox.value?.destroy()
+  pswpLightbox.value = null
 })
 </script>
 
@@ -653,111 +617,24 @@ onUnmounted(() => {
   min-height: 0;
 }
 
-.index-page-gallery-panel__lightbox-card {
-  position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  overflow: visible;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* PhotoSwipe: premium-ish chrome to match the site. */
+:deep(.pswp) {
+  --pswp-bg: rgba(8, 8, 12, 0.92);
+  --pswp-placeholder-bg: rgba(255, 255, 255, 0.06);
+  --pswp-icon-color: rgba(255, 255, 255, 0.92);
+  --pswp-icon-color-secondary: rgba(255, 255, 255, 0.65);
+  --pswp-icon-stroke-color: rgba(0, 0, 0, 0.55);
+  --pswp-icon-stroke-width: 2px;
+  --pswp-error-text-color: rgba(255, 255, 255, 0.88);
 }
 
-.index-page-gallery-panel__lightbox-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 3;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.2);
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease;
+:deep(.pswp__button) {
+  opacity: 0.92;
+  transition: opacity 0.18s ease;
 }
 
-.index-page-gallery-panel__lightbox-arrow:hover {
-  background: rgba(0, 0, 0, 0.35);
-}
-
-.index-page-gallery-panel__lightbox-arrow--prev {
-  left: 12px;
-}
-
-.index-page-gallery-panel__lightbox-arrow--next {
-  right: 12px;
-}
-
-.index-page-gallery-panel__lightbox-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow: hidden;
-}
-
-.index-page-gallery-panel__lightbox-img-wrap {
-  position: relative;
-  display: block;
-  line-height: 0;
-  width: fit-content;
-  max-width: 90vw;
-  height: fit-content;
-  max-height: 90vh;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.index-page-gallery-panel__lightbox-img {
-  max-width: 90vw;
-  max-height: 90vh;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-.index-page-gallery-panel__lightbox-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  margin: 0;
-  z-index: 2;
-  color: #ffffff;
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-
-.index-page-gallery-panel__lightbox-close:hover {
-  background: rgba(0, 0, 0, 0.6);
-}
-
-@media (max-width: 600px) {
-  .index-page-gallery-panel__lightbox-arrow {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-  }
-
-  .index-page-gallery-panel__lightbox-arrow--prev {
-    left: 8px;
-  }
-
-  .index-page-gallery-panel__lightbox-arrow--next {
-    right: 8px;
-  }
+:deep(.pswp__button:hover) {
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
