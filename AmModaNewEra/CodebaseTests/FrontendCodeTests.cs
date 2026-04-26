@@ -50,7 +50,9 @@ public class FrontendCodeTests
             "text-",
             "items-",
             "justify-",
-            "index-page-"
+            "index-page-",
+            // Third-party library (PhotoSwipe) uses fixed global class names like .pswp, .pswp__button, etc.
+            "pswp"
         };
 
         List<string> errors = new();
@@ -156,6 +158,11 @@ public class FrontendCodeTests
                     }
 
                     if (className.StartsWith("q-", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    if (className.StartsWith("pswp", StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
