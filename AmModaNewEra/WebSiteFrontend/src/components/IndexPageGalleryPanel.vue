@@ -220,7 +220,22 @@ const productPhotos = computed(() => {
     eager: true,
     as: 'url',
   })
-  return Object.values(files)
+
+  return Object.entries(files)
+    .sort(([a], [b]) => {
+      const aName = a.split('/').pop() ?? a
+      const bName = b.split('/').pop() ?? b
+      const aNum = Number.parseInt(aName, 10)
+      const bNum = Number.parseInt(bName, 10)
+
+      const aHasNum = Number.isFinite(aNum)
+      const bHasNum = Number.isFinite(bNum)
+      if (aHasNum && bHasNum) return aNum - bNum
+      if (aHasNum) return -1
+      if (bHasNum) return 1
+      return aName.localeCompare(bName)
+    })
+    .map(([, url]) => url)
 })
 
 const lightboxPhotoList = computed(() => {
@@ -422,6 +437,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.index-page-gallery-panel__panels-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
 .index-page-gallery-panel__section--upload {
   margin-top: 32px;
 }
@@ -523,6 +544,11 @@ onUnmounted(() => {
 
 /* Gallery tab: glass background behind content (full-bleed). */
 .index-page-gallery-panel__panels--gallery {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  box-sizing: border-box;
+  overflow-x: clip;
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(14px) saturate(1.1);
   -webkit-backdrop-filter: blur(14px) saturate(1.1);
