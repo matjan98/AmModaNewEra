@@ -552,6 +552,7 @@ defineExpose({
 
 /* Nawiguj on shop hero */
 .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
+  position: relative;
   pointer-events: auto;
   opacity: 0;
   transform: translateY(8px) scale(0.96);
@@ -563,6 +564,37 @@ defineExpose({
     background 0.22s ease,
     border-color 0.22s ease,
     box-shadow 0.22s ease;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    /* Smooth transitions between fixed segments */
+    #42a5f5 0%,
+    #42a5f5 calc(15% - var(--border-blend, 3%)),
+    #1e88e5 calc(15% + var(--border-blend, 3%)),
+    #1e88e5 calc(30% - var(--border-blend, 3%)),
+    #f44336 calc(30% + var(--border-blend, 3%)),
+    #f44336 calc(50% - var(--border-blend, 3%)),
+    #ffc107 calc(50% + var(--border-blend, 3%)),
+    #ffc107 calc(70% - var(--border-blend, 3%)),
+    #4caf50 calc(70% + var(--border-blend, 3%)),
+    #4caf50 100%
+  );
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.98;
+  transition: background-position 0.3s ease;
 }
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
@@ -580,6 +612,19 @@ defineExpose({
   transform: translateY(0) scale(1);
 }
 
+.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover::before {
+  animation: index-page-maps-cta-border-shift 3s linear infinite;
+}
+
+@keyframes index-page-maps-cta-border-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
     opacity: 1;
@@ -589,6 +634,11 @@ defineExpose({
 
   .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
     transition: none;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay::before {
+    animation: none !important;
+    background-position: 0% 50%;
   }
 }
 
