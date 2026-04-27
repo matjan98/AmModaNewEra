@@ -93,7 +93,7 @@
             v-for="(icon, idx) in starIcons"
             :key="idx"
             :name="icon"
-            size="19px"
+            size="24px"
           />
         </span>
         <span class="google-reviews-card__count">{{ ratingCount }} {{ opinionsLabel }}</span>
@@ -216,13 +216,35 @@ onMounted(async () => {
   .google-reviews-card--with-margin {
     margin-bottom: 12vh;
   }
-}
 
-.google-reviews-card__inner,
-.google-reviews-card__mini-inner {
-  filter:
-    drop-shadow(0 12px 22px rgba(0, 0, 0, 0.82))
-    drop-shadow(0 34px 86px rgba(0, 0, 0, 0.88));
+  /* On small screens, remove glassmorphism from the full rating card. */
+  .google-reviews-card__inner {
+    background: transparent;
+    border: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  /* Reflow: keep rating + stars together, move opinions count to next line. */
+  .google-reviews-card__row {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .google-reviews-card__count {
+    flex-basis: 100%;
+    margin: 2px 0 0 0;
+  }
+
+  .google-reviews-card__row--mini {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .google-reviews-card__count--mini {
+    flex-basis: 100%;
+  }
 }
 
 .google-reviews-card__inner {
@@ -243,6 +265,9 @@ onMounted(async () => {
   text-shadow:
     0 1px 1px rgba(0, 0, 0, 0.5),
     0 6px 18px rgba(0, 0, 0, 0.18);
+  filter:
+    drop-shadow(0 12px 22px rgba(0, 0, 0, 0.82))
+    drop-shadow(0 34px 86px rgba(0, 0, 0, 0.88));
 }
 
 .google-reviews-card__corner-indicator {
@@ -263,7 +288,12 @@ onMounted(async () => {
   justify-content: center;
 }
 
+/* Mini variant: no glass panel — content reads on the hero image via text shadows only. */
 .google-reviews-card__mini-inner {
+  --google-reviews-card-mini-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.96),
+    0 0 22px rgba(0, 0, 0, 0.72);
+
   width: fit-content;
   max-width: 100%;
   display: inline-flex;
@@ -273,17 +303,14 @@ onMounted(async () => {
   gap: 4px;
   padding: 8px 12px;
   margin: 0;
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  border: 0;
   border-radius: 12px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 12px 26px rgba(0, 0, 0, 0.78);
+  box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  text-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.9),
-    0 0 16px rgba(0, 0, 0, 0.55);
+  filter: none;
+  text-shadow: var(--google-reviews-card-mini-shadow);
   text-align: center;
 }
 
@@ -292,8 +319,7 @@ onMounted(async () => {
     margin-bottom: 10vh;
   }
 
-  .google-reviews-card__inner,
-  .google-reviews-card__mini-inner {
+  .google-reviews-card__inner {
     filter:
       drop-shadow(0 14px 26px rgba(0, 0, 0, 0.86))
       drop-shadow(0 40px 110px rgba(0, 0, 0, 0.9));
@@ -304,7 +330,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .google-reviews-card__rating--mini {
@@ -312,8 +338,12 @@ onMounted(async () => {
 }
 
 .google-reviews-card__stars--mini {
-  gap: 1px;
-  font-size: 12px;
+  gap: 2px;
+  font-size: 19px;
+}
+
+.google-reviews-card__stars--mini :deep(.q-icon) {
+  filter: drop-shadow(var(--google-reviews-card-mini-shadow));
 }
 
 .google-reviews-card__count--mini {
@@ -337,8 +367,9 @@ onMounted(async () => {
 }
 
 .google-reviews-card__mini .google-reviews-card__google-g {
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(var(--google-reviews-card-mini-shadow));
 }
 
 @media (min-width: 1000px) {
@@ -347,8 +378,8 @@ onMounted(async () => {
   }
 
   .google-reviews-card__mini .google-reviews-card__google-g {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
   }
 
   .google-reviews-card__rating--mini,
@@ -357,7 +388,8 @@ onMounted(async () => {
   }
 
   .google-reviews-card__stars--mini {
-    font-size: 15px;
+    font-size: 19px;
+    margin-bottom: 1px;
   }
 }
 
@@ -375,7 +407,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 0px;
   font-family: 'Poppins', sans-serif;
   color: rgba(255, 255, 255, 0.9);
   text-shadow:
@@ -393,6 +425,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  margin-left: 10px;
   color: rgba(255, 214, 102, 0.95);
 }
 
@@ -400,7 +433,13 @@ onMounted(async () => {
   font-size: 1.05rem;
   margin: 0 0 0 15px;
   font-weight: 500;
+  padding-right: 10px;
+  padding-left: 10px;
   color: rgba(170, 210, 255, 0.9);
+}
+
+.google-reviews-card__count.google-reviews-card__count--mini {
+  margin: 0;
 }
 
 </style>

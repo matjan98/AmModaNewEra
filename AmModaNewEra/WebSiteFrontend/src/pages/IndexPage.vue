@@ -272,7 +272,7 @@
 
             <section
               ref="heroIntroThirdRef"
-              class="index-page__hero-intro"
+              class="index-page__hero-intro index-page__hero-intro--maps-underlay-cover"
               :style="heroIntroCtaCssVars"
             >
               <div ref="heroIntroThirdPhotoRef" class="index-page__hero-intro-photo index-page__reveal-media">
@@ -378,22 +378,22 @@ const TAB_STORAGE_KEY = 'index-page-active-tab'
 /** Toggle to show the fixed "Galeria" shortcut in the corner again. */
 const SHOW_GALLERY_NAV_BUTTON = true
 const sectionTwoItems = [ 
-  { name: 'Biżuteria', photo: productsBizuteria },
-  { name: 'Bony podarunkowe', photo: productsBonPodarunkowy },
-  { name: 'Torebki', photo: productsTorebka },
-  { name: 'Buty', photo: productsButy },
   { name: 'Sukienki', photo: productsSukienka },
   { name: 'Bluzki', photo: productsBluzka },
   { name: 'Spodnie', photo: productsSpodnie },
   { name: 'Komplety', photo: productsKomplet },
-  { name: 'Peruki', photo: productsPeruka },
-  { name: 'Portfele', photo: productsPortfel },
-  { name: 'Rajstopy', photo: productsRajstopy },
-  { name: 'Czapki', photo: productsCzapka },
   { name: 'Kardigany', photo: productsKardigan },
   { name: 'Kurtki', photo: productsKurtka },
   { name: 'Marynarki', photo: productsMarynarka },
   { name: 'Plaszcze', photo: productsPlaszcz },
+  { name: 'Buty', photo: productsButy },
+  { name: 'Czapki', photo: productsCzapka },
+  { name: 'Torebki', photo: productsTorebka },
+  { name: 'Portfele', photo: productsPortfel },
+  { name: 'Rajstopy', photo: productsRajstopy },
+  { name: 'Peruki', photo: productsPeruka },
+  { name: 'Biżuteria', photo: productsBizuteria },
+  { name: 'Bony podarunkowe', photo: productsBonPodarunkowy },
 ]
 
 /** Matches `.index-page__section-two-row` grid: 4 cols desktop, 2 cols mobile. */
@@ -1230,6 +1230,11 @@ onUnmounted(() => {
   background: transparent;
   box-sizing: border-box;
   overflow: visible;
+}
+
+/* Stack above small fixed Maps CTA so the bar appears to slide out from behind main3 */
+.index-page__hero-intro--maps-underlay-cover {
+  z-index: 1650;
 }
 
 .index-page__hero-intro-photo {
