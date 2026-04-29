@@ -160,7 +160,7 @@ internal class AmModaDeployAppCodeTest
                 }
                 catch
                 {
-                    // Ignore
+
                 }
                 finally
                 {
@@ -170,7 +170,7 @@ internal class AmModaDeployAppCodeTest
         }
         catch
         {
-            // Ignore
+
         }
     }
 }

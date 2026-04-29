@@ -18,13 +18,13 @@ public class GitTagger
     public async Task CreateAndPushTagAsync(string repositoryPath, string tagPrefix, CancellationToken cancellationToken)
     {
         var tagName = $"{tagPrefix}-{DateTime.Now:yyyy-MM-dd-HH-mm}";
-        
+
         ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Creating git tag '{tagName}'...");
         await _processRunner.RunAsync("git", $"tag -f {tagName}", repositoryPath, cancellationToken, stderrColorAnsi: ConsoleColors.BrightBlue).ConfigureAwait(false);
-        
+
         ConsoleColors.WriteLine(ConsoleColors.Cyan, $"Pushing git tag '{tagName}' to origin...");
         await _processRunner.RunAsync("git", $"push origin {tagName} --force", repositoryPath, cancellationToken, stderrColorAnsi: ConsoleColors.BrightBlue).ConfigureAwait(false);
-        
+
         ConsoleColors.WriteLine(ConsoleColors.Green, $"Git tag '{tagName}' created and pushed successfully.");
     }
 

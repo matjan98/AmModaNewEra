@@ -27,8 +27,8 @@ async function copyFile(fromRel, toAbs) {
 }
 
 function toIconsSrc(src) {
-  // Source manifests often use "/android-chrome-192x192.png"; in our public structure
-  // icons live under "/icons/...".
+  
+  
   if (typeof src !== 'string' || src.length === 0) return src
   if (src.startsWith('/icons/')) return src
   if (src.startsWith('/')) return `/icons${src}`
@@ -44,7 +44,7 @@ async function syncManifest() {
   try {
     manifest = JSON.parse(raw)
   } catch {
-    // If user drops a non-JSON manifest, just copy it verbatim.
+    
     await fs.writeFile(toAbs, raw)
     return
   }

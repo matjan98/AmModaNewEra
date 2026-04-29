@@ -1,85 +1,9 @@
 <template>
   <div class="index-page-gallery-panel index-page-gallery-panel__panels index-page-gallery-panel__panels--gallery">
     <div class="index-page-gallery-panel__panels-inner">
-      <section v-if="galleryUploadUnlocked" class="index-page-gallery-panel__section index-page-gallery-panel__section--upload">
-        <div
-          class="index-page-gallery-panel__dropzone"
-          :class="{ 'index-page-gallery-panel__dropzone--active': dragActive }"
-          @dragenter.prevent="onDragEnter"
-          @dragover.prevent="onDragOver"
-          @dragleave.prevent="onDragLeave"
-          @drop.prevent="onDrop"
-        >
-          <div class="index-page-gallery-panel__dropzone-inner">
-            <q-icon name="cloud_upload" size="36px" class="q-mb-sm text-primary" />
-            <p class="index-page-gallery-panel__dropzone-title">
-              Przeciągnij i upuść zdjęcia tutaj
-            </p>
-            <p class="index-page-gallery-panel__dropzone-subtitle">
-              lub
-            </p>
-            <q-btn
-              color="primary"
-              flat
-              no-caps
-              label="Wybierz z dysku"
-              icon="upload"
-              @click="triggerFileInput"
-            />
-            <input
-              ref="fileInputRef"
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              multiple
-              class="index-page-gallery-panel__file-input"
-              @change="onFileSelected"
-            >
-          </div>
-        </div>
-
-        <div v-if="pendingFiles.length" class="index-page-gallery-panel__pending">
-          <div class="index-page-gallery-panel__pending-header">
-            <span>Wybrane zdjęcia ({{ pendingFiles.length }})</span>
-            <q-btn
-              flat
-              dense
-              no-caps
-              color="primary"
-              icon="clear_all"
-              label="Wyczyść"
-              @click="clearPending"
-            />
-          </div>
-          <ul class="index-page-gallery-panel__pending-list">
-            <li v-for="file in pendingFiles" :key="file.name" class="index-page-gallery-panel__pending-item">
-              <q-icon name="image" size="18px" class="q-mr-sm" />
-              <span class="index-page-gallery-panel__pending-name">{{ file.name }}</span>
-              <span class="index-page-gallery-panel__pending-size">{{ formatSize(file.size) }}</span>
-            </li>
-          </ul>
-          <q-btn
-            color="primary"
-            unelevated
-            no-caps
-            class="index-page-gallery-panel__pending-submit"
-            label="Zatwierdź i wgraj zdjęcia"
-            icon="cloud_upload"
-            :disable="!pendingFiles.length || loading"
-            @click="uploadPending"
-          />
-        </div>
-
-        <q-spinner v-if="loading" size="2rem" class="q-mt-md" />
-        <div v-if="error" class="index-page-gallery-panel__error-wrap">
-          <q-banner class="index-page-gallery-panel__error bg-negative text-white">
-            {{ error }}
-          </q-banner>
-        </div>
-      </section>
-
       <section class="index-page-gallery-panel__section index-page-gallery-panel__section--gallery">
         <h2 class="index-page-gallery-panel__gallery-heading">Galeria</h2>
-        <div v-if="galleryUploadUnlocked" class="index-page-gallery-panel__gallery">
+        <div class="index-page-gallery-panel__gallery">
           <template v-if="photoListWithUrls.length">
             <div
               v-for="photo in photoListWithUrls"
@@ -92,16 +16,6 @@
                 :alt="'Zdjęcie ' + photo.id"
                 class="index-page-gallery-panel__thumb index-page-gallery-panel__reveal-media-img"
               >
-              <q-btn
-                round
-                dense
-                flat
-                icon="delete"
-                size="sm"
-                class="index-page-gallery-panel__delete-btn"
-                :disable="deletingId === photo.id"
-                @click.stop="deletePhoto(photo.id)"
-              />
             </div>
           </template>
           <div v-else class="index-page-gallery-panel__placeholder">
@@ -134,7 +48,8 @@
 <script setup>
 import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import 'photoswipe/style.css'
-import { computed, inject, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { getApiUrl } from '../utils/apiUrl.js'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 
 const props = defineProps({
@@ -144,30 +59,11 @@ const props = defineProps({
   },
 })
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? ''
-/** Backend subpath on same-origin (must match deploy RemoteBackendPath, default "server"). */
-const API_SUBPATH = 'server'
-
-const galleryUploadUnlocked = inject('galleryUploadUnlocked', ref(false))
-
 const photoList = ref([])
-const loading = ref(false)
-const error = ref(null)
-const fileInputRef = ref(null)
-const deletingId = ref(null)
 const cacheBust = ref(0)
-
-const dragActive = ref(false)
-const pendingFiles = ref([])
 
 const photoDims = ref(new Map())
 const pswpLightbox = ref(null)
-
-function getApiUrl(path) {
-  const base = API_BASE.replace(/\/$/, '')
-  if (base) return `${base}/${path}`
-  return `${API_SUBPATH}/${path}`
-}
 
 const photoListWithUrls = computed(() =>
   photoList.value.map((p) => ({
@@ -201,7 +97,7 @@ const productPhotos = computed(() => {
 
 const lightboxPhotoList = computed(() => {
   const urls = []
-  if (galleryUploadUnlocked.value && photoListWithUrls.value.length) {
+  if (photoListWithUrls.value.length) {
     urls.push(...photoListWithUrls.value.map((p) => p.urlWithCache))
   }
   urls.push(...productPhotos.value)
@@ -246,8 +142,6 @@ function preloadDims(url) {
 }
 
 async function loadPhotos() {
-  loading.value = true
-  error.value = null
   try {
     const res = await fetch(getApiUrl('api/photo.php?list=1'))
     const data = await res.json()
@@ -259,102 +153,10 @@ async function loadPhotos() {
     }
   } catch (e) {
     console.error(e)
-    error.value = 'Nie udało się załadować zdjęć.'
     photoList.value = []
-  } finally {
-    loading.value = false
   }
   await nextTick()
   props.observeRevealZoomTargets?.()
-}
-
-function triggerFileInput() {
-  fileInputRef.value?.click()
-}
-
-function onDragEnter() {
-  dragActive.value = true
-}
-
-function onDragOver() {
-  dragActive.value = true
-}
-
-function onDragLeave() {
-  dragActive.value = false
-}
-
-function onDrop(event) {
-  dragActive.value = false
-  const files = Array.from(event.dataTransfer?.files || []).filter((file) =>
-    file.type.startsWith('image/'),
-  )
-  if (!files.length) return
-  pendingFiles.value = pendingFiles.value.concat(files)
-}
-
-function onFileSelected(ev) {
-  const fileList = ev.target?.files
-  if (!fileList?.length) return
-  const files = Array.from(fileList)
-  pendingFiles.value = pendingFiles.value.concat(files)
-  ev.target.value = ''
-}
-
-function clearPending() {
-  pendingFiles.value = []
-}
-
-async function uploadPending() {
-  if (!pendingFiles.value.length) return
-  loading.value = true
-  error.value = null
-  const form = new FormData()
-  pendingFiles.value.forEach((file) => {
-    form.append('photos[]', file)
-  })
-  try {
-    const res = await fetch(getApiUrl('api/upload.php'), {
-      method: 'POST',
-      body: form,
-    })
-    const data = await res.json()
-    if (data.ok) {
-      pendingFiles.value = []
-      await loadPhotos()
-    } else {
-      error.value = data.error || 'Błąd wgrywania.'
-    }
-  } catch (e) {
-    console.error(e)
-    error.value = 'Błąd połączenia z serwerem.'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function deletePhoto(id) {
-  deletingId.value = id
-  error.value = null
-  try {
-    const form = new FormData()
-    form.append('id', id)
-    const res = await fetch(getApiUrl('api/delete.php'), {
-      method: 'POST',
-      body: form,
-    })
-    const data = await res.json()
-    if (data.ok) {
-      await loadPhotos()
-    } else {
-      error.value = data.error || 'Nie udało się usunąć.'
-    }
-  } catch (e) {
-    console.error(e)
-    error.value = 'Błąd połączenia z serwerem.'
-  } finally {
-    deletingId.value = null
-  }
 }
 
 function onThumbClick(url, ev) {
@@ -370,14 +172,6 @@ function onThumbClick(url, ev) {
   if (!lb) return
   lb.options.dataSource = slides.value
   lb.loadAndOpen(index)
-}
-
-function formatSize(size) {
-  if (!size && size !== 0) return ''
-  if (size < 1024 * 1024) {
-    return `${Math.round(size / 1024)} KB`
-  }
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`
 }
 
 onMounted(() => {
@@ -407,95 +201,6 @@ onUnmounted(() => {
   padding: 0 16px;
 }
 
-.index-page-gallery-panel__section--upload {
-  margin-top: 32px;
-}
-
-.index-page-gallery-panel__dropzone {
-  border-radius: 14px;
-  border: 2px dashed rgba(255, 255, 255, 0.22);
-  padding: 18px 16px;
-  background: rgba(255, 255, 255, 0.04);
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.index-page-gallery-panel__dropzone--active {
-  border-color: #e61971;
-  background: rgba(230, 25, 113, 0.12);
-  box-shadow: 0 0 0 2px rgba(230, 25, 113, 0.15);
-}
-
-.index-page-gallery-panel__dropzone-inner {
-  text-align: center;
-}
-
-.index-page-gallery-panel__dropzone-title {
-  margin: 0 0 4px;
-  font-weight: 500;
-}
-
-.index-page-gallery-panel__dropzone-subtitle {
-  margin: 0 0 8px;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.index-page-gallery-panel__file-input {
-  display: none;
-}
-
-.index-page-gallery-panel__pending {
-  margin-top: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.index-page-gallery-panel__pending-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.index-page-gallery-panel__pending-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 160px;
-  overflow-y: auto;
-}
-
-.index-page-gallery-panel__pending-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  padding: 3px 0;
-  color: rgba(255, 255, 255, 0.88);
-}
-
-.index-page-gallery-panel__pending-name {
-  flex: 1;
-  margin-right: 8px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.index-page-gallery-panel__pending-size {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.8rem;
-}
-
-.index-page-gallery-panel__pending-submit {
-  margin-top: 10px;
-  width: 100%;
-}
-
 .index-page-gallery-panel__section--gallery {
   margin-top: 10vh;
 }
@@ -506,7 +211,7 @@ onUnmounted(() => {
   }
 }
 
-/* Gallery tab: glass background behind content (full-bleed). */
+
 .index-page-gallery-panel__panels--gallery {
   width: 100vw;
   margin-left: calc(50% - 50vw);
@@ -571,18 +276,6 @@ onUnmounted(() => {
   transform: scale(1.03);
 }
 
-.index-page-gallery-panel__delete-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(0, 0, 0, 0.5);
-  color: #ffffff;
-}
-
-.index-page-gallery-panel__delete-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
-}
-
 .index-page-gallery-panel__placeholder {
   grid-column: 1 / -1;
   display: flex;
@@ -617,7 +310,7 @@ onUnmounted(() => {
   min-height: 0;
 }
 
-/* PhotoSwipe: premium-ish chrome to match the site. */
+
 :deep(.pswp) {
   --pswp-bg: rgba(8, 8, 12, 0.92);
   --pswp-placeholder-bg: rgba(255, 255, 255, 0.06);

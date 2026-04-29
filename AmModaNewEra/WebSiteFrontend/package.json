@@ -9,6 +9,8 @@
   "scripts": {
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{js,cjs,mjs,vue}\"",
     "test": "echo \"No test specified\" && exit 0",
+    "ui:test": "playwright test",
+    "ui:update": "playwright test --update-snapshots",
     "sync:favicon": "node ./scripts/sync-favicon.mjs",
     "dev": "npm run sync:favicon && quasar dev",
     "build": "npm run sync:favicon && quasar build",
@@ -23,6 +25,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
+    "@playwright/test": "^1.55.0",
+    "serve": "^14.2.4",
     "eslint": "^9.14.0",
     "eslint-plugin-vue": "^10.4.0",
     "globals": "^16.4.0",

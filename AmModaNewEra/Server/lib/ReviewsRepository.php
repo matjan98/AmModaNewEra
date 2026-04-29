@@ -14,9 +14,7 @@ final class ReviewsRepository
         $this->pdo = $pdo;
     }
 
-    /**
-     * @return array{rating: float, rating_count: int, fetched_at: string}|null
-     */
+    
     public function getLatest(): ?array
     {
         $stmt = $this->pdo->query(
@@ -49,9 +47,7 @@ final class ReviewsRepository
         ]);
     }
 
-    /**
-     * @param array{fetched_at: string}|null $row
-     */
+    
     public function isStale(?array $row, int $ttlSeconds): bool
     {
         if ($row === null) {

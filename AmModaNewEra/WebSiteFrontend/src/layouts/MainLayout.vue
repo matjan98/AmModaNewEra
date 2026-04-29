@@ -10,7 +10,6 @@
       }"
     >
       <div class="main-layout__header-inner" :class="{ 'main-layout__header-inner--scrolled': useSidesLayout }">
-        <!-- Logo: link scrolls to top (same tab); not a <button> so image sizing stays plain img rules -->
         <div class="main-layout__brand" :class="{ 'main-layout__brand--center': useSidesLayout }">
           <a
             href="#"
@@ -26,11 +25,11 @@
             >
           </a>
         </div>
-        <!-- Contact below logo (when narrow: phones / not enough space) -->
+
         <div class="main-layout__contact main-layout__contact--below" :class="{ 'main-layout__contact--hidden': useSidesLayout }">
-          <a href="tel:+48503115446" class="main-layout__phone-link">
+          <a :href="PHONE_TEL_HREF" class="main-layout__phone-link">
             <q-icon name="phone" size="18px" class="main-layout__phone-icon" />
-            503 115 446
+            {{ PHONE_DISPLAY }}
           </a>
           <div class="main-layout__hours-toggle-wrap">
             <button
@@ -62,9 +61,8 @@
             </div>
           </div>
         </div>
-        <!-- Contact left (hours) when wide enough for row layout -->
+
         <div class="main-layout__contact main-layout__contact--left" :class="{ 'main-layout__contact--visible': useSidesLayout }">
-          <!-- Small screens: clock icon only, tap to show hours -->
           <div v-if="isSmallScreen" class="main-layout__hours-toggle-wrap">
             <button
               type="button"
@@ -87,7 +85,7 @@
               </div>
             </div>
           </div>
-          <!-- Larger screens: full hours text -->
+
           <div v-else class="main-layout__hours-toggle-wrap">
             <button
               type="button"
@@ -118,21 +116,20 @@
             </div>
           </div>
         </div>
-        <!-- Contact right (phone) when wide enough for row layout -->
+
         <div class="main-layout__contact main-layout__contact--right" :class="{ 'main-layout__contact--visible': useSidesLayout }">
-          <!-- Small screens: icon only, tap to call -->
           <a
             v-if="isSmallScreen"
-            href="tel:+48503115446"
+            :href="PHONE_TEL_HREF"
             class="main-layout__contact-icon-btn main-layout__contact-icon-btn--phone"
             aria-label="Zadzwoń"
           >
             <q-icon name="phone" size="22px" />
           </a>
-          <!-- Larger screens: full number -->
-          <a v-else href="tel:+48503115446" class="main-layout__phone-link">
+
+          <a v-else :href="PHONE_TEL_HREF" class="main-layout__phone-link">
             <q-icon name="phone" size="18px" class="main-layout__phone-icon" />
-            503 115 446
+            {{ PHONE_DISPLAY }}
           </a>
         </div>
       </div>
@@ -142,74 +139,72 @@
       <router-view />
     </q-page-container>
 
-    <div
-      class="main-layout__fab-column"
-    >
+    <div class="main-layout__fab-column">
       <div class="main-layout__mobile-fab-stack">
-      <div class="main-layout__mobile-fab-phone">
-        <div class="main-layout__mobile-fab-wrap">
-          <button
-            type="button"
-            class="main-layout__mobile-fab-btn"
-            :class="{ 'main-layout__mobile-fab-btn--active': phoneFabExpanded }"
-            aria-label="Zadzwoń"
-            :aria-expanded="phoneFabExpanded"
-            @click="togglePhoneFab"
-          >
-            <q-icon name="phone" size="22px" />
-            <span
-              v-if="isStoreOpenNow"
-              class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-0"
-              aria-hidden="true"
-            />
-          </button>
-          <div
-            v-show="phoneFabExpanded"
-            class="main-layout__mobile-fab-panel main-layout__mobile-fab-panel--phone"
-          >
-            <a href="tel:+48503115446" class="main-layout__mobile-fab-phone-link">
-              <span class="main-layout__mobile-fab-phone-label">Zadzwoń:</span>
-              <span class="main-layout__mobile-fab-phone-number">503 115 446</span>
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="main-layout__mobile-fab-hours">
-        <div class="main-layout__mobile-fab-wrap">
-          <button
-            ref="mobileHoursFabBtnRef"
-            type="button"
-            class="main-layout__mobile-fab-btn"
-            :class="{ 'main-layout__mobile-fab-btn--active': hoursExpanded }"
-            aria-label="Godziny otwarcia"
-            :aria-expanded="hoursExpanded"
-            @click="toggleHoursFab"
-          >
-            <q-icon name="fa-regular fa-clock" size="22px" />
-            <span
-              v-if="isStoreOpenNow"
-              class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-1"
-              aria-hidden="true"
-            />
-          </button>
-          <div
-            ref="mobileHoursFabPanelRef"
-            v-show="hoursExpanded"
-            class="main-layout__mobile-fab-panel main-layout__hours-dropdown"
-            :class="{ 'main-layout__mobile-fab-panel--flip-up': mobileHoursFabPanelFlipUp }"
-          >
-            <div
-              v-for="row in openingHours"
-              :key="'mobile-' + row.label"
-              class="main-layout__hours-row"
-              :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
+        <div class="main-layout__mobile-fab-phone">
+          <div class="main-layout__mobile-fab-wrap">
+            <button
+              type="button"
+              class="main-layout__mobile-fab-btn"
+              :class="{ 'main-layout__mobile-fab-btn--active': phoneFabExpanded }"
+              aria-label="Zadzwoń"
+              :aria-expanded="phoneFabExpanded"
+              @click="togglePhoneFab"
             >
-              <span class="main-layout__hours-day">{{ row.label }}</span>
-              <span class="main-layout__hours-time">{{ row.hours }}</span>
+              <q-icon name="phone" size="22px" />
+              <span
+                v-if="isStoreOpenNow"
+                class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-0"
+                aria-hidden="true"
+              />
+            </button>
+            <div
+              v-show="phoneFabExpanded"
+              class="main-layout__mobile-fab-panel main-layout__mobile-fab-panel--phone"
+            >
+              <a :href="PHONE_TEL_HREF" class="main-layout__mobile-fab-phone-link">
+                <span class="main-layout__mobile-fab-phone-label">Zadzwoń:</span>
+                <span class="main-layout__mobile-fab-phone-number">{{ PHONE_DISPLAY }}</span>
+              </a>
             </div>
           </div>
         </div>
-      </div>
+        <div class="main-layout__mobile-fab-hours">
+          <div class="main-layout__mobile-fab-wrap">
+            <button
+              ref="mobileHoursFabBtnRef"
+              type="button"
+              class="main-layout__mobile-fab-btn"
+              :class="{ 'main-layout__mobile-fab-btn--active': hoursExpanded }"
+              aria-label="Godziny otwarcia"
+              :aria-expanded="hoursExpanded"
+              @click="toggleHoursFab"
+            >
+              <q-icon name="fa-regular fa-clock" size="22px" />
+              <span
+                v-if="isStoreOpenNow"
+                class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-1"
+                aria-hidden="true"
+              />
+            </button>
+            <div
+              ref="mobileHoursFabPanelRef"
+              v-show="hoursExpanded"
+              class="main-layout__mobile-fab-panel main-layout__hours-dropdown"
+              :class="{ 'main-layout__mobile-fab-panel--flip-up': mobileHoursFabPanelFlipUp }"
+            >
+              <div
+                v-for="row in openingHours"
+                :key="'mobile-' + row.label"
+                class="main-layout__hours-row"
+                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
+              >
+                <span class="main-layout__hours-day">{{ row.label }}</span>
+                <span class="main-layout__hours-time">{{ row.hours }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </q-layout>
@@ -217,9 +212,9 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 'vue'
+import { OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 
-/** Header phone + hours use icon/compact FAB below this width; side-by-side pills from this + 1 px up */
-const SMALL_SCREEN_MAX_WIDTH = 749
+const SMALL_SCREEN_MAX_WIDTH = 750
 const isSmallScreen = ref(false)
 const useSidesLayout = computed(() => !isSmallScreen.value)
 
@@ -246,21 +241,13 @@ function updateSmallScreen() {
   }
 }
 
-const openingHours = [
-  { dayIndex: 1, label: 'poniedziałek', hours: '09:00 - 18:00' },
-  { dayIndex: 2, label: 'wtorek', hours: '09:00 - 18:00' },
-  { dayIndex: 3, label: 'środa', hours: '09:00 - 18:00' },
-  { dayIndex: 4, label: 'czwartek', hours: '09:00 - 18:00' },
-  { dayIndex: 5, label: 'piątek', hours: '09:00 - 18:00' },
-  { dayIndex: 6, label: 'sobota', hours: '09:00 - 14:00' },
-  { dayIndex: 0, label: 'niedziela', hours: 'Zamknięte' },
-]
+const openingHours = OPENING_HOURS
 
 const hoursExpanded = ref(false)
 
 const mobileHoursFabBtnRef = ref(null)
 const mobileHoursFabPanelRef = ref(null)
-/** When true, hours panel opens above the clock (default is below; flip when no room under). */
+
 const mobileHoursFabPanelFlipUp = ref(false)
 const HOURS_FAB_PANEL_GAP_PX = 8
 
@@ -311,7 +298,7 @@ watch(hoursExpanded, (open) => {
   })
 })
 
-/** Wall-clock time for “today” / open-now checks (updates every minute). */
+
 const now = ref(new Date())
 const todayDayIndex = computed(() => now.value.getDay())
 const openingToday = computed(() => openingHours.find((h) => h.dayIndex === todayDayIndex.value))
@@ -327,7 +314,7 @@ function parseOpeningRangeMinutes(hoursStr) {
   return { startMin, endMin }
 }
 
-/** True only within today’s opening interval (local time); end time is exclusive. */
+
 const isStoreOpenNow = computed(() => {
   const range = parseOpeningRangeMinutes(openingToday.value?.hours)
   if (!range) return false
@@ -338,16 +325,16 @@ const isStoreOpenNow = computed(() => {
 const headerRef = ref(null)
 provide('layoutHeaderRef', headerRef)
 
-/** Black header bar after leaving the top (narrow viewports only; driven by scroll). */
+
 const headerSolid = ref(false)
-/** Solid bar applies only below 750px — wide layouts stay transparent. */
+
 const headerSolidBarActive = computed(() => headerSolid.value && isSmallScreen.value)
 let headerSolidifyTimer = null
 const HEADER_SOLID_DELAY_MS = 100
-/** Treat sub-pixel noise / rubber-banding as still "top". */
+
 const HEADER_TOP_SCROLL_EPSILON_PX = 2
 
-/** Quasar often scrolls `.q-page` / `.q-page-container` instead of `window` (desktop). */
+
 let headerScrollRootListeners = []
 
 function getEffectiveScrollY() {
@@ -418,7 +405,7 @@ function onWindowScroll() {
   if (phoneFabExpanded.value) closePhoneFab()
 }
 
-/** Close hours / phone FAB panels on tap outside (capture runs before toggle handlers). */
+
 function onDocumentPointerDownOutsideHours(event) {
   const target = event.target
   if (!(target instanceof Node)) return
@@ -433,9 +420,6 @@ function onDocumentPointerDownOutsideHours(event) {
     if (!target.closest('.main-layout__mobile-fab-phone')) closePhoneFab()
   }
 }
-
-const galleryUploadUnlocked = ref(false)
-const showAuxInput = ref(false)
 
 const OPEN_STATUS_TICK_MS = 60_000
 
@@ -463,11 +447,7 @@ function scrollToTop() {
 
 function onLogoClick() {
   scrollToTop()
-  showAuxInput.value = true
 }
-
-provide('galleryUploadUnlocked', galleryUploadUnlocked)
-provide('showAuxInput', showAuxInput)
 
 onMounted(() => {
   now.value = new Date()
@@ -530,7 +510,7 @@ onUnmounted(() => {
   transition: background-color 0.5s ease, border-bottom-color 0.5s ease;
 }
 
-/* Double class beats Quasar `.q-layout__section--marginal` primary background on wide layouts */
+
 .main-layout__header.main-layout__header--solid {
   background: transparent;
   border-bottom-color: rgba(255, 255, 255, 0.08);
@@ -566,7 +546,7 @@ onUnmounted(() => {
   overflow: visible;
 }
 
-/* Stacked layout only — do not force this min-height on the compact row bar */
+
 .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
   min-height: 94px;
 }
@@ -579,7 +559,7 @@ onUnmounted(() => {
   min-height: unset;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 751px) {
   .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
     gap: 9px;
     min-height: 90px;
@@ -592,7 +572,7 @@ onUnmounted(() => {
   }
 }
 
-/* Stacked (narrow): logo absolutely centered horizontally; row layout uses grid (logo static, vertically centered) */
+
 .main-layout__brand {
   position: absolute;
   top: 6px;
@@ -665,15 +645,15 @@ onUnmounted(() => {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 10px;
   margin-bottom: 13px;
 }
 
-/* Contact below logo: visible when not scrolled, fades out when scrolled */
+
 .main-layout__contact--below {
   opacity: 1;
-  /* Reserve space for fixed logo above (scaled with shorter header) */
+  
   margin-top: 63px;
 }
 .main-layout__contact--below.main-layout__contact--hidden {
@@ -687,35 +667,7 @@ onUnmounted(() => {
   margin-bottom: 0;
 }
 
-@media (max-width: 749px) {
-  .main-layout__header :deep(.q-header__content) {
-    padding: 8px 16px;
-  }
-  .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
-    min-height: 50px;
-    gap: 8px;
-  }
-  .main-layout__brand {
-    top: 5px;
-  }
-  .main-layout__contact--below {
-    margin-top: 42px;
-    margin-bottom: 5px;
-    flex-direction: row;
-    justify-content: center;
-  }
-  .main-layout__contact--below .main-layout__hours-toggle-wrap {
-    order: 1;
-  }
-  .main-layout__contact--below .main-layout__phone-link {
-    order: 2;
-  }
-  .main-layout__contact--below.main-layout__contact--hidden {
-    top: 37px;
-  }
-}
 
-/* Contact left/right: hidden when not scrolled – pin to final position so no movement during fade */
 .main-layout__contact--left,
 .main-layout__contact--right {
   position: absolute;
@@ -795,7 +747,7 @@ onUnmounted(() => {
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
-/* Icon-only contact buttons (small screens, scrolled header) */
+
 .main-layout__contact-icon-btn {
   display: inline-flex;
   align-items: center;
@@ -858,9 +810,7 @@ onUnmounted(() => {
   transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/*
- * Hours pill: match `.main-layout__phone-link` glass chip (same frosted white + hover).
- */
+
 .main-layout__header .main-layout__open-status,
 .main-layout__header button.main-layout__open-status {
   padding: 6px 13px;
@@ -951,33 +901,6 @@ onUnmounted(() => {
   color: #121212;
 }
 
-@media (min-width: 750px) {
-  .main-layout__phone-link,
-  .main-layout__open-status {
-    font-size: 1.05rem;
-  }
-  .main-layout__hours-row {
-    font-size: 1.05rem;
-  }
-}
-
-@media (max-width: 960px) {
-  .main-layout__contact {
-    justify-content: flex-start;
-  }
-}
-
-/* Keep hours dropdown within viewport on mobile */
-@media (max-width: 600px) {
-  .main-layout__hours-dropdown {
-    left: 0;
-    right: auto;
-    min-width: 220px;
-    max-width: min(320px, calc(100vw - 24px));
-  }
-}
-
-/* Fixed column: mobile = vertical cluster; desktop (751+) = Facebook only, bottom-right */
 .main-layout__fab-column {
   position: fixed;
   right: max(16px, env(safe-area-inset-right, 0px));
@@ -987,25 +910,6 @@ onUnmounted(() => {
   align-items: flex-end;
   gap: 10px;
   pointer-events: none;
-}
-
-@media (max-width: 750px) {
-  .main-layout__fab-column {
-    top: calc(50% - 30vh);
-    bottom: auto;
-    /* Slightly below optical center */
-    transform: translateY(calc(-50% + 20px));
-  }
-}
-
-@media (min-width: 751px) {
-  .main-layout__fab-column {
-    top: auto;
-    bottom: max(18px, env(safe-area-inset-bottom, 0px));
-    transform: none;
-    /* Facebook-only column: inset a bit more from the viewport edge than on mobile */
-    right: max(40px, env(safe-area-inset-right, 0px));
-  }
 }
 
 .main-layout__fab-column > * {
@@ -1036,6 +940,23 @@ onUnmounted(() => {
 }
 
 @media (min-width: 751px) {
+  .main-layout__phone-link,
+  .main-layout__open-status {
+    font-size: 1.05rem;
+  }
+
+  .main-layout__hours-row {
+    font-size: 1.05rem;
+  }
+
+  .main-layout__fab-column {
+    top: auto;
+    bottom: max(18px, env(safe-area-inset-bottom, 0px));
+    transform: none;
+    
+    right: max(40px, env(safe-area-inset-right, 0px));
+  }
+
   .main-layout__fab-column--entered .main-layout__facebook-fab {
     transition-delay: 0s;
   }
@@ -1057,16 +978,60 @@ onUnmounted(() => {
 }
 
 @media (max-width: 750px) {
+  .main-layout__header :deep(.q-header__content) {
+    padding: 8px 16px;
+  }
+
+  .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
+    min-height: 50px;
+    gap: 8px;
+  }
+
+  .main-layout__brand {
+    top: 5px;
+  }
+
+  .main-layout__contact--below {
+    margin-top: 42px;
+    margin-bottom: 5px;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .main-layout__contact--below .main-layout__hours-toggle-wrap {
+    order: 1;
+  }
+
+  .main-layout__contact--below .main-layout__phone-link {
+    order: 2;
+  }
+
+  .main-layout__contact--below.main-layout__contact--hidden {
+    top: 37px;
+  }
+
+  .main-layout__hours-dropdown {
+    left: 0;
+    right: auto;
+    min-width: 220px;
+    max-width: min(320px, calc(100vw - 24px));
+  }
+
+  .main-layout__fab-column {
+    top: calc(50% - 30vh);
+    bottom: auto;
+    
+    transform: translateY(calc(-50% + 20px));
+  }
+
   .main-layout__contact--below {
     display: none !important;
   }
-
-  /* Hide fixed right-edge FAB column (phone, hours, Facebook) on small viewports */
+ 
   .main-layout__fab-column {
     display: none !important;
   }
 
-  /* Phone + clock FABs only on small viewports (must live here so base rules never override desktop display:none). */
   .main-layout__mobile-fab-stack {
     position: relative;
     z-index: 6201;
@@ -1133,7 +1098,6 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
-/* Hours: default below clock FAB; flip up only when there is no room underneath. */
 .main-layout__mobile-fab-panel.main-layout__hours-dropdown {
   top: calc(100% + 8px);
   bottom: auto;
@@ -1256,7 +1220,7 @@ onUnmounted(() => {
 }
 
 @keyframes main-layout-fab-dot-pulse {
-  /* 3s cycle: ~2.4s visible, then 0.3s fade out + 0.3s fade in (each = 10% of period) */
+  
   0%,
   80% {
     opacity: 1;

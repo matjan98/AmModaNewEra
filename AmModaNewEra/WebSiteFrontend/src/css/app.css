@@ -1,4 +1,4 @@
-/* app global css */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -23,12 +23,12 @@ body,
   background: transparent;
 }
 
-/* Override Quasar primary brand color */
+
 :root {
   --q-primary: #E61971;
 }
 
-/* Pink text selection (readable on dark UI) */
+
 ::selection {
   background-color: rgba(230, 25, 113, 0.48);
   color: #ffffff;

@@ -55,10 +55,10 @@ public class DeploymentConfiguration
             yield return "Deployment:FtpPassword is missing.";
         }
 
-        // SmtpPassword optional – used only when backend has config/smtp.php
+
         if (!string.IsNullOrWhiteSpace(SmtpPassword))
         {
-            // OK – will be injected during deploy
+
         }
     }
 }

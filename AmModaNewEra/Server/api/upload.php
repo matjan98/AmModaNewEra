@@ -36,10 +36,10 @@ $allowedTypes = [
     'image/gif' => 'gif',
     'image/webp' => 'webp',
 ];
-$maxSize = 5 * 1024 * 1024; // 5 MB per file
+$maxSize = 5 * 1024 * 1024; 
 $maxFiles = 50;
 
-// Collect files: support single "photo" or multiple "photos[]"
+
 $files = [];
 if (!empty($_FILES['photo']) && is_uploaded_file($_FILES['photo']['tmp_name'] ?? '')) {
     $f = $_FILES['photo'];

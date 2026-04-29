@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// CORS for image request (same as upload)
+
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
     'http://localhost:9000',
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $photosDir = __DIR__ . '/../photos';
 
-// List all photos (photo_* files only)
+
 if (isset($_GET['list']) && $_GET['list'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
     $photos = [];
@@ -40,7 +40,7 @@ if (isset($_GET['list']) && $_GET['list'] === '1') {
             }
         }
     }
-    // Newest first (by mtime)
+    
     usort($photos, function ($a, $b) use ($photosDir) {
         $tA = filemtime($photosDir . '/' . $a['id']) ?: 0;
         $tB = filemtime($photosDir . '/' . $b['id']) ?: 0;
@@ -50,7 +50,7 @@ if (isset($_GET['list']) && $_GET['list'] === '1') {
     exit;
 }
 
-// Serve single image by id
+
 if (isset($_GET['img']) && $_GET['img'] === '1' && !empty($_GET['id'])) {
     $id = $_GET['id'];
     if (preg_match('/^photo_[a-f0-9.]+\.(jpe?g|png|gif|webp)$/i', $id)) {
@@ -77,7 +77,7 @@ if (isset($_GET['img']) && $_GET['img'] === '1' && !empty($_GET['id'])) {
     exit;
 }
 
-// Legacy: single main image (img=1 without id) – main.*
+
 if (isset($_GET['img']) && $_GET['img'] === '1') {
     $mainFiles = $photosDir ? glob($photosDir . '/main.*') : false;
     $mainPath = $mainFiles && count($mainFiles) > 0 ? $mainFiles[0] : null;
@@ -104,7 +104,7 @@ if (isset($_GET['img']) && $_GET['img'] === '1') {
     exit;
 }
 
-// GET without params – JSON with photos list (for backward compat: hasPhoto + url for single main)
+
 header('Content-Type: application/json; charset=utf-8');
 
 $mainFiles = $photosDir ? glob($photosDir . '/main.*') : false;

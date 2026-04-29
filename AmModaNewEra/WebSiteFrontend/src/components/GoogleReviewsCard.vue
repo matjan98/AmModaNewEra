@@ -12,29 +12,31 @@
   >
     <div v-if="variant === 'mini'" class="google-reviews-card__mini">
       <div class="google-reviews-card__mini-inner">
-        <svg
-          class="google-reviews-card__google-g"
-          viewBox="0 0 48 48"
-          aria-hidden="true"
-          focusable="false"
-        >
-          <path
-            fill="#FFC107"
-            d="M43.611 20.083H42V20H24v8h11.303C33.654 32.657 29.179 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.047 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
-          />
-          <path
-            fill="#FF3D00"
-            d="M6.306 14.691l6.571 4.819C14.655 16.108 19.01 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.047 6.053 29.268 4 24 4c-7.683 0-14.356 4.346-17.694 10.691z"
-          />
-          <path
-            fill="#4CAF50"
-            d="M24 44c5.076 0 9.773-1.948 13.31-5.122l-6.141-5.198C29.11 35.091 26.683 36 24 36c-5.158 0-9.615-3.316-11.271-7.946l-6.52 5.023C9.505 39.556 16.227 44 24 44z"
-          />
-          <path
-            fill="#1976D2"
-            d="M43.611 20.083H42V20H24v8h11.303c-.793 2.223-2.231 4.096-4.134 5.287l.003-.002 6.141 5.198C36.88 39.975 44 35 44 24c0-1.341-.138-2.65-.389-3.917z"
-          />
-        </svg>
+        <span class="google-reviews-card__google-bubble" aria-hidden="true">
+          <svg
+            class="google-reviews-card__google-g"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              fill="#FFC107"
+              d="M43.611 20.083H42V20H24v8h11.303C33.654 32.657 29.179 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.047 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"
+            />
+            <path
+              fill="#FF3D00"
+              d="M6.306 14.691l6.571 4.819C14.655 16.108 19.01 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.047 6.053 29.268 4 24 4c-7.683 0-14.356 4.346-17.694 10.691z"
+            />
+            <path
+              fill="#4CAF50"
+              d="M24 44c5.076 0 9.773-1.948 13.31-5.122l-6.141-5.198C29.11 35.091 26.683 36 24 36c-5.158 0-9.615-3.316-11.271-7.946l-6.52 5.023C9.505 39.556 16.227 44 24 44z"
+            />
+            <path
+              fill="#1976D2"
+              d="M43.611 20.083H42V20H24v8h11.303c-.793 2.223-2.231 4.096-4.134 5.287l.003-.002 6.141 5.198C36.88 39.975 44 35 44 24c0-1.341-.138-2.65-.389-3.917z"
+            />
+          </svg>
+        </span>
 
         <div class="google-reviews-card__row google-reviews-card__row--mini">
           <span class="google-reviews-card__rating google-reviews-card__rating--mini">{{ ratingDisplay }}</span>
@@ -104,6 +106,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { getApiUrl } from '../utils/apiUrl.js'
 
 defineProps({
   withMargin: {
@@ -131,15 +134,6 @@ const FALLBACK_RATING_COUNT = 171
 
 const rating = ref(FALLBACK_RATING)
 const ratingCount = ref(FALLBACK_RATING_COUNT)
-
-const API_BASE = import.meta.env.VITE_API_BASE ?? ''
-const API_SUBPATH = 'server'
-
-function getApiUrl(path) {
-  const base = API_BASE.replace(/\/$/, '')
-  if (base) return `${base}/${path}`
-  return `${API_SUBPATH}/${path}`
-}
 
 const ratingDisplay = computed(() => rating.value.toFixed(1).replace('.', ','))
 
@@ -177,7 +171,7 @@ onMounted(async () => {
     if (Number.isFinite(fetchedRating) && fetchedRating > 0) rating.value = fetchedRating
     if (Number.isFinite(fetchedCount) && fetchedCount >= 0) ratingCount.value = fetchedCount
   } catch {
-    // fallback values remain
+    void 0
   }
 })
 </script>
@@ -212,12 +206,12 @@ onMounted(async () => {
   margin-bottom: 5vh;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 750px) {
   .google-reviews-card--with-margin {
     margin-bottom: 12vh;
   }
 
-  /* On small screens, remove glassmorphism from the full rating card. */
+  
   .google-reviews-card__inner {
     background: transparent;
     border: 0;
@@ -226,7 +220,7 @@ onMounted(async () => {
     box-shadow: none;
   }
 
-  /* Reflow: keep rating + stars together, move opinions count to next line. */
+  
   .google-reviews-card__row {
     flex-wrap: wrap;
     gap: 6px;
@@ -288,7 +282,7 @@ onMounted(async () => {
   justify-content: center;
 }
 
-/* Mini variant: no glass panel — content reads on the hero image via text shadows only. */
+
 .google-reviews-card__mini-inner {
   --google-reviews-card-mini-shadow:
     0 3px 10px rgba(0, 0, 0, 0.96),
@@ -314,17 +308,38 @@ onMounted(async () => {
   text-align: center;
 }
 
-@media (min-width: 1000px) {
-  .google-reviews-card--with-margin {
-    margin-bottom: 10vh;
-  }
-
-  .google-reviews-card__inner {
-    filter:
-      drop-shadow(0 14px 26px rgba(0, 0, 0, 0.86))
-      drop-shadow(0 40px 110px rgba(0, 0, 0, 0.9));
-  }
+.google-reviews-card__google-bubble {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.32),
+    0 2px 6px rgba(0, 0, 0, 0.24);
 }
+
+.google-reviews-card__google-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #ffffff;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.22));
+}
+
+.google-reviews-card__mini .google-reviews-card__google-bubble .google-reviews-card__google-g {
+  filter: none;
+}
+
 
 .google-reviews-card__row--mini {
   display: inline-flex;
@@ -372,7 +387,47 @@ onMounted(async () => {
   filter: drop-shadow(var(--google-reviews-card-mini-shadow));
 }
 
-@media (min-width: 1000px) {
+@media (min-width: 751px) {
+  .google-reviews-card__google-bubble {
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-radius: 14px;
+  }
+
+  .google-reviews-card__google-bubble::after {
+    bottom: -6px;
+    border-left-width: 7px;
+    border-right-width: 7px;
+    border-top-width: 7px;
+  }
+
+  .google-reviews-card__stars--mini {
+    font-size: 26px;
+  }
+
+  .google-reviews-card__rating--mini {
+    font-size: 1.25rem;
+  }
+
+  .google-reviews-card__count--mini {
+    font-size: 1.25rem;
+  }
+
+  .google-reviews-card__mini .google-reviews-card__google-g {
+    width: 42px;
+    height: 42px;
+  }
+
+  .google-reviews-card--with-margin {
+    margin-bottom: 10vh;
+  }
+
+  .google-reviews-card__inner {
+    filter:
+      drop-shadow(0 14px 26px rgba(0, 0, 0, 0.86))
+      drop-shadow(0 40px 110px rgba(0, 0, 0, 0.9));
+  }
+
   .google-reviews-card__mini-inner {
     gap: 6px;
   }

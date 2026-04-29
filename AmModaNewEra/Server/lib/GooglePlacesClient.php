@@ -7,7 +7,7 @@ use RuntimeException;
 
 final class GooglePlacesClient
 {
-    /** @var array<string,mixed> */
+    
     private array $config;
 
     public function __construct(array $config)
@@ -15,9 +15,7 @@ final class GooglePlacesClient
         $this->config = $config;
     }
 
-    /**
-     * @return array{rating: float, userRatingCount: int}
-     */
+    
     public function fetchPlaceDetails(): array
     {
         $url = rtrim($this->config['endpoint'], '/') . '/' . rawurlencode($this->config['place_id']);

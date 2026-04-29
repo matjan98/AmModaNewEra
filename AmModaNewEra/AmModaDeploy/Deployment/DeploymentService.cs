@@ -50,7 +50,7 @@ public class DeploymentService
         {
             var cancellationToken = cancellationTokenSource.Token;
 
-            // Frontend deployment
+
             var frontendPath = ResolveFrontendPath();
             var buildOutputPath = ResolveBuildOutputPath(frontendPath);
 
@@ -224,7 +224,7 @@ public class DeploymentService
     private async Task BuildFrontendAsync(string frontendPath, CancellationToken cancellationToken)
     {
         ConsoleColors.WriteLine(ConsoleColors.Yellow, "Building frontend (npx quasar build)...");
-        // FORCE_COLOR=1 so Quasar/Vite emit ANSI colors even when stdout/stderr are redirected (no TTY).
+
         await _processRunner.RunAsync(
             "npx",
             "quasar build",
@@ -308,7 +308,7 @@ public class DeploymentService
             searchRoot = searchRoot.Parent;
         }
 
-        // Backend is optional - if not found, return null
+
         return null;
     }
 }

@@ -48,7 +48,7 @@ public class FtpUploader
                 }
                 catch
                 {
-                    // ignore disconnect errors
+
                 }
             }
         }
@@ -87,7 +87,7 @@ public class FtpUploader
                 }
                 catch
                 {
-                    // ignore disconnect errors
+
                 }
             }
         }

@@ -51,7 +51,7 @@ public class FrontendCodeTests
             "items-",
             "justify-",
             "index-page-",
-            // Third-party library (PhotoSwipe) uses fixed global class names like .pswp, .pswp__button, etc.
+
             "pswp"
         };
 
@@ -270,7 +270,7 @@ public class FrontendCodeTests
                 foreach (Match match in imgMatches)
                 {
                     var tag = match.Value;
-                    // Accept both static alt= and Vue v-bind :alt=
+
                     var altPattern = @"\s:?alt\s*=\s*[""'].*?[""']";
                     var altMatch = Regex.IsMatch(tag, altPattern);
 

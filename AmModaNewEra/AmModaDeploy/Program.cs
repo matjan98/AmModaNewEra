@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using AmModaDeploy;
 using AmModaDeploy.Deployment;
 
-// Use UTF-8 for console so output from child processes (e.g. Quasar build) displays correctly
+
 Console.OutputEncoding = Encoding.UTF8;
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
@@ -13,7 +13,7 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         Native.SetConsoleOutputCP(65001);
         Native.EnableVirtualTerminalProcessing();
     }
-    catch { /* ignore if not running in console */ }
+    catch { }
 }
 
 var configuration = new ConfigurationBuilder()

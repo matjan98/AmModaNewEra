@@ -10,15 +10,13 @@ namespace AmModaDeploy.Deployment;
 
 public class ProcessRunner
 {
-    /// <param name="stderrColorAnsi">ANSI color for stderr lines (e.g. ConsoleColors.Blue for git output). If null, uses Red.</param>
-    /// <param name="additionalEnvironment">Optional env vars for the process (e.g. FORCE_COLOR=1 for Quasar/Node to emit colors).</param>
     public async Task RunAsync(
-        string fileName,
-        string arguments,
-        string workingDirectory,
-        CancellationToken cancellationToken,
-        string? stderrColorAnsi = null,
-        IReadOnlyDictionary<string, string>? additionalEnvironment = null)
+    string fileName,
+    string arguments,
+    string workingDirectory,
+    CancellationToken cancellationToken,
+    string? stderrColorAnsi = null,
+    IReadOnlyDictionary<string, string>? additionalEnvironment = null)
     {
         var commandArguments = string.IsNullOrWhiteSpace(arguments)
             ? string.Empty
@@ -91,7 +89,7 @@ public class ProcessRunner
                 }
                 catch
                 {
-                    // ignore kill exceptions
+
                 }
             }
         });
