@@ -206,6 +206,7 @@ import { useRevealZoom } from './indexPage/useRevealZoom.js'
 import { useSectionTwoGrid } from './indexPage/useSectionTwoGrid.js'
 import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
+import { useIntersectionObserver } from '../composables/useIntersectionObserver.js'
 import heroIntroFirstImage from '../assets/Main photos/main2.webp'
 import heroIntroSecondImage from '../assets/Main photos/atf_photo.webp'
 import heroIntroThirdImage from '../assets/Main photos/main3.webp'
@@ -306,9 +307,15 @@ const heroIntroCtaCssVars = computed(() => ({
   '--hero-cta-button-row-height': `${HERO_CTA_BUTTON_ROW_HEIGHT_PX}px`,
 }))
 
-let heroCtaIntersectionObserver = null
 let heroCtaResizeAttached = false
 let heroCtaVisualViewportAttached = false
+const heroCtaIntersectionEnabled = ref(false)
+const heroCtaIntersection = useIntersectionObserver(
+  () => {
+    onHeroCtaIntersection()
+  },
+  { threshold: HERO_CTA_IO_THRESHOLDS, enabled: heroCtaIntersectionEnabled },
+)
 
 function getViewportBottomClientY() {
   const vv = window.visualViewport
@@ -432,10 +439,8 @@ function onHeroCtaIntersection() {
 
 function setupHeroCtaIntersection(on) {
   if (!on) {
-    if (heroCtaIntersectionObserver) {
-      heroCtaIntersectionObserver.disconnect()
-      heroCtaIntersectionObserver = null
-    }
+    heroCtaIntersectionEnabled.value = false
+    heroCtaIntersection.stop()
     if (heroCtaResizeAttached) {
       window.removeEventListener('resize', updateHeroCtaModes)
       heroCtaResizeAttached = false
@@ -466,16 +471,8 @@ function setupHeroCtaIntersection(on) {
     return
   }
 
-  if (heroCtaIntersectionObserver) {
-    heroCtaIntersectionObserver.disconnect()
-  }
-
-  heroCtaIntersectionObserver = new IntersectionObserver(onHeroCtaIntersection, {
-    root: null,
-    rootMargin: '0px',
-    threshold: HERO_CTA_IO_THRESHOLDS,
-  })
-
+  heroCtaIntersection.stop()
+  heroCtaIntersectionEnabled.value = true
   const sections = [
     heroIntroRef.value,
     heroIntroAfterRef.value,
@@ -483,7 +480,7 @@ function setupHeroCtaIntersection(on) {
     shopBottomSectionsRef.value?.heroIntroFacebookRef?.value,
   ]
   for (const el of sections) {
-    if (el) heroCtaIntersectionObserver.observe(el)
+    if (el) heroCtaIntersection.observe(el)
   }
   updateHeroCtaModes()
 }

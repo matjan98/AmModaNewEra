@@ -138,9 +138,11 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 import googleMapsPinImg from '../assets/google-maps.png'
+import { useMediaQuery } from '../composables/useMediaQuery.js'
+import { useIntersectionObserver } from '../composables/useIntersectionObserver.js'
 
 defineProps({
   ctaCssVars: {
@@ -177,22 +179,12 @@ const bigMapsCtaBtnRef = ref(null)
 const heroIntroFacebookInView = ref(false)
 const facebookShopFollowInView = ref(false)
 const bigMapsCtaFullyVisible = ref(false)
-const isSmallScreen = ref(false)
-
-let heroIntroFacebookObserver = null
-let facebookShopFollowObserver = null
-let bigMapsCtaObserver = null
-let smallScreenMql = null
+const { matches: isSmallScreen } = useMediaQuery('(max-width: 749px)')
 
 const bigMapsCtaVisible = computed(() => Boolean(bigMapsCtaFullyVisible.value))
 const smallFixedMapsCtaVisible = computed(() =>
   Boolean(facebookShopFollowInView.value && !bigMapsCtaFullyVisible.value)
 )
-
-const updateIsSmallScreen = () => {
-  if (typeof window === 'undefined') return
-  isSmallScreen.value = Boolean(window.matchMedia?.('(max-width: 749px)')?.matches)
-}
 
 const isElementFullyInViewport = (el, tolerancePx = 2) => {
   if (!el || typeof el.getBoundingClientRect !== 'function') return false
@@ -208,88 +200,42 @@ const isElementFullyInViewport = (el, tolerancePx = 2) => {
   )
 }
 
-onMounted(() => {
-  updateIsSmallScreen()
-  if (typeof window !== 'undefined' && window.matchMedia) {
-    smallScreenMql = window.matchMedia('(max-width: 749px)')
-    smallScreenMql.addEventListener?.('change', updateIsSmallScreen)
-  }
+useIntersectionObserver(
+  (entry) => {
+    heroIntroFacebookInView.value = Boolean(entry?.isIntersecting)
+  },
+  { threshold: 0.35 },
+  heroIntroFacebookRef,
+)
 
-  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
-  if (!heroIntroFacebookRef.value) return
+useIntersectionObserver(
+  (entry) => {
+    facebookShopFollowInView.value = Boolean(entry?.isIntersecting)
+  },
+  { threshold: 0 },
+  facebookShopFollowRef,
+)
 
-  heroIntroFacebookObserver = new IntersectionObserver(
-    (entries) => {
-      const [entry] = entries
-      heroIntroFacebookInView.value = Boolean(entry?.isIntersecting)
-    },
-    {
-      threshold: 0.35,
-    }
-  )
-
-  heroIntroFacebookObserver.observe(heroIntroFacebookRef.value)
-
-  if (!facebookShopFollowRef.value) return
-
-  facebookShopFollowObserver = new IntersectionObserver(
-    (entries) => {
-      const [entry] = entries
-      facebookShopFollowInView.value = Boolean(entry?.isIntersecting)
-    },
-    {
-      threshold: 0,
-    }
-  )
-
-  facebookShopFollowObserver.observe(facebookShopFollowRef.value)
-
-  if (!bigMapsCtaBtnRef.value) return
-
-  bigMapsCtaObserver = new IntersectionObserver(
-    (entries) => {
-      const [entry] = entries
-      if (!bigMapsCtaBtnRef.value) return
-      const ratio = entry?.intersectionRatio ?? 0
-      if (ratio <= 0) {
-        bigMapsCtaFullyVisible.value = false
-        return
-      }
-
-      if (ratio >= 0.98) {
-        bigMapsCtaFullyVisible.value = isElementFullyInViewport(bigMapsCtaBtnRef.value, 2)
-        return
-      }
-
+useIntersectionObserver(
+  (entry) => {
+    const el = bigMapsCtaBtnRef.value
+    if (!el) return
+    const ratio = entry?.intersectionRatio ?? 0
+    if (ratio <= 0) {
       bigMapsCtaFullyVisible.value = false
-    },
-    {
-      threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.95, 0.98, 0.99, 1],
+      return
     }
-  )
 
-  bigMapsCtaObserver.observe(bigMapsCtaBtnRef.value)
-})
+    if (ratio >= 0.98) {
+      bigMapsCtaFullyVisible.value = isElementFullyInViewport(el, 2)
+      return
+    }
 
-onBeforeUnmount(() => {
-  if (heroIntroFacebookObserver) {
-    heroIntroFacebookObserver.disconnect()
-    heroIntroFacebookObserver = null
-  }
-  if (facebookShopFollowObserver) {
-    facebookShopFollowObserver.disconnect()
-    facebookShopFollowObserver = null
-  }
-  if (bigMapsCtaObserver) {
-    bigMapsCtaObserver.disconnect()
-    bigMapsCtaObserver = null
-  }
-
-  if (smallScreenMql) {
-    smallScreenMql.removeEventListener?.('change', updateIsSmallScreen)
-    smallScreenMql = null
-  }
-})
+    bigMapsCtaFullyVisible.value = false
+  },
+  { threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.95, 0.98, 0.99, 1] },
+  bigMapsCtaBtnRef,
+)
 
 defineExpose({
   facebookShopFollowRef,

@@ -106,7 +106,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { getApiUrl } from '../utils/apiUrl.js'
+import { apiGetJson } from '../utils/apiJson.js'
 
 defineProps({
   withMargin: {
@@ -161,18 +161,14 @@ const opinionsLabel = computed(() => {
 })
 
 onMounted(async () => {
-  try {
-    const res = await fetch(getApiUrl('api/reviews.php'))
-    if (!res.ok) return
-    const data = await res.json()
-    if (!data || data.ok !== true) return
-    const fetchedRating = Number(data.rating)
-    const fetchedCount = Number(data.ratingCount)
-    if (Number.isFinite(fetchedRating) && fetchedRating > 0) rating.value = fetchedRating
-    if (Number.isFinite(fetchedCount) && fetchedCount >= 0) ratingCount.value = fetchedCount
-  } catch {
-    void 0
-  }
+  const res = await apiGetJson('api/reviews.php')
+  if (!res.ok) return
+  const data = res.data
+  if (!data || data.ok !== true) return
+  const fetchedRating = Number(data.rating)
+  const fetchedCount = Number(data.ratingCount)
+  if (Number.isFinite(fetchedRating) && fetchedRating > 0) rating.value = fetchedRating
+  if (Number.isFinite(fetchedCount) && fetchedCount >= 0) ratingCount.value = fetchedCount
 })
 </script>
 

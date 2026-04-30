@@ -1,5 +1,8 @@
 <template>
-  <div class="index-page-gallery-panel index-page-gallery-panel__panels index-page-gallery-panel__panels--gallery">
+  <div
+    class="index-page-gallery-panel index-page-gallery-panel__panels index-page-gallery-panel__panels--gallery"
+    :class="{ 'index-page-gallery-panel__panels--empty': !photoListWithUrls.length }"
+  >
     <div class="index-page-gallery-panel__panels-inner">
       <section class="index-page-gallery-panel__section index-page-gallery-panel__section--gallery">
         <h2 class="index-page-gallery-panel__gallery-heading">Galeria</h2>
@@ -50,6 +53,7 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import 'photoswipe/style.css'
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { getApiUrl } from '../utils/apiUrl.js'
+import { apiGetJson } from '../utils/apiJson.js'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 
 const props = defineProps({
@@ -142,17 +146,13 @@ function preloadDims(url) {
 }
 
 async function loadPhotos() {
-  try {
-    const res = await fetch(getApiUrl('api/photo.php?list=1'))
-    const data = await res.json()
-    if (data.ok && Array.isArray(data.photos)) {
-      photoList.value = data.photos
-      cacheBust.value = Date.now()
-    } else {
-      photoList.value = []
-    }
-  } catch (e) {
-    console.error(e)
+  const res = await apiGetJson('api/photo.php?list=1')
+  if (!res.ok && res.error) console.error(res.error)
+  const data = res.ok ? res.data : null
+  if (data?.ok && Array.isArray(data.photos)) {
+    photoList.value = data.photos
+    cacheBust.value = Date.now()
+  } else {
     photoList.value = []
   }
   await nextTick()
@@ -226,6 +226,10 @@ onUnmounted(() => {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 14px 34px rgba(0, 0, 0, 0.35);
+}
+
+.index-page-gallery-panel__panels--empty {
+  min-height: 100dvh;
 }
 
 .index-page-gallery-panel__gallery-heading {

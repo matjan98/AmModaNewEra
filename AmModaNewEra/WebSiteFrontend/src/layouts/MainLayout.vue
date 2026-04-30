@@ -214,12 +214,11 @@
 import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
+import { useMediaQuery } from '../composables/useMediaQuery.js'
 
 const SMALL_SCREEN_MAX_WIDTH = 750
-const isSmallScreen = ref(false)
+const { matches: isSmallScreen } = useMediaQuery(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
 const useSidesLayout = computed(() => !isSmallScreen.value)
-
-let mediaQuery = null
 
 function clearHeaderSolidState() {
   if (headerSolidifyTimer != null) {
@@ -229,18 +228,17 @@ function clearHeaderSolidState() {
   headerSolid.value = false
 }
 
-function updateSmallScreen() {
-  const next = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`).matches
-  const prev = isSmallScreen.value
-  isSmallScreen.value = next
+watch(isSmallScreen, (next, prev) => {
   if (!next) {
     clearHeaderSolidState()
-  } else if (!prev && next) {
+    return
+  }
+  if (!prev && next) {
     nextTick(() => {
       updateHeaderSolidFromScroll()
     })
   }
-}
+})
 
 const openingHours = OPENING_HOURS
 
@@ -429,9 +427,6 @@ function onLogoClick() {
 }
 
 onMounted(() => {
-  updateSmallScreen()
-  mediaQuery = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
-  mediaQuery.addEventListener('change', updateSmallScreen)
   window.addEventListener('scroll', onWindowScroll, { passive: true })
   nextTick(() => {
     refreshHeaderScrollRootListeners()
@@ -445,7 +440,6 @@ onMounted(() => {
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
 })
 onUnmounted(() => {
-  if (mediaQuery) mediaQuery.removeEventListener('change', updateSmallScreen)
   if (headerSolidifyTimer != null) {
     clearTimeout(headerSolidifyTimer)
     headerSolidifyTimer = null
