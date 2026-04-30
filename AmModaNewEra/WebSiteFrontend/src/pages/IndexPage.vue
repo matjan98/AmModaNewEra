@@ -89,6 +89,26 @@
                   @load="onHeroIntroImageLoad"
                 >
               </div>
+              <div class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--top">
+                <div class="index-page__hero-intro-cta-block">
+                  <div class="index-page__hero-intro-address-row">
+                    <p
+                      class="index-page__hero-intro-address index-page__hero-intro-address--second index-page__hero-intro-address--visible"
+                    >
+                      {{ ADDRESS_LINE }}
+                    </p>
+                  </div>
+                  <div class="index-page__hero-intro-btn-row">
+                    <button
+                      type="button"
+                      class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--visible"
+                      @click="scrollToLocationSection"
+                    >
+                      Odwiedź nas
+                    </button>
+                  </div>
+                </div>
+              </div>
               <div
                 class="index-page__hero-intro-sticky-cta"
                 :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroAfterCtaFloated }"
@@ -405,6 +425,7 @@ function updateHeroCtaModes() {
     heroIntroThirdPhotoRef.value,
     heroIntroThirdRef.value,
   )
+
   const prevFbFloat = heroIntroFacebookCtaFloated.value
   const shop = shopBottomSectionsRef.value
   heroIntroFacebookCtaFloated.value = computeHeroFacebookCtaFloated(
@@ -747,6 +768,12 @@ onUnmounted(() => {
   padding-left: 16px;
   box-sizing: border-box;
   pointer-events: none;
+}
+
+.index-page__hero-intro-sticky-cta--top {
+  align-items: flex-start;
+  padding-top: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-top, 0px));
+  padding-bottom: 0;
 }
 
 
@@ -1106,6 +1133,10 @@ button.index-page__hero-intro-cta-btn {
 
   .index-page__hero-intro-sticky-cta {
     padding: 0 12px max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
+  }
+
+  .index-page__hero-intro-sticky-cta--top {
+    padding: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-top, 0px)) 12px 0;
   }
 
   .index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
