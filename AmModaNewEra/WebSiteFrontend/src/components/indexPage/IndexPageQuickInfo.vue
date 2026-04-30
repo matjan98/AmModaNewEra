@@ -130,7 +130,7 @@ const todayPillParts = computed(() => {
   width: 100%;
   min-height: 28px;
   font-family: 'Poppins', sans-serif;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.35;
 }
 
@@ -140,7 +140,7 @@ const todayPillParts = computed(() => {
 
 .index-page-quick-info__label {
   flex: 0 0 auto;
-  align-self: flex-start;
+  align-self: flex-center;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.72);
@@ -158,11 +158,11 @@ const todayPillParts = computed(() => {
   display: inline-flex;
   align-items: baseline;
   gap: 12px;
-  padding: 6px 12px;
+  padding: 5px 10px;
   max-width: 100%;
   box-sizing: border-box;
   vertical-align: baseline;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1.25;
@@ -206,9 +206,9 @@ const todayPillParts = computed(() => {
 .index-page-quick-info__facebook-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 5px 10px;
-  font-size: clamp(0.76rem, 1.92vw, 0.86rem);
+  font-size: clamp(0.86rem, 1.92vw, 0.86rem);
   font-weight: 500;
   line-height: 1.25;
   border: 0;

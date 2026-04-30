@@ -108,7 +108,7 @@ defineEmits(['goToGallery', 'goToInfo'])
 
 @media (max-width: 600px) {
   .index-page-nav-buttons__btn {
-    font-size: 1.15rem;
+    font-size: 1.35rem;
     padding: 3px 14px;
     gap: 6px;
   }
