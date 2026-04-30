@@ -295,7 +295,7 @@ onMounted(async () => {
   justify-content: center;
   flex-direction: column;
   gap: 4px;
-  padding: 8px 12px;
+  padding: 2px 4px;
   margin: 0;
   background: transparent;
   border: 0;

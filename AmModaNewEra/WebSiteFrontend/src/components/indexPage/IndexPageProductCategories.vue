@@ -213,13 +213,13 @@ const emit = defineEmits(['toggle', 'imageLoad'])
 .index-page-product-categories__caption {
   min-height: 28px;
   padding: 12px 12px 18px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(10px) saturate(1.1);
   -webkit-backdrop-filter: blur(10px) saturate(1.1);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   color: #ffffff;
   text-align: center;
-  font-size: clamp(0.8rem, 1.35vw, 1.15rem);
+  font-size: clamp(0.95rem, 1.35vw, 1.15rem);
   font-weight: 400;
   line-height: 1.2;
   letter-spacing: 0.01em;
@@ -235,8 +235,8 @@ const emit = defineEmits(['toggle', 'imageLoad'])
 .index-page-product-categories__facebook-cta-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 22px;
+  gap: 6px;
+  padding: 12px 18px;
   text-decoration: none;
   color: rgba(255, 255, 255, 0.96);
   font-weight: 600;
@@ -259,7 +259,7 @@ const emit = defineEmits(['toggle', 'imageLoad'])
 .index-page-product-categories__facebook-cta-btn--below {
   position: relative;
   overflow: hidden;
-  gap: 15px;
+  gap: 10px;
   color: #ffffff;
   background: linear-gradient(
     145deg,

@@ -1,6 +1,6 @@
 <template>
   <div class="index-page-shop-bottom-sections index-page-shop-bottom-sections__root">
-    
+    <!-- 1) Facebook CTA above shop block -->
     <section
       ref="facebookShopFollowRef"
       class="index-page-shop-bottom-sections__facebook-shop-follow"
@@ -26,7 +26,7 @@
       </a>
     </section>
 
-    
+    <!-- 2) Address + Google Maps (sticky / float, matches fixed shop photo) -->
     <section
       ref="heroIntroFacebookRef"
       class="index-page-shop-bottom-sections__hero-intro index-page-shop-bottom-sections__hero-intro--facebook-fixed-bg"
@@ -55,7 +55,7 @@
               class="index-page-shop-bottom-sections__hero-intro-address index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last"
               :class="{ 'index-page-shop-bottom-sections__hero-intro-address--visible': bigMapsCtaVisible }"
             >
-              {{ ADDRESS_LINE }}
+              Kozy, ul. Bielska 166
             </p>
           </div>
           <div class="index-page-shop-bottom-sections__hero-intro-btn-row">
@@ -87,7 +87,7 @@
       </div>
     </section>
 
-    
+    <!-- 3) Small fixed Maps CTA (shows after Facebook container appears) -->
     <div
       v-show="smallFixedMapsCtaVisible"
       class="index-page-shop-bottom-sections__small-fixed-maps-cta"
@@ -95,7 +95,7 @@
     >
       <p class="index-page-shop-bottom-sections__small-fixed-maps-address">
         <span class="index-page-shop-bottom-sections__small-fixed-maps-address-text">
-          {{ ADDRESS_LINE }}
+          Kozy, ul. Bielska 166
         </span>
       </p>
       <a
@@ -121,7 +121,19 @@
       </a>
     </div>
 
-    <GoogleReviewsCard class="index-page-shop-bottom-sections__google-reviews" />
+    <div class="index-page-shop-bottom-sections__google-reviews-slot" aria-label="Ocena Google">
+      <GoogleReviewsCard
+        v-if="isSmallScreen"
+        variant="mini"
+        :with-margin="false"
+        class="index-page-shop-bottom-sections__google-reviews"
+      />
+      <GoogleReviewsCard
+        v-else
+        :with-margin="false"
+        class="index-page-shop-bottom-sections__google-reviews"
+      />
+    </div>
   </div>
 </template>
 
@@ -129,7 +141,6 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 import googleMapsPinImg from '../assets/google-maps.png'
-import { ADDRESS_LINE, FACEBOOK_URL, MAPS_URL } from '../constants/siteInfo.js'
 
 defineProps({
   ctaCssVars: {
@@ -150,11 +161,11 @@ defineProps({
   },
   facebookUrl: {
     type: String,
-    default: FACEBOOK_URL,
+    default: 'https://www.facebook.com/AMModaDamska/',
   },
   mapsUrl: {
     type: String,
-    default: MAPS_URL,
+    default: 'https://www.google.com/maps/dir/?api=1&destination=Kozy%2C%20Bielska%20166',
   },
 })
 
@@ -166,15 +177,22 @@ const bigMapsCtaBtnRef = ref(null)
 const heroIntroFacebookInView = ref(false)
 const facebookShopFollowInView = ref(false)
 const bigMapsCtaFullyVisible = ref(false)
+const isSmallScreen = ref(false)
 
 let heroIntroFacebookObserver = null
 let facebookShopFollowObserver = null
 let bigMapsCtaObserver = null
+let smallScreenMql = null
 
 const bigMapsCtaVisible = computed(() => Boolean(bigMapsCtaFullyVisible.value))
 const smallFixedMapsCtaVisible = computed(() =>
   Boolean(facebookShopFollowInView.value && !bigMapsCtaFullyVisible.value)
 )
+
+const updateIsSmallScreen = () => {
+  if (typeof window === 'undefined') return
+  isSmallScreen.value = Boolean(window.matchMedia?.('(max-width: 749px)')?.matches)
+}
 
 const isElementFullyInViewport = (el, tolerancePx = 2) => {
   if (!el || typeof el.getBoundingClientRect !== 'function') return false
@@ -191,6 +209,12 @@ const isElementFullyInViewport = (el, tolerancePx = 2) => {
 }
 
 onMounted(() => {
+  updateIsSmallScreen()
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    smallScreenMql = window.matchMedia('(max-width: 749px)')
+    smallScreenMql.addEventListener?.('change', updateIsSmallScreen)
+  }
+
   if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return
   if (!heroIntroFacebookRef.value) return
 
@@ -259,6 +283,11 @@ onBeforeUnmount(() => {
   if (bigMapsCtaObserver) {
     bigMapsCtaObserver.disconnect()
     bigMapsCtaObserver = null
+  }
+
+  if (smallScreenMql) {
+    smallScreenMql.removeEventListener?.('change', updateIsSmallScreen)
+    smallScreenMql = null
   }
 })
 
@@ -354,7 +383,10 @@ defineExpose({
   z-index: 1500;
 }
 
-
+/*
+ * Shop Nawiguj bar: when it switches to fixed (`--floated`), `--facebook-float-pop` holds one paint at the
+ * same typography + scale as the in-photo hero overlay; JS clears it → CSS settles to the compact bar.
+ */
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
   .index-page-shop-bottom-sections__hero-intro-cta-block--facebook-shop {
   height: auto;
@@ -462,7 +494,7 @@ defineExpose({
   transition: none;
 }
 
-
+/* Last hero (shop photo): dock address + Nawiguj at vertical center of the image when not floated; enlarge Nawiguj + address. */
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated) {
   align-items: center;
   padding-top: max(8px, env(safe-area-inset-top, 0px));
@@ -653,7 +685,7 @@ defineExpose({
   }
 }
 
-
+/* Nawiguj on shop hero */
 .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
   position: relative;
   pointer-events: none;
@@ -676,7 +708,7 @@ defineExpose({
   padding: 2px;
   background: linear-gradient(
     135deg,
-    
+    /* Smooth transitions between fixed segments */
     #42a5f5 0%,
     #42a5f5 calc(15% - var(--border-blend, 3%)),
     #1e88e5 calc(15% + var(--border-blend, 3%)),
@@ -772,7 +804,10 @@ defineExpose({
   transition: none;
 }
 
-
+/*
+ * Static hero Maps CTA: on first reveal, match the fixed bar’s size (mobile / desktop),
+ * then grow to the normal hero button. Keyframe 0% mirrors the small-fixed fixed-bar button styling.
+ */
 @keyframes index-page-maps-cta-reveal-link-not-floated-mobile {
   0% {
     padding: 11px 19px 11px 23px;
@@ -1119,7 +1154,7 @@ defineExpose({
   }
 }
 
-
+/* When the shop hero section is in viewport, enlarge typography back to previous sizes. */
 .index-page-shop-bottom-sections__hero-intro--inview .index-page-shop-bottom-sections__hero-intro-address {
   font-size: clamp(0.82rem, 2.35vw, 1.08rem);
 }
@@ -1286,7 +1321,10 @@ defineExpose({
   transform: translateY(0) scale(0.95);
 }
 
-
+/*
+ * Fixed Maps CTA address: keep final typography unchanged, animate only `transform: scale()`
+ * on an inner node to avoid 1-frame layout jumps from font metric changes.
+ */
 @keyframes index-page-fixed-maps-address-scale-mobile {
   0% {
     transform: scale(2.85);
@@ -1307,7 +1345,7 @@ defineExpose({
   }
 }
 
-
+/* Small fixed Maps CTA: address + compact button */
 .index-page-shop-bottom-sections__small-fixed-maps-cta {
   position: fixed;
   left: 50%;
@@ -1429,7 +1467,7 @@ defineExpose({
   }
 }
 
-
+/* “Przejdź na Facebook” above shop hero */
 .index-page-shop-bottom-sections__facebook-cta-btn--below {
   position: relative;
   overflow: hidden;
@@ -1520,10 +1558,18 @@ defineExpose({
   opacity: 0.95;
 }
 
+.index-page-shop-bottom-sections__google-reviews-slot {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  box-sizing: border-box;
+  padding-bottom: 5vh;
+}
+
 .index-page-shop-bottom-sections__google-reviews {
   flex: 0 0 auto;
-  height: 5vh;
-  min-height: 0;
-  flex-shrink: 0;
+  width: 100%;
 }
 </style>

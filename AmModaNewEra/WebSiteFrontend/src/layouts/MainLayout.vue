@@ -213,6 +213,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
+import { useOpeningHours } from '../composables/useOpeningHours.js'
 
 const SMALL_SCREEN_MAX_WIDTH = 750
 const isSmallScreen = ref(false)
@@ -299,27 +300,8 @@ watch(hoursExpanded, (open) => {
 })
 
 
-const now = ref(new Date())
-const todayDayIndex = computed(() => now.value.getDay())
-const openingToday = computed(() => openingHours.find((h) => h.dayIndex === todayDayIndex.value))
-const isOpenToday = computed(() => openingToday.value?.hours !== 'Zamknięte')
-const todayHours = computed(() => openingToday.value?.hours ?? 'Zamknięte')
-
-function parseOpeningRangeMinutes(hoursStr) {
-  if (!hoursStr || hoursStr === 'Zamknięte') return null
-  const m = hoursStr.trim().match(/^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/)
-  if (!m) return null
-  const startMin = Number(m[1]) * 60 + Number(m[2])
-  const endMin = Number(m[3]) * 60 + Number(m[4])
-  return { startMin, endMin }
-}
-
-
-const isStoreOpenNow = computed(() => {
-  const range = parseOpeningRangeMinutes(openingToday.value?.hours)
-  if (!range) return false
-  const mins = now.value.getHours() * 60 + now.value.getMinutes()
-  return mins >= range.startMin && mins < range.endMin
+const { todayDayIndex, todayHours, isOpenToday, isStoreOpenNow } = useOpeningHours(openingHours, {
+  liveClock: true,
 })
 
 const headerRef = ref(null)
@@ -421,10 +403,7 @@ function onDocumentPointerDownOutsideHours(event) {
   }
 }
 
-const OPEN_STATUS_TICK_MS = 60_000
-
 const phoneFabExpanded = ref(false)
-let openStatusTickTimer = null
 
 function togglePhoneFab() {
   phoneFabExpanded.value = !phoneFabExpanded.value
@@ -450,11 +429,6 @@ function onLogoClick() {
 }
 
 onMounted(() => {
-  now.value = new Date()
-  openStatusTickTimer = window.setInterval(() => {
-    now.value = new Date()
-  }, OPEN_STATUS_TICK_MS)
-
   updateSmallScreen()
   mediaQuery = window.matchMedia(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
   mediaQuery.addEventListener('change', updateSmallScreen)
@@ -471,10 +445,6 @@ onMounted(() => {
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
 })
 onUnmounted(() => {
-  if (openStatusTickTimer != null) {
-    window.clearInterval(openStatusTickTimer)
-    openStatusTickTimer = null
-  }
   if (mediaQuery) mediaQuery.removeEventListener('change', updateSmallScreen)
   if (headerSolidifyTimer != null) {
     clearTimeout(headerSolidifyTimer)
@@ -505,15 +475,15 @@ onUnmounted(() => {
   background: transparent;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  border-bottom: 1px solid transparent;
+  border-bottom: none;
   overflow: visible;
-  transition: background-color 0.5s ease, border-bottom-color 0.5s ease;
+  transition: background-color 0.5s ease;
 }
 
 
 .main-layout__header.main-layout__header--solid {
   background: transparent;
-  border-bottom-color: rgba(255, 255, 255, 0.08);
+  border-bottom: none;
 }
 
 .main-layout__page-container {

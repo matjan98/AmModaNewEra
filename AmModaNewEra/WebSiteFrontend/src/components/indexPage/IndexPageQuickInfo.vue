@@ -13,7 +13,13 @@
       <div class="index-page-quick-info__row">
         <span class="index-page-quick-info__label">Dziś:</span>
         <span class="index-page-quick-info__value">
-          <span class="index-page-quick-info__today-pill">{{ quickInfoTodayLine }}</span>
+          <span class="index-page-quick-info__today-pill">
+            <template v-if="todayPillParts.isSplit">
+              <span class="index-page-quick-info__today-prefix">{{ todayPillParts.prefix }}</span>
+              <span class="index-page-quick-info__today-hours">{{ todayPillParts.hours }}</span>
+            </template>
+            <template v-else>{{ todayPillParts.text }}</template>
+          </span>
         </span>
       </div>
       <div class="index-page-quick-info__row index-page-quick-info__row--gallery">
@@ -39,7 +45,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   phoneTelHref: {
     type: String,
     required: true,
@@ -56,6 +64,15 @@ defineProps({
     type: String,
     required: true,
   },
+})
+
+const todayPillParts = computed(() => {
+  const line = (props.quickInfoTodayLine ?? '').trim()
+  const match = line.match(/^(.+?!)(?:\s+)(\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})$/)
+  if (!match) {
+    return { isSplit: false, text: line }
+  }
+  return { isSplit: true, prefix: match[1], hours: match[2] }
 })
 </script>
 
@@ -138,8 +155,10 @@ defineProps({
 }
 
 .index-page-quick-info__today-pill {
-  display: inline-block;
-  padding: 5px 10px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 12px;
   max-width: 100%;
   box-sizing: border-box;
   vertical-align: baseline;

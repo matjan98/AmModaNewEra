@@ -105,14 +105,7 @@ defineEmits(['update:expanded'])
   margin-left: -50dvw;
   padding: clamp(11px, 2.35vw, 17px) clamp(11px, 2.65vw, 19px);
   text-align: center;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.02) 38%,
-      rgba(0, 0, 0, 0.06) 100%
-    ),
-    rgba(10, 10, 14, 0.48);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(18px) saturate(1.25);
   -webkit-backdrop-filter: blur(18px) saturate(1.25);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -137,6 +130,7 @@ defineEmits(['update:expanded'])
   list-style: none;
   margin: 0 auto;
   padding: 0;
+  width: 90%;
   max-width: min(420px, 100%);
   text-align: left;
 }
@@ -267,8 +261,34 @@ defineEmits(['update:expanded'])
   color: #ffffff;
 }
 
+.index-page-store-hours__row:not(.index-page-store-hours__row--today) {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+}
+
+.index-page-store-hours__row:not(.index-page-store-hours__row--today):not(
+    .index-page-store-hours__row--collapsed-hide
+  )
+  .index-page-store-hours__day,
+.index-page-store-hours__row:not(.index-page-store-hours__row--today):not(
+    .index-page-store-hours__row--collapsed-hide
+  )
+  .index-page-store-hours__time {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+
+.index-page-store-hours__row:not(.index-page-store-hours__row--today):not(
+    .index-page-store-hours__row--collapsed-hide
+  ) {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
 .index-page-store-hours__day {
-  text-transform: uppercase;
+  text-transform: capitalize;
   font-weight: 400;
 }
 
@@ -295,9 +315,16 @@ defineEmits(['update:expanded'])
   }
 
   .index-page-store-hours__row:not(.index-page-store-hours__row--collapsed-hide) {
-    padding: 12px 14px;
+    padding: 8px 14px;
     border-radius: 12px;
     font-size: 1.08rem;
+  }
+
+  .index-page-store-hours__row:not(.index-page-store-hours__row--today):not(
+      .index-page-store-hours__row--collapsed-hide
+    ) {
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 
   .index-page-store-hours__toggle {

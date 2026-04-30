@@ -118,7 +118,7 @@
 
             <IndexPageStoreHours
               v-model:expanded="storeHoursExpanded"
-              :opening-hours="STORE_OPENING_HOURS"
+              :opening-hours="OPENING_HOURS"
               :today-store-day-index="todayStoreDayIndex"
               :store-hours-heading-label="storeHoursHeadingLabel"
               :intro-revealed="storeHoursIntroRevealed"
@@ -205,6 +205,7 @@ import { sectionTwoItems } from './indexPage/indexPageProducts.js'
 import { useRevealZoom } from './indexPage/useRevealZoom.js'
 import { useSectionTwoGrid } from './indexPage/useSectionTwoGrid.js'
 import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
+import { useOpeningHours } from '../composables/useOpeningHours.js'
 import heroIntroFirstImage from '../assets/Main photos/main2.webp'
 import heroIntroSecondImage from '../assets/Main photos/atf_photo.webp'
 import heroIntroThirdImage from '../assets/Main photos/main3.webp'
@@ -216,8 +217,6 @@ const SHOW_GALLERY_NAV_BUTTON = true
 
 const SECTION_TWO_BREAKPOINT_PX = 751
 
-
-const STORE_OPENING_HOURS = OPENING_HOURS
 
 function getStoredTab() {
   try {
@@ -521,19 +520,8 @@ const facebookUrl = FACEBOOK_URL
 
 const mapsUrl = MAPS_URL
 
-const todayStoreDayIndex = computed(() => new Date().getDay())
-
-
-const quickInfoTodayLine = computed(() => {
-  const row = STORE_OPENING_HOURS.find((h) => h.dayIndex === todayStoreDayIndex.value)
-  if (!row) return '—'
-  if (row.hours === 'Zamknięte') return 'Zamknięte'
-  return `Otwarte ${row.hours}`
-})
-
-const storeHoursHeadingLabel = computed(() =>
-  todayStoreDayIndex.value === 0 ? 'Godziny otwarcia' : 'dziś otwarte!',
-)
+const { todayDayIndex: todayStoreDayIndex, todayLine: quickInfoTodayLine, storeHoursHeadingLabel } =
+  useOpeningHours(OPENING_HOURS)
 
 onMounted(async () => {
   updateSectionTwoWindowWidth()
@@ -575,9 +563,8 @@ onUnmounted(() => {
 <style scoped>
 .index-page {
   --index-address-above-cta-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.75),
-    0 2px 12px rgba(0, 0, 0, 0.55),
-    0 4px 24px rgba(0, 0, 0, 0.4);
+  0 2px 5px rgb(0, 0, 0),
+  0 0 10px rgb(0, 0, 0);
   background: transparent;
   color: rgba(255, 255, 255, 0.92);
   min-height: 100vh;
@@ -915,8 +902,8 @@ onUnmounted(() => {
 
 .index-page__hero-intro-quote {
   text-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.92),
-    0 0 18px rgba(0, 0, 0, 0.55);
+    0 2px 5px rgb(0, 0, 0),
+    0 0 10px rgb(0, 0, 0);
 }
 
 .index-page__hero-intro-quote-text {
