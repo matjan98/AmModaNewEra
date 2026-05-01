@@ -126,6 +126,7 @@ import { useHeroCtas } from './indexPage/useHeroCtas.js'
 import { useSectionTwoGrid } from './indexPage/useSectionTwoGrid.js'
 import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
+import { animateWindowScrollTo } from '../utils/scrollAnimation.js'
 import heroIntroFirstImage from '../assets/Main photos/main2.webp'
 import heroIntroSecondImage from '../assets/Main photos/atf_photo.webp'
 import heroIntroThirdImage from '../assets/Main photos/main3.webp'
@@ -308,17 +309,11 @@ function scrollToPageBottom() {
   if (typeof window === 'undefined') return
   const root = document.documentElement
   const body = document.body
-  const maxScrollTop = Math.max(
-    root?.scrollHeight ?? 0,
-    body?.scrollHeight ?? 0,
-    root?.offsetHeight ?? 0,
-    body?.offsetHeight ?? 0,
-  )
+  const scrollHeight = Math.max(root?.scrollHeight ?? 0, body?.scrollHeight ?? 0)
+  const clientHeight = root?.clientHeight ?? window.innerHeight ?? 0
+  const maxScrollTop = Math.max(0, scrollHeight - clientHeight)
 
-  window.scrollTo({
-    top: maxScrollTop,
-    behavior: 'smooth',
-  })
+  animateWindowScrollTo({ top: maxScrollTop, totalMs: 1500, slowFinishMs: 0 })
 }
 
 function computeHeroFacebookCtaFloated(photoEl, sectionFallbackEl) {
