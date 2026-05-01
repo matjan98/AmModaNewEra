@@ -264,6 +264,7 @@ const {
   onUpdate: updateFacebookCtaModes,
   getExtraObservedElements: () => [shopBottomSectionsRef.value?.heroIntroFacebookRef?.value],
   heroCtaImageGapPx: HERO_CTA_IMAGE_BOTTOM_GAP_PX,
+  takeoverEpsilonPx: -12,
 })
 
 const setHeroIntroAtfEl = (el) => {
