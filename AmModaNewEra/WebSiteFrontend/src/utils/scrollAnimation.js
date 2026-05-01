@@ -12,10 +12,6 @@ function easeInOutCubic(t) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
-function easeOutCubic(t) {
-  return 1 - Math.pow(1 - t, 3)
-}
-
 function getReducedMotionPreferred() {
   if (typeof window === 'undefined' || !window.matchMedia) return false
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -33,7 +29,7 @@ function getMaxScrollTop() {
  * Animates window scrolling to a target `top` value with a controlled duration and easing.
  * Returns a cancel function.
  */
-export function animateWindowScrollTo({ top, totalMs = 1500, slowFinishMs = 500 } = {}) {
+export function animateWindowScrollTo({ top, totalMs = 1500 } = {}) {
   if (typeof window === 'undefined') return () => void 0
   if (getReducedMotionPreferred()) {
     window.scrollTo(0, Math.max(0, top ?? 0))
@@ -46,8 +42,6 @@ export function animateWindowScrollTo({ top, totalMs = 1500, slowFinishMs = 500 
   if (!Number.isFinite(delta) || Math.abs(delta) < 1) return () => void 0
 
   const total = Math.max(0, Number(totalMs) || 0)
-  const finish = Math.max(0, Math.min(Number(slowFinishMs) || 0, total))
-  const phaseAMs = Math.max(0, total - finish)
 
   let rafId = 0
   let cancelled = false
@@ -82,19 +76,8 @@ export function animateWindowScrollTo({ top, totalMs = 1500, slowFinishMs = 500 
     if (!startTs) startTs = ts
     const elapsed = ts - startTs
 
-    let easedProgress = 1
-    if (total > 0) {
-      if (phaseAMs > 0 && elapsed < phaseAMs) {
-        const t = clamp01(elapsed / phaseAMs)
-        easedProgress = (phaseAMs / total) * easeInOutCubic(t)
-      } else if (finish > 0 && elapsed < total) {
-        const t = clamp01((elapsed - phaseAMs) / finish)
-        const base = phaseAMs / total
-        easedProgress = base + (1 - base) * easeOutCubic(t)
-      } else {
-        easedProgress = 1
-      }
-    }
+    const t = total > 0 ? clamp01(elapsed / total) : 1
+    const easedProgress = easeInOutCubic(t)
 
     const nextTop = lerp(startTop, targetTop, clamp01(easedProgress))
     window.scrollTo(0, nextTop)

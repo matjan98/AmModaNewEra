@@ -199,9 +199,11 @@ const todayPillParts = computed(() => {
 }
 
 .index-page-quick-info__facebook-btn {
-  gap: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
   padding: 5px 10px;
-  font-size: clamp(0.86rem, 1.92vw, 0.86rem);
+  font-size: clamp(0.92rem, 1.92vw, 0.86rem);
   font-weight: 500;
   line-height: 1.25;
   border-radius: 8px;

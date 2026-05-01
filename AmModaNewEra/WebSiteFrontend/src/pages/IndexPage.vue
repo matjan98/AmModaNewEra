@@ -313,7 +313,7 @@ function scrollToPageBottom() {
   const clientHeight = root?.clientHeight ?? window.innerHeight ?? 0
   const maxScrollTop = Math.max(0, scrollHeight - clientHeight)
 
-  animateWindowScrollTo({ top: maxScrollTop, totalMs: 1500, slowFinishMs: 0 })
+  animateWindowScrollTo({ top: maxScrollTop, totalMs: 1500 })
 }
 
 function computeHeroFacebookCtaFloated(photoEl, sectionFallbackEl) {
