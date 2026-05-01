@@ -27,7 +27,7 @@
                   :cta-visible="heroIntroCtaVisible"
                   :cta-floated="heroIntroCtaFloated"
                   :on-image-load="onHeroIntroImageLoad"
-                  :on-cta-click="scrollToPageBottom"
+                  :on-cta-click="scrollToPageBottomSlow"
                   :set-hero-intro-atf-el="setHeroIntroAtfEl"
                   :set-hero-intro-atf-photo-el="setHeroIntroAtfPhotoEl"
                   :set-hero-intro-atf-cta-el="setHeroIntroAtfCtaEl"
@@ -56,7 +56,7 @@
               :yellow-top-hidden="heroIntroCtaVisible && !heroIntroAfterRedTakesOver"
               :cta-floated="heroIntroAfterCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToPageBottom"
+              :on-cta-click="scrollToPageBottomFast"
               :set-hero-intro-after-el="setHeroIntroAfterEl"
               :set-hero-intro-after-photo-el="setHeroIntroAfterPhotoEl"
               :set-hero-intro-after-cta-el="setHeroIntroAfterCtaEl"
@@ -78,7 +78,7 @@
               :yellow-top-hidden="heroIntroCtaVisible && !heroIntroThirdRedTakesOver"
               :cta-floated="heroIntroThirdCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToPageBottom"
+              :on-cta-click="scrollToPageBottomFast"
               :set-hero-intro-third-el="setHeroIntroThirdEl"
               :set-hero-intro-third-photo-el="setHeroIntroThirdPhotoEl"
               :set-hero-intro-third-cta-el="setHeroIntroThirdCtaEl"
@@ -305,7 +305,7 @@ const setHeroIntroThirdTopCtaBtnEl = (el) => {
 }
 
 
-function scrollToPageBottom() {
+function scrollToPageBottomWithDuration(totalMs) {
   if (typeof window === 'undefined') return
   const root = document.documentElement
   const body = document.body
@@ -313,7 +313,15 @@ function scrollToPageBottom() {
   const clientHeight = root?.clientHeight ?? window.innerHeight ?? 0
   const maxScrollTop = Math.max(0, scrollHeight - clientHeight)
 
-  animateWindowScrollTo({ top: maxScrollTop, totalMs: 1500 })
+  animateWindowScrollTo({ top: maxScrollTop, totalMs })
+}
+
+function scrollToPageBottomFast() {
+  scrollToPageBottomWithDuration(1000)
+}
+
+function scrollToPageBottomSlow() {
+  scrollToPageBottomWithDuration(2500)
 }
 
 function computeHeroFacebookCtaFloated(photoEl, sectionFallbackEl) {
