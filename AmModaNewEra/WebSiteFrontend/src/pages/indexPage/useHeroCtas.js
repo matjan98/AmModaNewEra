@@ -23,12 +23,19 @@ export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedEle
   const heroIntroAfterCtaFloated = ref(false)
   const heroIntroThirdCtaFloated = ref(false)
 
+  const heroIntroAfterBottomCtaInViewport = ref(false)
+  const heroIntroThirdBottomCtaInViewport = ref(false)
+
   const heroIntroAfterYellowVisible = computed(
-    () => heroIntroAfterCtaFloated.value && heroIntroCtaVisible.value,
+    () =>
+      (heroIntroAfterCtaFloated.value && heroIntroCtaVisible.value) ||
+      (heroIntroAfterBottomCtaInViewport.value && heroIntroCtaVisible.value),
   )
 
   const heroIntroThirdYellowVisible = computed(
-    () => heroIntroThirdCtaFloated.value && heroIntroCtaVisible.value,
+    () =>
+      (heroIntroThirdCtaFloated.value && heroIntroCtaVisible.value) ||
+      (heroIntroThirdBottomCtaInViewport.value && heroIntroCtaVisible.value),
   )
 
   let heroCtaResizeAttached = false
@@ -74,6 +81,17 @@ export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedEle
     return rect.bottom >= yellowBottom - epsilon
   }
 
+  function computeBottomCtaInViewport(ctaEl) {
+    if (!ctaEl) return false
+    const rect = ctaEl.getBoundingClientRect()
+    if (rect.height <= 0) return false
+    const viewportBottom = getViewportBottomClientY()
+    const epsilon = 0.5
+    if (rect.bottom <= epsilon) return false
+    if (rect.top >= viewportBottom - epsilon) return false
+    return true
+  }
+
   function updateHeroCtaModes() {
     heroIntroCtaFloated.value = computeHeroCtaFloated(heroIntroPhotoRef.value, heroIntroRef.value)
 
@@ -94,6 +112,13 @@ export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedEle
       heroIntroThirdTopCtaBtnRef.value,
     )
     heroIntroThirdCtaFloated.value = heroIntroThirdBaseFloated && !heroIntroThirdRedTakesOver
+
+    heroIntroAfterBottomCtaInViewport.value = computeBottomCtaInViewport(
+      heroIntroAfterCtaRef.value,
+    )
+    heroIntroThirdBottomCtaInViewport.value = computeBottomCtaInViewport(
+      heroIntroThirdCtaRef.value,
+    )
 
     onUpdate?.()
   }

@@ -674,7 +674,10 @@ defineExpose({
   mask-composite: exclude;
   pointer-events: none;
   opacity: 0.98;
-  transition: background-position 0.3s ease;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible::before {
+  animation: index-page-maps-cta-border-shift var(--mapsCtaBorderShiftDuration, 14s) linear infinite;
 }
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
@@ -693,8 +696,8 @@ defineExpose({
   transform: translateY(0) scale(1);
 }
 
-.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover::before {
-  animation: index-page-maps-cta-border-shift 3s linear infinite;
+.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
+  --mapsCtaBorderShiftDuration: 3s;
 }
 
 @keyframes index-page-maps-cta-border-shift {
