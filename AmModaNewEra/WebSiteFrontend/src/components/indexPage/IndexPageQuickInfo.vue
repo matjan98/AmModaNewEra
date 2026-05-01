@@ -206,6 +206,7 @@ const todayPillParts = computed(() => {
   line-height: 1.25;
   border-radius: 8px;
   border: 0;
+  text-decoration: none;
 }
 
 .index-page-quick-info__facebook-icon {

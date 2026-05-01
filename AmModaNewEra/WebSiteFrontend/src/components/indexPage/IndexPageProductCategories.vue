@@ -198,10 +198,10 @@ const emit = defineEmits(['toggle', 'imageLoad'])
   aspect-ratio: 3 / 4;
   object-fit: cover;
   display: block;
-  transition: transform 0.2s ease;
 }
 
 .index-page-product-categories__card:hover .index-page-product-categories__img {
+  transition: transform 0.2s ease;
   transform: scale(1.02);
 }
 

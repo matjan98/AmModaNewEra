@@ -599,6 +599,10 @@ button.index-page__hero-intro-cta-btn {
   }
 }
 
+/* Shared reveal-zoom animation for images that use
+ * `.index-page__reveal-media` + `.index-page__reveal-media-img`.
+ * Image starts slightly zoomed in and eases back to scale(1)
+ * after a 0.3s delay once the container enters the viewport. */
 .index-page__reveal-media:not(.index-page__reveal-media--in) .index-page__reveal-media-img {
   transform: scale(1.15);
   transform-origin: center center;
@@ -606,7 +610,7 @@ button.index-page__hero-intro-cta-btn {
 
 .index-page__reveal-media--in .index-page__reveal-media-img {
   transform: scale(1);
-  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0s;
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
 }
 
 @media (prefers-reduced-motion: reduce) {

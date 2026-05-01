@@ -27,7 +27,7 @@
                   :cta-visible="heroIntroCtaVisible"
                   :cta-floated="heroIntroCtaFloated"
                   :on-image-load="onHeroIntroImageLoad"
-                  :on-cta-click="scrollToLocationSection"
+                  :on-cta-click="scrollToPageBottom"
                   :set-hero-intro-atf-el="setHeroIntroAtfEl"
                   :set-hero-intro-atf-photo-el="setHeroIntroAtfPhotoEl"
                   :set-hero-intro-atf-cta-el="setHeroIntroAtfCtaEl"
@@ -56,7 +56,7 @@
               :yellow-top-hidden="heroIntroAfterYellowVisible"
               :cta-floated="heroIntroAfterCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToLocationSection"
+              :on-cta-click="scrollToPageBottom"
               :set-hero-intro-after-el="setHeroIntroAfterEl"
               :set-hero-intro-after-photo-el="setHeroIntroAfterPhotoEl"
               :set-hero-intro-after-cta-el="setHeroIntroAfterCtaEl"
@@ -78,7 +78,7 @@
               :yellow-top-hidden="heroIntroThirdYellowVisible"
               :cta-floated="heroIntroThirdCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToLocationSection"
+              :on-cta-click="scrollToPageBottom"
               :set-hero-intro-third-el="setHeroIntroThirdEl"
               :set-hero-intro-third-photo-el="setHeroIntroThirdPhotoEl"
               :set-hero-intro-third-cta-el="setHeroIntroThirdCtaEl"
@@ -302,10 +302,20 @@ const setHeroIntroThirdTopCtaBtnEl = (el) => {
 }
 
 
-function scrollToLocationSection() {
-  shopBottomSectionsRef.value?.heroIntroFacebookRef?.value?.scrollIntoView({
+function scrollToPageBottom() {
+  if (typeof window === 'undefined') return
+  const root = document.documentElement
+  const body = document.body
+  const maxScrollTop = Math.max(
+    root?.scrollHeight ?? 0,
+    body?.scrollHeight ?? 0,
+    root?.offsetHeight ?? 0,
+    body?.offsetHeight ?? 0,
+  )
+
+  window.scrollTo({
+    top: maxScrollTop,
     behavior: 'smooth',
-    block: 'start',
   })
 }
 
