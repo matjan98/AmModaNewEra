@@ -89,7 +89,11 @@
                   @load="onHeroIntroImageLoad"
                 >
               </div>
-              <div class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--top">
+              <!-- AI_ALIAS: heroIntroMain2_topStickyCta ("górny stały") -->
+              <div
+                class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--top"
+                :class="{ 'index-page__hero-intro-sticky-cta--hidden': heroIntroAfterYellowVisible }"
+              >
                 <div class="index-page__hero-intro-cta-block">
                   <div class="index-page__hero-intro-address-row">
                     <p
@@ -100,6 +104,7 @@
                   </div>
                   <div class="index-page__hero-intro-btn-row">
                     <button
+                      ref="heroIntroAfterTopCtaBtnRef"
                       type="button"
                       class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--visible"
                       @click="scrollToLocationSection"
@@ -109,6 +114,7 @@
                   </div>
                 </div>
               </div>
+              <!-- AI_ALIAS: heroIntroMain2_bottomStickyCta ("dolny stały" when not floated; "fixed" when --floated) -->
               <div
                 class="index-page__hero-intro-sticky-cta"
                 :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroAfterCtaFloated }"
@@ -157,6 +163,36 @@
                   @load="onHeroIntroImageLoad"
                 >
               </div>
+              <!-- AI_ALIAS: heroIntroMain3_topStickyCta ("górny stały") -->
+              <div
+                class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--top"
+                :class="{ 'index-page__hero-intro-sticky-cta--hidden': heroIntroThirdYellowVisible }"
+              >
+                <div class="index-page__hero-intro-cta-block">
+                  <div class="index-page__hero-intro-address-row">
+                    <p
+                      class="index-page__hero-intro-address index-page__hero-intro-address--visible"
+                    >
+                      <span class="index-page__hero-intro-quote">
+                        <span class="index-page__hero-intro-quote-text">”Najlepszy taki sklep w okolicy“</span>
+                        <br>
+                        <span class="index-page__hero-intro-quote-signature">~Jakub Pilarz</span>
+                      </span>
+                    </p>
+                  </div>
+                  <div class="index-page__hero-intro-btn-row">
+                    <button
+                      ref="heroIntroThirdTopCtaBtnRef"
+                      type="button"
+                      class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--visible"
+                      @click="scrollToLocationSection"
+                    >
+                      Odwiedź nas
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- AI_ALIAS: heroIntroMain3_bottomStickyCta ("dolny stały" when not floated; "fixed" when --floated) -->
               <div
                 class="index-page__hero-intro-sticky-cta"
                 :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroThirdCtaFloated }"
@@ -279,9 +315,11 @@ const heroIntroCtaRef = ref(null)
 const heroIntroAfterRef = ref(null)
 const heroIntroAfterPhotoRef = ref(null)
 const heroIntroAfterCtaRef = ref(null)
+const heroIntroAfterTopCtaBtnRef = ref(null)
 const heroIntroThirdRef = ref(null)
 const heroIntroThirdPhotoRef = ref(null)
 const heroIntroThirdCtaRef = ref(null)
+const heroIntroThirdTopCtaBtnRef = ref(null)
 const shopBottomSectionsRef = ref(null)
 
 const { sectionTwoRows, updateSectionTwoWindowWidth } = useSectionTwoGrid({
@@ -327,6 +365,14 @@ const heroIntroCtaCssVars = computed(() => ({
   '--hero-cta-button-row-height': `${HERO_CTA_BUTTON_ROW_HEIGHT_PX}px`,
 }))
 
+const heroIntroAfterYellowVisible = computed(
+  () => heroIntroAfterCtaFloated.value && heroIntroCtaVisible.value,
+)
+
+const heroIntroThirdYellowVisible = computed(
+  () => heroIntroThirdCtaFloated.value && heroIntroCtaVisible.value,
+)
+
 let heroCtaResizeAttached = false
 let heroCtaVisualViewportAttached = false
 const heroCtaIntersectionEnabled = ref(false)
@@ -365,6 +411,16 @@ function computeHeroCtaFloated(photoEl, sectionFallbackEl) {
   if (rect.bottom <= 0 || rect.top >= viewportBottom) return false
 
   return rect.bottom > viewportBottom - epsilon
+}
+
+function computeRedTakesOverFromYellow(redEl) {
+  if (!redEl) return false
+  const rect = redEl.getBoundingClientRect()
+  if (rect.height <= 0) return false
+  const viewportBottom = getViewportBottomClientY()
+  const yellowBottom = viewportBottom - HERO_CTA_IMAGE_BOTTOM_GAP_PX
+  const epsilon = 0.5
+  return rect.bottom >= yellowBottom - epsilon
 }
 
 function computeHeroFacebookCtaFloated(photoEl, sectionFallbackEl) {
@@ -417,14 +473,22 @@ function scheduleFacebookShopFloatSettle() {
 
 function updateHeroCtaModes() {
   heroIntroCtaFloated.value = computeHeroCtaFloated(heroIntroPhotoRef.value, heroIntroRef.value)
-  heroIntroAfterCtaFloated.value = computeHeroCtaFloated(
+  const heroIntroAfterBaseFloated = computeHeroCtaFloated(
     heroIntroAfterPhotoRef.value,
     heroIntroAfterRef.value,
   )
-  heroIntroThirdCtaFloated.value = computeHeroCtaFloated(
+  const heroIntroAfterRedTakesOver = computeRedTakesOverFromYellow(
+    heroIntroAfterTopCtaBtnRef.value,
+  )
+  heroIntroAfterCtaFloated.value = heroIntroAfterBaseFloated && !heroIntroAfterRedTakesOver
+  const heroIntroThirdBaseFloated = computeHeroCtaFloated(
     heroIntroThirdPhotoRef.value,
     heroIntroThirdRef.value,
   )
+  const heroIntroThirdRedTakesOver = computeRedTakesOverFromYellow(
+    heroIntroThirdTopCtaBtnRef.value,
+  )
+  heroIntroThirdCtaFloated.value = heroIntroThirdBaseFloated && !heroIntroThirdRedTakesOver
 
   const prevFbFloat = heroIntroFacebookCtaFloated.value
   const shop = shopBottomSectionsRef.value
@@ -774,6 +838,12 @@ onUnmounted(() => {
   align-items: flex-start;
   padding-top: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-top, 0px));
   padding-bottom: 0;
+}
+
+.index-page__hero-intro-sticky-cta--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 
