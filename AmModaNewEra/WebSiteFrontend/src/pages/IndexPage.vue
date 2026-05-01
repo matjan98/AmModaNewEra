@@ -21,45 +21,17 @@
           <transition :name="'index-page__slide-' + panelSlideDirection">
             <div v-if="activeTab === 'info'" key="info" class="index-page__panels">
               <div class="index-page__panels-inner">
-                <section
-                  ref="heroIntroRef"
-                  class="index-page__hero-intro"
-                  :style="heroIntroCtaCssVars"
-                >
-                  <div ref="heroIntroPhotoRef" class="index-page__hero-intro-photo index-page__reveal-media">
-                    <img
-                      :src="heroIntroSecondImage"
-                      alt="AM Moda"
-                      class="index-page__hero-intro-photo-img index-page__reveal-media-img"
-                      @load="onHeroIntroImageLoad"
-                    >
-                  </div>
-                  <div
-                    class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--first"
-                    :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroCtaFloated }"
-                  >
-                    <div ref="heroIntroCtaRef" class="index-page__hero-intro-cta-block">
-                      <div class="index-page__hero-intro-address-row">
-                        <div
-                          class="index-page__hero-intro-google-mini"
-                          :class="{ 'index-page__hero-intro-google-mini--visible': heroIntroCtaVisible }"
-                        >
-                          <GoogleReviewsCard variant="mini" :with-margin="false" />
-                        </div>
-                      </div>
-                      <div class="index-page__hero-intro-btn-row">
-                        <button
-                          type="button"
-                          class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--solid"
-                          :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
-                          @click="scrollToLocationSection"
-                        >
-                          Odwiedź nas
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </section>
+                <IndexPageHeroIntroAtf
+                  :cta-css-vars="heroIntroCtaCssVars"
+                  :image-src="heroIntroSecondImage"
+                  :cta-visible="heroIntroCtaVisible"
+                  :cta-floated="heroIntroCtaFloated"
+                  :on-image-load="onHeroIntroImageLoad"
+                  :on-cta-click="scrollToLocationSection"
+                  :set-hero-intro-atf-el="setHeroIntroAtfEl"
+                  :set-hero-intro-atf-photo-el="setHeroIntroAtfPhotoEl"
+                  :set-hero-intro-atf-cta-el="setHeroIntroAtfCtaEl"
+                />
 
             <IndexPageQuickInfo
               :phone-tel-href="PHONE_TEL_HREF"
@@ -76,71 +48,20 @@
               @image-load="onRevealSectionTwoImageLoad"
             />
 
-            <section
-              ref="heroIntroAfterRef"
-              class="index-page__hero-intro"
-              :style="heroIntroCtaCssVars"
-            >
-              <div ref="heroIntroAfterPhotoRef" class="index-page__hero-intro-photo index-page__reveal-media">
-                <img
-                  :src="heroIntroFirstImage"
-                  alt=""
-                  class="index-page__hero-intro-photo-img index-page__reveal-media-img"
-                  @load="onHeroIntroImageLoad"
-                >
-              </div>
-              <!-- AI_ALIAS: heroIntroMain2_topStickyCta ("górny stały") -->
-              <div
-                class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--top"
-                :class="{ 'index-page__hero-intro-sticky-cta--hidden': heroIntroAfterYellowVisible }"
-              >
-                <div class="index-page__hero-intro-cta-block">
-                  <div class="index-page__hero-intro-address-row">
-                    <p
-                      class="index-page__hero-intro-address index-page__hero-intro-address--second index-page__hero-intro-address--visible"
-                    >
-                      {{ ADDRESS_LINE }}
-                    </p>
-                  </div>
-                  <div class="index-page__hero-intro-btn-row">
-                    <button
-                      ref="heroIntroAfterTopCtaBtnRef"
-                      type="button"
-                      class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--visible"
-                      @click="scrollToLocationSection"
-                    >
-                      Odwiedź nas
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <!-- AI_ALIAS: heroIntroMain2_bottomStickyCta ("dolny stały" when not floated; "fixed" when --floated) -->
-              <div
-                class="index-page__hero-intro-sticky-cta"
-                :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroAfterCtaFloated }"
-              >
-                <div ref="heroIntroAfterCtaRef" class="index-page__hero-intro-cta-block">
-                  <div class="index-page__hero-intro-address-row">
-                    <p
-                      class="index-page__hero-intro-address index-page__hero-intro-address--second"
-                      :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
-                    >
-                      {{ ADDRESS_LINE }}
-                    </p>
-                  </div>
-                  <div class="index-page__hero-intro-btn-row">
-                    <button
-                      type="button"
-                      class="index-page__hero-intro-cta-btn"
-                      :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
-                      @click="scrollToLocationSection"
-                    >
-                      Odwiedź nas
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
+            <IndexPageHeroIntroAfter
+              :cta-css-vars="heroIntroCtaCssVars"
+              :image-src="heroIntroFirstImage"
+              :address-line="ADDRESS_LINE"
+              :cta-visible="heroIntroCtaVisible"
+              :yellow-top-hidden="heroIntroAfterYellowVisible"
+              :cta-floated="heroIntroAfterCtaFloated"
+              :on-image-load="onHeroIntroImageLoad"
+              :on-cta-click="scrollToLocationSection"
+              :set-hero-intro-after-el="setHeroIntroAfterEl"
+              :set-hero-intro-after-photo-el="setHeroIntroAfterPhotoEl"
+              :set-hero-intro-after-cta-el="setHeroIntroAfterCtaEl"
+              :set-hero-intro-after-top-cta-btn-el="setHeroIntroAfterTopCtaBtnEl"
+            />
 
             <IndexPageStoreHours
               v-model:expanded="storeHoursExpanded"
@@ -150,79 +71,19 @@
               :intro-revealed="storeHoursIntroRevealed"
             />
 
-            <section
-              ref="heroIntroThirdRef"
-              class="index-page__hero-intro index-page__hero-intro--maps-underlay-cover"
-              :style="heroIntroCtaCssVars"
-            >
-              <div ref="heroIntroThirdPhotoRef" class="index-page__hero-intro-photo index-page__reveal-media">
-                <img
-                  :src="heroIntroThirdImage"
-                  alt=""
-                  class="index-page__hero-intro-photo-img index-page__reveal-media-img"
-                  @load="onHeroIntroImageLoad"
-                >
-              </div>
-              <!-- AI_ALIAS: heroIntroMain3_topStickyCta ("górny stały") -->
-              <div
-                class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--top"
-                :class="{ 'index-page__hero-intro-sticky-cta--hidden': heroIntroThirdYellowVisible }"
-              >
-                <div class="index-page__hero-intro-cta-block">
-                  <div class="index-page__hero-intro-address-row">
-                    <p
-                      class="index-page__hero-intro-address index-page__hero-intro-address--visible"
-                    >
-                      <span class="index-page__hero-intro-quote">
-                        <span class="index-page__hero-intro-quote-text">”Najlepszy taki sklep w okolicy“</span>
-                        <br>
-                        <span class="index-page__hero-intro-quote-signature">~Jakub Pilarz</span>
-                      </span>
-                    </p>
-                  </div>
-                  <div class="index-page__hero-intro-btn-row">
-                    <button
-                      ref="heroIntroThirdTopCtaBtnRef"
-                      type="button"
-                      class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--visible"
-                      @click="scrollToLocationSection"
-                    >
-                      Odwiedź nas
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <!-- AI_ALIAS: heroIntroMain3_bottomStickyCta ("dolny stały" when not floated; "fixed" when --floated) -->
-              <div
-                class="index-page__hero-intro-sticky-cta"
-                :class="{ 'index-page__hero-intro-sticky-cta--floated': heroIntroThirdCtaFloated }"
-              >
-                <div ref="heroIntroThirdCtaRef" class="index-page__hero-intro-cta-block">
-                  <div class="index-page__hero-intro-address-row">
-                    <p
-                      class="index-page__hero-intro-address"
-                      :class="{ 'index-page__hero-intro-address--visible': heroIntroCtaVisible }"
-                    >
-                      <span class="index-page__hero-intro-quote">
-                        <span class="index-page__hero-intro-quote-text">”Najlepszy taki sklep w okolicy“</span>
-                        <br>
-                        <span class="index-page__hero-intro-quote-signature">~Jakub Pilarz</span>
-                      </span>
-                    </p>
-                  </div>
-                  <div class="index-page__hero-intro-btn-row">
-                    <button
-                      type="button"
-                      class="index-page__hero-intro-cta-btn"
-                      :class="{ 'index-page__hero-intro-cta-btn--visible': heroIntroCtaVisible }"
-                      @click="scrollToLocationSection"
-                    >
-                      Odwiedź nas
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
+            <IndexPageHeroIntroThird
+              :cta-css-vars="heroIntroCtaCssVars"
+              :image-src="heroIntroThirdImage"
+              :cta-visible="heroIntroCtaVisible"
+              :yellow-top-hidden="heroIntroThirdYellowVisible"
+              :cta-floated="heroIntroThirdCtaFloated"
+              :on-image-load="onHeroIntroImageLoad"
+              :on-cta-click="scrollToLocationSection"
+              :set-hero-intro-third-el="setHeroIntroThirdEl"
+              :set-hero-intro-third-photo-el="setHeroIntroThirdPhotoEl"
+              :set-hero-intro-third-cta-el="setHeroIntroThirdCtaEl"
+              :set-hero-intro-third-top-cta-btn-el="setHeroIntroThirdTopCtaBtnEl"
+            />
 
             <IndexPageShopBottomSections
               ref="shopBottomSectionsRef"
@@ -249,9 +110,11 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import GoogleReviewsCard from '../components/GoogleReviewsCard.vue'
 import IndexPageShopBottomSections from '../components/IndexPageShopBottomSections.vue'
 import IndexPageGalleryPanel from '../components/IndexPageGalleryPanel.vue'
+import IndexPageHeroIntroAtf from '../components/indexPage/IndexPageHeroIntroAtf.vue'
+import IndexPageHeroIntroAfter from '../components/indexPage/IndexPageHeroIntroAfter.vue'
+import IndexPageHeroIntroThird from '../components/indexPage/IndexPageHeroIntroThird.vue'
 import IndexPageNavButtons from '../components/indexPage/IndexPageNavButtons.vue'
 import IndexPageProductCategories from '../components/indexPage/IndexPageProductCategories.vue'
 import IndexPageQuickInfo from '../components/indexPage/IndexPageQuickInfo.vue'
@@ -259,10 +122,10 @@ import IndexPageStoreHours from '../components/indexPage/IndexPageStoreHours.vue
 import { ADDRESS_LINE, FACEBOOK_URL, MAPS_URL, OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 import { sectionTwoItems } from './indexPage/indexPageProducts.js'
 import { useRevealZoom } from './indexPage/useRevealZoom.js'
+import { useHeroCtas } from './indexPage/useHeroCtas.js'
 import { useSectionTwoGrid } from './indexPage/useSectionTwoGrid.js'
 import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
-import { useIntersectionObserver } from '../composables/useIntersectionObserver.js'
 import heroIntroFirstImage from '../assets/Main photos/main2.webp'
 import heroIntroSecondImage from '../assets/Main photos/atf_photo.webp'
 import heroIntroThirdImage from '../assets/Main photos/main3.webp'
@@ -309,17 +172,6 @@ watch(activeTab, (value) => {
 
 const panelSlideDirection = ref('left')
 const mainRef = ref(null)
-const heroIntroRef = ref(null)
-const heroIntroPhotoRef = ref(null)
-const heroIntroCtaRef = ref(null)
-const heroIntroAfterRef = ref(null)
-const heroIntroAfterPhotoRef = ref(null)
-const heroIntroAfterCtaRef = ref(null)
-const heroIntroAfterTopCtaBtnRef = ref(null)
-const heroIntroThirdRef = ref(null)
-const heroIntroThirdPhotoRef = ref(null)
-const heroIntroThirdCtaRef = ref(null)
-const heroIntroThirdTopCtaBtnRef = ref(null)
 const shopBottomSectionsRef = ref(null)
 
 const { sectionTwoRows, updateSectionTwoWindowWidth } = useSectionTwoGrid({
@@ -337,10 +189,6 @@ const {
 const { observeRevealZoomTargets, scheduleRevealZoomAfterLayout, setupRevealZoomObserver } =
   useRevealZoom({ mainRef })
 
-const heroIntroCtaFloated = ref(false)
-const heroIntroAfterCtaFloated = ref(false)
-const heroIntroThirdCtaFloated = ref(false)
-
 const heroIntroFacebookCtaFloated = ref(false)
 
 const facebookShopFloatPop = ref(false)
@@ -351,12 +199,9 @@ const storeHoursExpanded = ref(false)
 const storeHoursIntroRevealed = true
 
 const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
-
 const HERO_CTA_STACK_HEIGHT_PX = 96
 const HERO_CTA_ADDRESS_ROW_HEIGHT_PX = 49
 const HERO_CTA_BUTTON_ROW_HEIGHT_PX = 47
-
-const HERO_CTA_IO_THRESHOLDS = Array.from({ length: 100 }, (_, i) => i / 99)
 
 const heroIntroCtaCssVars = computed(() => ({
   '--hero-cta-img-gap': `${HERO_CTA_IMAGE_BOTTOM_GAP_PX}px`,
@@ -365,30 +210,95 @@ const heroIntroCtaCssVars = computed(() => ({
   '--hero-cta-button-row-height': `${HERO_CTA_BUTTON_ROW_HEIGHT_PX}px`,
 }))
 
-const heroIntroAfterYellowVisible = computed(
-  () => heroIntroAfterCtaFloated.value && heroIntroCtaVisible.value,
-)
+function updateFacebookCtaModes() {
+  const prevFbFloat = heroIntroFacebookCtaFloated.value
+  const shop = shopBottomSectionsRef.value
+  heroIntroFacebookCtaFloated.value = computeHeroFacebookCtaFloated(
+    shop?.heroIntroFacebookPhotoRef?.value ?? null,
+    shop?.heroIntroFacebookRef?.value ?? null,
+  )
 
-const heroIntroThirdYellowVisible = computed(
-  () => heroIntroThirdCtaFloated.value && heroIntroCtaVisible.value,
-)
-
-let heroCtaResizeAttached = false
-let heroCtaVisualViewportAttached = false
-const heroCtaIntersectionEnabled = ref(false)
-const heroCtaIntersection = useIntersectionObserver(
-  () => {
-    onHeroCtaIntersection()
-  },
-  { threshold: HERO_CTA_IO_THRESHOLDS, enabled: heroCtaIntersectionEnabled },
-)
-
-function getViewportBottomClientY() {
-  const vv = window.visualViewport
-  if (vv) {
-    return vv.offsetTop + vv.height
+  if (!heroIntroFacebookCtaFloated.value) {
+    if (typeof window !== 'undefined' && facebookShopFloatSettleTimer != null) {
+      clearTimeout(facebookShopFloatSettleTimer)
+      facebookShopFloatSettleTimer = null
+    }
+    facebookShopFloatPop.value = false
+  } else if (!prevFbFloat && heroIntroFacebookCtaFloated.value) {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    ) {
+      facebookShopFloatPop.value = false
+    } else {
+      facebookShopFloatPop.value = true
+      scheduleFacebookShopFloatSettle()
+    }
   }
-  return window.innerHeight || document.documentElement.clientHeight || 0
+
+  updateFacebookShopSectionPassed()
+}
+
+const {
+  getViewportBottomClientY,
+  heroIntroRef,
+  heroIntroPhotoRef,
+  heroIntroCtaRef,
+  heroIntroAfterRef,
+  heroIntroAfterPhotoRef,
+  heroIntroAfterCtaRef,
+  heroIntroAfterTopCtaBtnRef,
+  heroIntroThirdRef,
+  heroIntroThirdPhotoRef,
+  heroIntroThirdCtaRef,
+  heroIntroThirdTopCtaBtnRef,
+  heroIntroCtaFloated,
+  heroIntroAfterCtaFloated,
+  heroIntroThirdCtaFloated,
+  heroIntroAfterYellowVisible,
+  heroIntroThirdYellowVisible,
+  updateHeroCtaModes,
+  setupHeroCtaIntersection,
+} = useHeroCtas({
+  heroIntroCtaVisible,
+  onUpdate: updateFacebookCtaModes,
+  getExtraObservedElements: () => [shopBottomSectionsRef.value?.heroIntroFacebookRef?.value],
+})
+
+const setHeroIntroAtfEl = (el) => {
+  heroIntroRef.value = el
+}
+const setHeroIntroAtfPhotoEl = (el) => {
+  heroIntroPhotoRef.value = el
+}
+const setHeroIntroAtfCtaEl = (el) => {
+  heroIntroCtaRef.value = el
+}
+
+const setHeroIntroAfterEl = (el) => {
+  heroIntroAfterRef.value = el
+}
+const setHeroIntroAfterPhotoEl = (el) => {
+  heroIntroAfterPhotoRef.value = el
+}
+const setHeroIntroAfterCtaEl = (el) => {
+  heroIntroAfterCtaRef.value = el
+}
+const setHeroIntroAfterTopCtaBtnEl = (el) => {
+  heroIntroAfterTopCtaBtnRef.value = el
+}
+
+const setHeroIntroThirdEl = (el) => {
+  heroIntroThirdRef.value = el
+}
+const setHeroIntroThirdPhotoEl = (el) => {
+  heroIntroThirdPhotoRef.value = el
+}
+const setHeroIntroThirdCtaEl = (el) => {
+  heroIntroThirdCtaRef.value = el
+}
+const setHeroIntroThirdTopCtaBtnEl = (el) => {
+  heroIntroThirdTopCtaBtnRef.value = el
 }
 
 
@@ -397,30 +307,6 @@ function scrollToLocationSection() {
     behavior: 'smooth',
     block: 'start',
   })
-}
-
-function computeHeroCtaFloated(photoEl, sectionFallbackEl) {
-  const el = photoEl ?? sectionFallbackEl
-  if (!el) return false
-  const rect = el.getBoundingClientRect()
-  if (rect.height <= 0) return false
-
-  const viewportBottom = getViewportBottomClientY()
-  const epsilon = 0.5
-
-  if (rect.bottom <= 0 || rect.top >= viewportBottom) return false
-
-  return rect.bottom > viewportBottom - epsilon
-}
-
-function computeRedTakesOverFromYellow(redEl) {
-  if (!redEl) return false
-  const rect = redEl.getBoundingClientRect()
-  if (rect.height <= 0) return false
-  const viewportBottom = getViewportBottomClientY()
-  const yellowBottom = viewportBottom - HERO_CTA_IMAGE_BOTTOM_GAP_PX
-  const epsilon = 0.5
-  return rect.bottom >= yellowBottom - epsilon
 }
 
 function computeHeroFacebookCtaFloated(photoEl, sectionFallbackEl) {
@@ -469,105 +355,6 @@ function scheduleFacebookShopFloatSettle() {
       facebookShopFloatSettleTimer = null
     }, 48)
   })
-}
-
-function updateHeroCtaModes() {
-  heroIntroCtaFloated.value = computeHeroCtaFloated(heroIntroPhotoRef.value, heroIntroRef.value)
-  const heroIntroAfterBaseFloated = computeHeroCtaFloated(
-    heroIntroAfterPhotoRef.value,
-    heroIntroAfterRef.value,
-  )
-  const heroIntroAfterRedTakesOver = computeRedTakesOverFromYellow(
-    heroIntroAfterTopCtaBtnRef.value,
-  )
-  heroIntroAfterCtaFloated.value = heroIntroAfterBaseFloated && !heroIntroAfterRedTakesOver
-  const heroIntroThirdBaseFloated = computeHeroCtaFloated(
-    heroIntroThirdPhotoRef.value,
-    heroIntroThirdRef.value,
-  )
-  const heroIntroThirdRedTakesOver = computeRedTakesOverFromYellow(
-    heroIntroThirdTopCtaBtnRef.value,
-  )
-  heroIntroThirdCtaFloated.value = heroIntroThirdBaseFloated && !heroIntroThirdRedTakesOver
-
-  const prevFbFloat = heroIntroFacebookCtaFloated.value
-  const shop = shopBottomSectionsRef.value
-  heroIntroFacebookCtaFloated.value = computeHeroFacebookCtaFloated(
-    shop?.heroIntroFacebookPhotoRef?.value ?? null,
-    shop?.heroIntroFacebookRef?.value ?? null,
-  )
-
-  if (!heroIntroFacebookCtaFloated.value) {
-    if (typeof window !== 'undefined' && facebookShopFloatSettleTimer != null) {
-      clearTimeout(facebookShopFloatSettleTimer)
-      facebookShopFloatSettleTimer = null
-    }
-    facebookShopFloatPop.value = false
-  } else if (!prevFbFloat && heroIntroFacebookCtaFloated.value) {
-    if (
-      typeof window !== 'undefined' &&
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    ) {
-      facebookShopFloatPop.value = false
-    } else {
-      facebookShopFloatPop.value = true
-      scheduleFacebookShopFloatSettle()
-    }
-  }
-
-  updateFacebookShopSectionPassed()
-}
-
-function onHeroCtaIntersection() {
-  updateHeroCtaModes()
-}
-
-function setupHeroCtaIntersection(on) {
-  if (!on) {
-    heroCtaIntersectionEnabled.value = false
-    heroCtaIntersection.stop()
-    if (heroCtaResizeAttached) {
-      window.removeEventListener('resize', updateHeroCtaModes)
-      heroCtaResizeAttached = false
-    }
-    if (heroCtaVisualViewportAttached && window.visualViewport) {
-      const vv = window.visualViewport
-      vv.removeEventListener('resize', updateHeroCtaModes)
-      vv.removeEventListener('scroll', updateHeroCtaModes)
-      heroCtaVisualViewportAttached = false
-    }
-    return
-  }
-
-  if (!heroCtaResizeAttached) {
-    window.addEventListener('resize', updateHeroCtaModes)
-    heroCtaResizeAttached = true
-  }
-
-  if (!heroCtaVisualViewportAttached && window.visualViewport) {
-    const vv = window.visualViewport
-    vv.addEventListener('resize', updateHeroCtaModes)
-    vv.addEventListener('scroll', updateHeroCtaModes)
-    heroCtaVisualViewportAttached = true
-  }
-
-  if (typeof IntersectionObserver === 'undefined') {
-    updateHeroCtaModes()
-    return
-  }
-
-  heroCtaIntersection.stop()
-  heroCtaIntersectionEnabled.value = true
-  const sections = [
-    heroIntroRef.value,
-    heroIntroAfterRef.value,
-    heroIntroThirdRef.value,
-    shopBottomSectionsRef.value?.heroIntroFacebookRef?.value,
-  ]
-  for (const el of sections) {
-    if (el) heroCtaIntersection.observe(el)
-  }
-  updateHeroCtaModes()
 }
 
 
@@ -642,7 +429,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style>
 .index-page {
   --index-address-above-cta-shadow:
   0 2px 5px rgb(0, 0, 0),
@@ -773,475 +560,6 @@ onUnmounted(() => {
 
 .index-page__slide-right-leave-to {
   transform: translateX(100%);
-}
-
-
-.index-page__hero-intro {
-  position: relative;
-  margin-top: 0;
-  margin-bottom: 0;
-  left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
-  background: transparent;
-  box-sizing: border-box;
-  overflow: visible;
-}
-
-
-.index-page__hero-intro--maps-underlay-cover {
-  z-index: 1650;
-}
-
-.index-page__hero-intro-photo {
-  width: 100%;
-  overflow: visible;
-}
-
-.index-page__hero-intro-photo-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
-}
-
-.index-page__hero-intro-photo.index-page__reveal-media {
-  overflow: hidden;
-}
-
-
-.index-page__reveal-media {
-  overflow: hidden;
-}
-
-.index-page__hero-intro-sticky-cta {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 6;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-right: 16px;
-  padding-bottom: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
-  padding-left: 16px;
-  box-sizing: border-box;
-  pointer-events: none;
-}
-
-.index-page__hero-intro-sticky-cta--top {
-  align-items: flex-start;
-  padding-top: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-top, 0px));
-  padding-bottom: 0;
-}
-
-.index-page__hero-intro-sticky-cta--hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-
-.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
-  padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
-}
-
-
-.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-cta-block {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-  gap: 10px;
-}
-
-.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-address-row,
-.index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated)
-  .index-page__hero-intro-btn-row {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-}
-
-.index-page__hero-intro-sticky-cta--first.index-page__hero-intro-sticky-cta--floated
-  .index-page__hero-intro-cta-block {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-  gap: 8px;
-}
-
-.index-page__hero-intro-sticky-cta--first.index-page__hero-intro-sticky-cta--floated
-  .index-page__hero-intro-address-row,
-.index-page__hero-intro-sticky-cta--first.index-page__hero-intro-sticky-cta--floated
-  .index-page__hero-intro-btn-row {
-  height: auto;
-  min-height: 0;
-  max-height: none;
-}
-
-.index-page__hero-intro-sticky-cta--floated {
-  position: fixed;
-  top: auto;
-  bottom: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
-  left: 0;
-  right: 0;
-  height: auto;
-  justify-content: center;
-  align-items: flex-end;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding-top: 0;
-  padding-right: 16px;
-  padding-bottom: 0;
-  padding-left: 16px;
-  z-index: 1500;
-}
-
-.index-page__hero-intro-cta-block {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0;
-  box-sizing: border-box;
-  width: 100%;
-  max-width: min(92vw, 560px);
-  height: var(--hero-cta-stack-height, 96px);
-  min-height: var(--hero-cta-stack-height, 96px);
-  max-height: var(--hero-cta-stack-height, 96px);
-  margin: 0;
-  padding: 0;
-  pointer-events: none;
-}
-
-.index-page__hero-intro-address-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  height: var(--hero-cta-address-row-height, 49px);
-  min-height: var(--hero-cta-address-row-height, 49px);
-  max-height: var(--hero-cta-address-row-height, 49px);
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.index-page__hero-intro-btn-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  height: var(--hero-cta-button-row-height, 47px);
-  min-height: var(--hero-cta-button-row-height, 47px);
-  max-height: var(--hero-cta-button-row-height, 47px);
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.index-page__hero-intro-address {
-  margin: 0;
-  padding: 0 8px;
-  font-family: 'Poppins', sans-serif;
-  font-size: clamp(0.82rem, 2.35vw, 1.08rem);
-  font-weight: 500;
-  line-height: 1.25;
-  letter-spacing: 0.04em;
-  text-align: center;
-  color: #ffffff;
-  text-transform: none;
-  text-shadow: var(--index-address-above-cta-shadow);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.45s ease 0.05s,
-              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
-}
-
-.index-page__hero-intro-google-mini {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.45s ease 0.05s,
-              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
-  pointer-events: auto;
-}
-
-.index-page__hero-intro-google-mini--visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.index-page__hero-intro-address--visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.index-page__hero-intro-quote {
-  text-shadow:
-    0 2px 5px rgb(0, 0, 0),
-    0 0 10px rgb(0, 0, 0);
-}
-
-.index-page__hero-intro-quote-text {
-  display: inline;
-}
-
-.index-page__hero-intro-quote-signature {
-  display: block;
-  width: 100%;
-  text-align: right;
-  margin-top: 2px;
-  line-height: 1.05;
-  font-size: 0.82em;
-  letter-spacing: 0.03em;
-  color: #ffffff;
-  opacity: 1;
-}
-
-@media (min-width: 1000px) {
-  .index-page__hero-intro-address--second {
-    font-size: clamp(0.86rem, 2.45vw, 1.14rem);
-  }
-}
-
-
-.index-page__hero-intro-cta-btn {
-  pointer-events: auto;
-  cursor: pointer;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-width: 140px;
-  margin: 0;
-  padding: 12px 22px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: normal;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.96);
-  background: rgba(14, 14, 18, 0.72);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 32px rgba(0, 0, 0, 0.45);
-  isolation: isolate;
-  opacity: 0;
-  transform: scale(0.94);
-  transform-origin: center center;
-  transition:
-    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.35s ease,
-    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    min-width 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-button.index-page__hero-intro-cta-btn {
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-
-.index-page__hero-intro-cta-btn--solid {
-  font-size: 1rem;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-  color: #141414;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.2);
-}
-
-.index-page__hero-intro-cta-btn--solid.index-page__hero-intro-cta-btn--visible:hover {
-  background: #f3f3f3;
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
-}
-
-.index-page__hero-intro-cta-btn--solid.index-page__hero-intro-cta-btn--visible:active {
-  background: #e8e8e8;
-}
-
-
-@media (max-width: 749px) {
-  .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop) {
-    --hero-cta-stack-height: 90px;
-    --hero-cta-address-row-height: 34px;
-    --hero-cta-button-row-height: 56px;
-  }
-
-  .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop)
-    .index-page__hero-intro-address-row {
-    align-items: flex-end;
-  }
-
-  .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop)
-    .index-page__hero-intro-btn-row {
-    align-items: flex-start;
-  }
-
-  .index-page__hero-intro-address:not(.index-page__hero-intro-address--facebook-shop-last) {
-    font-size: clamp(0.68rem, 3.45vw, 1.14rem);
-    line-height: 1.18;
-  }
-
-  .index-page__hero-intro-cta-btn {
-    min-width: 130px;
-    padding: 12px 17px;
-    font-size: 0.8rem;
-    border-radius: 4px;
-  }
-
-  .index-page__hero-intro-cta-btn--solid {
-    font-size: 0.84rem;
-    font-weight: 500;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:hover {
-    min-width: 118px;
-    padding: 12px 15px;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:active {
-    min-width: 114px;
-    padding: 11px 14px;
-  }
-}
-
-.index-page__hero-intro-cta-btn--visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-
-.index-page__hero-intro-cta-btn--visible:hover {
-  min-width: 126px;
-  padding: 10px 18px;
-}
-
-.index-page__hero-intro-cta-btn--visible:active {
-  min-width: 122px;
-  padding: 9px 16px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .index-page__hero-intro-cta-btn {
-    opacity: 1;
-    transform: none;
-    transition:
-      padding 0.45s ease,
-      min-width 0.45s ease;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:hover {
-    min-width: 126px;
-    padding: 10px 18px;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:active {
-    min-width: 122px;
-    padding: 9px 16px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) and (max-width: 749px) {
-  .index-page__hero-intro-cta-btn--visible:hover {
-    min-width: 118px;
-    padding: 7px 13px;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:active {
-    min-width: 114px;
-    padding: 6px 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  .index-page__hero-intro {
-    margin-top: 0;
-  }
-
-  .index-page__hero-intro-photo {
-    height: 75vh;
-    overflow: hidden;
-  }
-
-  .index-page__hero-intro-photo-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center center;
-  }
-
-  .index-page__hero-intro-sticky-cta {
-    padding: 0 12px max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
-  }
-
-  .index-page__hero-intro-sticky-cta--top {
-    padding: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-top, 0px)) 12px 0;
-  }
-
-  .index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
-    padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
-  }
-
-  .index-page__hero-intro-sticky-cta--floated {
-    padding: 0 12px;
-  }
-
-  .index-page__hero-intro-btn-row {
-    height: auto;
-    min-height: var(--hero-cta-button-row-height, 47px);
-    max-height: none;
-  }
-}
-
-.index-page__reveal-media:not(.index-page__reveal-media--in) .index-page__reveal-media-img {
-  transform: scale(1.15);
-  transform-origin: center center;
-}
-
-.index-page__reveal-media--in .index-page__reveal-media-img {
-  transform: scale(1);
-  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .index-page__reveal-media:not(.index-page__reveal-media--in) .index-page__reveal-media-img {
-    transform: scale(1);
-  }
-
-  .index-page__reveal-media--in .index-page__reveal-media-img {
-    transition: none;
-  }
 }
 
 @media (max-width: 600px) {

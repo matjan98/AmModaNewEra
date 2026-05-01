@@ -1223,27 +1223,9 @@ defineExpose({
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn {
-  display: inline-flex;
-  align-items: center;
   gap: 8px;
-  padding: 12px 22px;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.96);
-  font-weight: 600;
-  font-size: 1rem;
-  background: rgba(14, 14, 18, 0.72);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 32px rgba(0, 0, 0, 0.45);
-  transition:
-    background 0.22s ease,
-    border-color 0.22s ease,
-    transform 0.18s ease,
-    box-shadow 0.22s ease;
+  border: 0;
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
@@ -1419,15 +1401,6 @@ defineExpose({
   overflow: hidden;
   gap: 15px;
   color: #ffffff;
-  background: linear-gradient(
-    145deg,
-    rgba(46, 210, 255, 0.54) 0%,
-    rgba(0, 176, 255, 0.44) 45%,
-    rgba(0, 142, 235, 0.48) 100%
-  );
-  backdrop-filter: blur(18px) saturate(1.45);
-  -webkit-backdrop-filter: blur(18px) saturate(1.45);
-  border: 1px solid rgba(185, 245, 255, 0.6);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     0 10px 34px rgba(0, 176, 255, 0.42),
@@ -1473,16 +1446,7 @@ defineExpose({
     0 14px 36px rgba(0, 0, 0, 0.5);
 }
 
-.index-page-shop-bottom-sections__facebook-cta-btn--below:hover {
-  background: linear-gradient(
-    145deg,
-    rgba(88, 230, 255, 0.58) 0%,
-    rgba(28, 198, 255, 0.52) 45%,
-    rgba(0, 160, 245, 0.58) 100%
-  );
-  border-color: rgba(210, 250, 255, 0.66);
-  transform: translateY(-1px);
-}
+/* hover handled by shared global selector */
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {

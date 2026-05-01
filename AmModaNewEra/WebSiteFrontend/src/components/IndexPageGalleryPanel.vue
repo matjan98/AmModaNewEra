@@ -218,14 +218,9 @@ onUnmounted(() => {
   margin-right: calc(50% - 50vw);
   box-sizing: border-box;
   overflow-x: clip;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 34px rgba(0, 0, 0, 0.35);
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
 }
 
 .index-page-gallery-panel__panels--empty {
@@ -262,8 +257,6 @@ onUnmounted(() => {
   position: relative;
   border-radius: 10px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
   min-height: 160px;
 }

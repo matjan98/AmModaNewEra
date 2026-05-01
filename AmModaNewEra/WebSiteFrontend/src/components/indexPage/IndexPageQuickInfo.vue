@@ -79,10 +79,6 @@ const todayPillParts = computed(() => {
 <style scoped>
 .index-page-quick-info__root {
   display: none;
-  position: relative;
-  left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
   margin-top: 0;
   padding: 20px 16px;
   box-sizing: border-box;
@@ -199,34 +195,17 @@ const todayPillParts = computed(() => {
 }
 
 .index-page-quick-info__link:focus-visible {
-  outline: 2px solid rgba(255, 170, 210, 0.85);
-  outline-offset: 3px;
+  outline: none;
 }
 
 .index-page-quick-info__facebook-btn {
-  display: inline-flex;
-  align-items: center;
   gap: 10px;
   padding: 5px 10px;
   font-size: clamp(0.86rem, 1.92vw, 0.86rem);
   font-weight: 500;
   line-height: 1.25;
-  border: 0;
   border-radius: 8px;
-  text-decoration: none;
-  color: #ffffff;
-  background: linear-gradient(
-    145deg,
-    rgba(46, 210, 255, 0.54) 0%,
-    rgba(0, 176, 255, 0.44) 45%,
-    rgba(0, 142, 235, 0.48) 100%
-  );
-  backdrop-filter: blur(18px) saturate(1.45);
-  -webkit-backdrop-filter: blur(18px) saturate(1.45);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 10px 34px rgba(0, 176, 255, 0.42),
-    0 12px 40px rgba(0, 0, 0, 0.42);
+  border: 0;
 }
 
 .index-page-quick-info__facebook-icon {
@@ -235,14 +214,6 @@ const todayPillParts = computed(() => {
   opacity: 0.92;
 }
 
-.index-page-quick-info__facebook-btn:hover {
-  background: linear-gradient(
-    145deg,
-    rgba(88, 230, 255, 0.58) 0%,
-    rgba(28, 198, 255, 0.52) 45%,
-    rgba(0, 160, 245, 0.58) 100%
-  );
-  transform: translateY(-1px);
-}
+/* hover handled by shared global selector */
 </style>
 

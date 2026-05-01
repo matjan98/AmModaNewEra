@@ -31,3 +31,9 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+
+# Ensure these source files are never ignored (e.g. by global ignore rules)
+!src/components/indexPage/IndexPageHeroIntroAfter.vue
+!src/components/indexPage/IndexPageHeroIntroAtf.vue
+!src/components/indexPage/IndexPageHeroIntroThird.vue
+!src/pages/indexPage/useHeroCtas.js
