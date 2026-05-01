@@ -53,7 +53,7 @@
               :image-src="heroIntroFirstImage"
               :address-line="ADDRESS_LINE"
               :cta-visible="heroIntroCtaVisible"
-              :yellow-top-hidden="heroIntroAfterYellowVisible"
+              :yellow-top-hidden="heroIntroCtaVisible && !heroIntroAfterRedTakesOver"
               :cta-floated="heroIntroAfterCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
               :on-cta-click="scrollToPageBottom"
@@ -75,7 +75,7 @@
               :cta-css-vars="heroIntroCtaCssVars"
               :image-src="heroIntroThirdImage"
               :cta-visible="heroIntroCtaVisible"
-              :yellow-top-hidden="heroIntroThirdYellowVisible"
+              :yellow-top-hidden="heroIntroCtaVisible && !heroIntroThirdRedTakesOver"
               :cta-floated="heroIntroThirdCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
               :on-cta-click="scrollToPageBottom"
@@ -255,14 +255,15 @@ const {
   heroIntroCtaFloated,
   heroIntroAfterCtaFloated,
   heroIntroThirdCtaFloated,
-  heroIntroAfterYellowVisible,
-  heroIntroThirdYellowVisible,
+  heroIntroAfterRedTakesOver,
+  heroIntroThirdRedTakesOver,
   updateHeroCtaModes,
   setupHeroCtaIntersection,
 } = useHeroCtas({
   heroIntroCtaVisible,
   onUpdate: updateFacebookCtaModes,
   getExtraObservedElements: () => [shopBottomSectionsRef.value?.heroIntroFacebookRef?.value],
+  heroCtaImageGapPx: HERO_CTA_IMAGE_BOTTOM_GAP_PX,
 })
 
 const setHeroIntroAtfEl = (el) => {

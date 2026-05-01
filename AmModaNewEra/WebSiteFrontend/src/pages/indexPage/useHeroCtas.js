@@ -1,10 +1,15 @@
 import { computed, ref } from 'vue'
 import { useIntersectionObserver } from '../../composables/useIntersectionObserver.js'
 
-const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
 const HERO_CTA_IO_THRESHOLDS = Array.from({ length: 100 }, (_, i) => i / 99)
 
-export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedElements }) {
+export function useHeroCtas({
+  heroIntroCtaVisible,
+  onUpdate,
+  getExtraObservedElements,
+  heroCtaImageGapPx = 20,
+  takeoverEpsilonPx = 0,
+}) {
   const heroIntroRef = ref(null)
   const heroIntroPhotoRef = ref(null)
   const heroIntroCtaRef = ref(null)
@@ -22,6 +27,9 @@ export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedEle
   const heroIntroCtaFloated = ref(false)
   const heroIntroAfterCtaFloated = ref(false)
   const heroIntroThirdCtaFloated = ref(false)
+
+  const heroIntroAfterRedTakesOver = ref(false)
+  const heroIntroThirdRedTakesOver = ref(false)
 
   const heroIntroAfterBottomCtaInViewport = ref(false)
   const heroIntroThirdBottomCtaInViewport = ref(false)
@@ -76,7 +84,7 @@ export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedEle
     const rect = redEl.getBoundingClientRect()
     if (rect.height <= 0) return false
     const viewportBottom = getViewportBottomClientY()
-    const yellowBottom = viewportBottom - HERO_CTA_IMAGE_BOTTOM_GAP_PX
+    const yellowBottom = viewportBottom - heroCtaImageGapPx + takeoverEpsilonPx
     const epsilon = 0.5
     return rect.bottom >= yellowBottom - epsilon
   }
@@ -99,19 +107,21 @@ export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedEle
       heroIntroAfterPhotoRef.value,
       heroIntroAfterRef.value,
     )
-    const heroIntroAfterRedTakesOver = computeRedTakesOverFromYellow(
+    const heroIntroAfterRedTakesOverNow = computeRedTakesOverFromYellow(
       heroIntroAfterTopCtaBtnRef.value,
     )
-    heroIntroAfterCtaFloated.value = heroIntroAfterBaseFloated && !heroIntroAfterRedTakesOver
+    heroIntroAfterRedTakesOver.value = heroIntroAfterRedTakesOverNow
+    heroIntroAfterCtaFloated.value = heroIntroAfterBaseFloated && !heroIntroAfterRedTakesOverNow
 
     const heroIntroThirdBaseFloated = computeHeroCtaFloated(
       heroIntroThirdPhotoRef.value,
       heroIntroThirdRef.value,
     )
-    const heroIntroThirdRedTakesOver = computeRedTakesOverFromYellow(
+    const heroIntroThirdRedTakesOverNow = computeRedTakesOverFromYellow(
       heroIntroThirdTopCtaBtnRef.value,
     )
-    heroIntroThirdCtaFloated.value = heroIntroThirdBaseFloated && !heroIntroThirdRedTakesOver
+    heroIntroThirdRedTakesOver.value = heroIntroThirdRedTakesOverNow
+    heroIntroThirdCtaFloated.value = heroIntroThirdBaseFloated && !heroIntroThirdRedTakesOverNow
 
     heroIntroAfterBottomCtaInViewport.value = computeBottomCtaInViewport(
       heroIntroAfterCtaRef.value,
@@ -187,6 +197,8 @@ export function useHeroCtas({ heroIntroCtaVisible, onUpdate, getExtraObservedEle
     heroIntroCtaFloated,
     heroIntroAfterCtaFloated,
     heroIntroThirdCtaFloated,
+    heroIntroAfterRedTakesOver,
+    heroIntroThirdRedTakesOver,
     heroIntroAfterYellowVisible,
     heroIntroThirdYellowVisible,
     updateHeroCtaModes,
