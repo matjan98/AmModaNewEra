@@ -40,7 +40,8 @@
             >
               <span>
                 <span v-if="isOpenToday">
-                  Dzisiaj otwarte: {{ todayHours }}
+                  <span class="main-layout__hours-label">Dzisiaj otwarte:</span>
+                  <span class="main-layout__hours-value">{{ todayHours }}</span>
                 </span>
                 <span v-else>
                   Dzisiaj zamknięte
@@ -95,7 +96,8 @@
             >
               <span>
                 <span v-if="isOpenToday">
-                  Dzisiaj otwarte: {{ todayHours }}
+                  <span class="main-layout__hours-label">Dzisiaj otwarte:</span>
+                  <span class="main-layout__hours-value">{{ todayHours }}</span>
                 </span>
                 <span v-else>
                   Dzisiaj zamknięte
@@ -812,6 +814,11 @@ onUnmounted(() => {
 .main-layout__hours-chevron {
   margin-left: 2px;
   flex-shrink: 0;
+}
+
+.main-layout__hours-value {
+  margin-left: 10px;
+  font-weight: 600;
 }
 
 .main-layout__hours-dropdown {

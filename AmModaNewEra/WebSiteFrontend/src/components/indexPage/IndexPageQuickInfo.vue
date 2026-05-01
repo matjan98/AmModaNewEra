@@ -23,7 +23,7 @@
         </span>
       </div>
       <div class="index-page-quick-info__row index-page-quick-info__row--gallery">
-        <span class="index-page-quick-info__label">Galeria:</span>
+        <span class="index-page-quick-info__label">Aktualności:</span>
         <a
           :href="facebookUrl"
           target="_blank"
