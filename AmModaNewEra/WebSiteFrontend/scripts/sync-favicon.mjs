@@ -8,6 +8,9 @@ const sourceDir = path.resolve(projectRoot, '../Logo/Favicon')
 const publicDir = path.resolve(projectRoot, 'public')
 const publicIconsDir = path.resolve(publicDir, 'icons')
 
+const openGraphSource = path.resolve(projectRoot, 'src/assets/main-photos/open-graph-1200x630.jpg')
+const openGraphDest = path.join(publicIconsDir, 'open-graph-1200x630.jpg')
+
 const copyPairs = [
   { from: 'favicon.ico', to: path.join(publicDir, 'favicon.ico') },
   { from: 'favicon-16x16.png', to: path.join(publicIconsDir, 'favicon-16x16.png') },
@@ -63,6 +66,7 @@ async function main() {
   await ensureDir(publicIconsDir)
 
   await Promise.all(copyPairs.map((p) => copyFile(p.from, p.to)))
+  await fs.copyFile(openGraphSource, openGraphDest)
   await syncManifest()
 
   process.stdout.write('favicon synced\n')

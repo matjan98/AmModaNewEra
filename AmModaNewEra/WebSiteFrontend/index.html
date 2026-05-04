@@ -10,19 +10,21 @@
     <meta property="og:title" content="<%= productName %>">
     <meta property="og:description" content="<%= productDescription %>">
     <meta property="og:locale" content="pl_PL">
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<%= productName %>">
     <meta name="twitter:description" content="<%= productDescription %>">
+    <meta name="twitter:image" content="<%= siteOrigin %>/icons/open-graph-1200x630.jpg">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="width=device-width, initial-scale=1<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>">
 
-    <!--
-      TODO: Once production domain is decided, add:
-      <link rel="canonical" href="https://example.com/">
-      <meta property="og:url" content="https://example.com/">
-      <meta property="og:image" content="https://example.com/og-image.webp">
-    -->
+    <link rel="canonical" href="<%= siteOrigin %>/">
+    <meta property="og:url" content="<%= siteOrigin %>/">
+    <meta property="og:image" content="<%= siteOrigin %>/icons/open-graph-1200x630.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:alt" content="A&M Moda Damska – salon przy ul. Bielskiej 166, Kozy">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

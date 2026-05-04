@@ -247,7 +247,8 @@ const {
   getFacebookSectionEl: () => shopBottomSectionsRef.value?.heroIntroFacebookRef?.value ?? null,
   heroCtaStackHeightPx: HERO_CTA_STACK_HEIGHT_PX,
   heroCtaImageGapPx: HERO_CTA_IMAGE_BOTTOM_GAP_PX,
-  takeoverEpsilonPx: -12,
+  /** Align top ↔ floated swap with `viewportBottom - gap` (same as CSS `--hero-cta-img-gap`). */
+  takeoverEpsilonPx: 0,
 })
 
 const heroIntroAtfComp = ref(null)

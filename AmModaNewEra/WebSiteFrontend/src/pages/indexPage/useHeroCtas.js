@@ -1,7 +1,8 @@
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useIntersectionObserver } from '../../composables/useIntersectionObserver.js'
 
-const HERO_CTA_IO_THRESHOLDS = [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
+/** Dense enough for section enter/leave; scroll listener handles continuous updates. */
+const HERO_CTA_IO_THRESHOLDS = Array.from({ length: 21 }, (_, i) => i / 20)
 
 export function useHeroCtas({
   onUpdate,
@@ -40,9 +41,36 @@ export function useHeroCtas({
   const facebookShopCtaPassedOnce = ref(false)
 
   let heroCtaResizeAttached = false
+  let heroCtaScrollAttached = false
   let heroCtaVisualViewportAttached = false
   let scheduledRafId = 0
   const heroCtaIntersectionEnabled = ref(false)
+
+  /** @type {ResizeObserver|null} */
+  let heroCtaSectionResizeObserver = null
+
+  function syncHeroSectionResizeObserver() {
+    if (typeof ResizeObserver === 'undefined') return
+    if (!heroCtaSectionResizeObserver) {
+      heroCtaSectionResizeObserver = new ResizeObserver(() => {
+        scheduleUpdateHeroCtaModes()
+      })
+    }
+    heroCtaSectionResizeObserver.disconnect()
+    const after = heroIntroAfterRef.value
+    const third = heroIntroThirdRef.value
+    if (after) heroCtaSectionResizeObserver.observe(after)
+    if (third) heroCtaSectionResizeObserver.observe(third)
+  }
+
+  watch(
+    [heroIntroAfterRef, heroIntroThirdRef],
+    () => {
+      if (!heroCtaIntersectionEnabled.value) return
+      syncHeroSectionResizeObserver()
+    },
+    { flush: 'post' },
+  )
 
   const heroCtaIntersection = useIntersectionObserver(
     () => {
@@ -187,11 +215,18 @@ export function useHeroCtas({
         window.removeEventListener('resize', scheduleUpdateHeroCtaModes)
         heroCtaResizeAttached = false
       }
+      if (heroCtaScrollAttached) {
+        window.removeEventListener('scroll', scheduleUpdateHeroCtaModes)
+        heroCtaScrollAttached = false
+      }
       if (heroCtaVisualViewportAttached && window.visualViewport) {
         const vv = window.visualViewport
         vv.removeEventListener('resize', scheduleUpdateHeroCtaModes)
         vv.removeEventListener('scroll', scheduleUpdateHeroCtaModes)
         heroCtaVisualViewportAttached = false
+      }
+      if (heroCtaSectionResizeObserver) {
+        heroCtaSectionResizeObserver.disconnect()
       }
       return
     }
@@ -199,6 +234,11 @@ export function useHeroCtas({
     if (!heroCtaResizeAttached) {
       window.addEventListener('resize', scheduleUpdateHeroCtaModes)
       heroCtaResizeAttached = true
+    }
+
+    if (!heroCtaScrollAttached) {
+      window.addEventListener('scroll', scheduleUpdateHeroCtaModes, { passive: true })
+      heroCtaScrollAttached = true
     }
 
     if (!heroCtaVisualViewportAttached && window.visualViewport) {
@@ -220,6 +260,7 @@ export function useHeroCtas({
     for (const el of sections) {
       if (el) heroCtaIntersection.observe(el)
     }
+    syncHeroSectionResizeObserver()
     updateHeroCtaModes()
   }
 

@@ -3,8 +3,14 @@
 
 import { defineConfig } from '#q-app/wrappers'
 
+/** Public site origin for absolute URLs in index.html (Open Graph, canonical). No trailing slash. */
+const siteOrigin = (process.env.SITE_ORIGIN ?? 'https://ammoda.pl').replace(/\/$/, '')
+
 export default defineConfig((/* ctx */) => {
   return {
+    htmlVariables: {
+      siteOrigin
+    },
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
 
