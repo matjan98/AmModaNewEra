@@ -402,7 +402,7 @@ body,
   margin: 0;
   padding: 0 8px;
   font-family: 'Poppins', sans-serif;
-  font-size: clamp(0.82rem, 2.35vw, 1.08rem);
+  font-size: clamp(0.82rem, 2.35vw, 1.14rem);
   font-weight: 500;
   line-height: 1.25;
   letter-spacing: 0.04em;
@@ -475,7 +475,7 @@ button.index-page__hero-intro-cta-btn {
 }
 
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop) {
     --hero-cta-stack-height: 90px;
     --hero-cta-address-row-height: 34px;
@@ -551,7 +551,7 @@ button.index-page__hero-intro-cta-btn {
   }
 }
 
-@media (prefers-reduced-motion: reduce) and (max-width: 749px) {
+@media (prefers-reduced-motion: reduce) and (max-width: 749.98px) {
   .index-page__hero-intro-cta-btn--visible:hover {
     min-width: 118px;
     padding: 7px 13px;
@@ -563,7 +563,7 @@ button.index-page__hero-intro-cta-btn {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 749.98px) {
   .index-page__hero-intro {
     margin-top: 0;
   }
@@ -704,24 +704,16 @@ button.index-page__hero-intro-cta-btn {
 }
 
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page__hero-intro-cta-btn--solid {
     font-size: 0.84rem;
     font-weight: 500;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 749.98px) {
   .index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
     padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
-  }
-}
-
-/* Index page hero: styles previously colocated with IndexPageHeroIntroAfter.vue */
-
-@media (min-width: 1000px) {
-  .index-page__hero-intro-address--second {
-    font-size: clamp(0.86rem, 2.45vw, 1.14rem);
   }
 }
 

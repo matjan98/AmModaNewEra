@@ -100,7 +100,7 @@ const todayPillParts = computed(() => {
     0 18px 60px rgba(0, 0, 0, 0.38);
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-quick-info__root {
     display: block;
   }

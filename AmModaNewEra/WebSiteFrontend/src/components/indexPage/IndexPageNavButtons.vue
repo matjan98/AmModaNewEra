@@ -67,7 +67,7 @@ defineEmits(['goToGallery', 'goToInfo'])
     0 2px 10px rgba(0, 0, 0, 0.18);
   cursor: pointer;
   font-family: 'Dancing Script', cursive;
-  font-size: 1.55rem;
+  font-size: clamp(1.35rem, 0.5vw + 1.2rem, 1.9rem);
   letter-spacing: 0.02em;
   transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
@@ -90,13 +90,7 @@ defineEmits(['goToGallery', 'goToInfo'])
   right: auto;
 }
 
-@media (min-width: 800px) {
-  .index-page-nav-buttons__btn {
-    font-size: 1.9rem;
-    padding: 4px 18px;
-    gap: 10px;
-  }
-
+@media (min-width: 750px) {
   .index-page-nav-buttons__btn--right {
     right: 32px;
   }
@@ -106,15 +100,7 @@ defineEmits(['goToGallery', 'goToInfo'])
   }
 }
 
-@media (max-width: 600px) {
-  .index-page-nav-buttons__btn {
-    font-size: 1.35rem;
-    padding: 3px 14px;
-    gap: 6px;
-  }
-}
-
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-nav-buttons__fixed {
     top: 54px;
   }

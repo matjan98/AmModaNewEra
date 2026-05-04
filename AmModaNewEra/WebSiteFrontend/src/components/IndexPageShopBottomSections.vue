@@ -141,7 +141,7 @@
 import { computed, ref } from 'vue'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 import googleMapsPinImg from '../assets/google-maps.png'
-import { useMediaQuery } from '../composables/useMediaQuery.js'
+import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
 import { useIntersectionObserver } from '../composables/useIntersectionObserver.js'
 
 defineProps({
@@ -179,7 +179,7 @@ const bigMapsCtaBtnRef = ref(null)
 const heroIntroFacebookInView = ref(false)
 const facebookShopFollowInView = ref(false)
 const bigMapsCtaFullyVisible = ref(false)
-const { matches: isSmallScreen } = useMediaQuery('(max-width: 749px)')
+const { matches: isSmallScreen } = useIsSmallScreen()
 
 const bigMapsCtaVisible = computed(() => Boolean(bigMapsCtaFullyVisible.value))
 const smallFixedMapsCtaVisible = computed(() =>
@@ -377,7 +377,7 @@ defineExpose({
     line-height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
       .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     )
@@ -418,7 +418,7 @@ defineExpose({
   transition: none;
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     font-size: clamp(0.325rem, 2.9vw, 1.08rem);
@@ -491,7 +491,7 @@ defineExpose({
     line-height 0.26s cubic-bezier(0.42, 0, 0.58, 1);
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     font-size: clamp(0.325rem, 2.9vw, 1.08rem);
@@ -614,7 +614,7 @@ defineExpose({
   transform: translateY(0);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 749.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--floated {
     padding: 0 12px;
   }
@@ -1119,7 +1119,7 @@ defineExpose({
     line-height 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-shop-bottom-sections__hero-intro--inview
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
       .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
@@ -1135,7 +1135,7 @@ defineExpose({
   font-size: clamp(0.72rem, 5.25vw, 3.05rem);
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-shop-bottom-sections__hero-intro--inview
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
@@ -1155,7 +1155,7 @@ defineExpose({
   font-size: clamp(calc(0.82rem + 2px), calc(2.35vw + 2px), calc(1.08rem + 2px));
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-shop-bottom-sections__hero-intro--inview
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {

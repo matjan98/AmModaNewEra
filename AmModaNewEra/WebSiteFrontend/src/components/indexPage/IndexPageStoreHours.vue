@@ -299,7 +299,7 @@ defineEmits(['update:expanded'])
   color: #ffffff;
 }
 
-@media (max-width: 749px) {
+@media (max-width: 749.98px) {
   .index-page-store-hours__banner {
     padding: 14px 18px;
   }

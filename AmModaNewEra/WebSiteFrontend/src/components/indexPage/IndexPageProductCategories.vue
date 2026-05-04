@@ -221,7 +221,7 @@ const emit = defineEmits(['toggle', 'imageLoad'])
   text-transform: none;
 }
 
-@media (max-width: 750px) {
+@media (max-width: 749.98px) {
   .index-page-product-categories__row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

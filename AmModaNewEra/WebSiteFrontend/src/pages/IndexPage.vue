@@ -127,6 +127,7 @@ import { useSectionTwoGrid } from './indexPage/useSectionTwoGrid.js'
 import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { animateWindowScrollTo } from '../utils/scrollAnimation.js'
+import { SMALL_SCREEN_MAX_WIDTH_PX } from '../constants/breakpoints.js'
 import heroIntroFirstImage from '../assets/Main photos/main2.webp'
 import heroIntroSecondImage from '../assets/Main photos/atf_photo.webp'
 import heroIntroThirdImage from '../assets/Main photos/main3.webp'
@@ -135,8 +136,6 @@ import facebookShopPhoto from '../assets/Main photos/shop.webp'
 const TAB_STORAGE_KEY = 'index-page-active-tab'
 
 const SHOW_GALLERY_NAV_BUTTON = true
-
-const SECTION_TWO_BREAKPOINT_PX = 751
 
 
 function getStoredTab() {
@@ -177,7 +176,7 @@ const shopBottomSectionsRef = ref(null)
 
 const { sectionTwoRows, updateSectionTwoWindowWidth } = useSectionTwoGrid({
   sectionTwoItems,
-  breakpointPx: SECTION_TWO_BREAKPOINT_PX,
+  breakpointPx: SMALL_SCREEN_MAX_WIDTH_PX,
 })
 
 const {
@@ -577,7 +576,7 @@ onUnmounted(() => {
   transform: translateX(100%);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 749.98px) {
   .index-page {
     padding: 0;
   }

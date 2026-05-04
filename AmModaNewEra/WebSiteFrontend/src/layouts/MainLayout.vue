@@ -216,10 +216,9 @@
 import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 'vue'
 import { OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
-import { useMediaQuery } from '../composables/useMediaQuery.js'
+import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
 
-const SMALL_SCREEN_MAX_WIDTH = 750
-const { matches: isSmallScreen } = useMediaQuery(`(max-width: ${SMALL_SCREEN_MAX_WIDTH}px)`)
+const { matches: isSmallScreen } = useIsSmallScreen()
 const useSidesLayout = computed(() => !isSmallScreen.value)
 
 function clearHeaderSolidState() {
@@ -525,7 +524,7 @@ onUnmounted(() => {
   min-height: unset;
 }
 
-@media (min-width: 751px) {
+@media (min-width: 750px) {
   .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
     gap: 9px;
     min-height: 90px;
@@ -910,7 +909,7 @@ onUnmounted(() => {
   transition-delay: 0.2s;
 }
 
-@media (min-width: 751px) {
+@media (min-width: 750px) {
   .main-layout__phone-link,
   .main-layout__open-status {
     font-size: 1.05rem;
@@ -948,7 +947,7 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 750px) {
+@media (max-width: 749.98px) {
   .main-layout__header :deep(.q-header__content) {
     padding: 8px 16px;
   }

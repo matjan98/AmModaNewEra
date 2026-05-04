@@ -205,12 +205,6 @@ onUnmounted(() => {
   margin-top: 10vh;
 }
 
-@media (max-width: 600px) {
-  .index-page-gallery-panel__section--gallery {
-    margin-top: 4vh;
-  }
-}
-
 
 .index-page-gallery-panel__panels--gallery {
   width: 100vw;
@@ -327,20 +321,11 @@ onUnmounted(() => {
   opacity: 1;
 }
 
-@media (max-width: 768px) {
-  .index-page-gallery-panel__gallery {
-    grid-template-columns: repeat(3, 1fr);
+@media (max-width: 749.98px) {
+  .index-page-gallery-panel__section--gallery {
+    margin-top: 4vh;
   }
-}
 
-@media (max-width: 749px) {
-  .index-page-gallery-panel__gallery-heading {
-    margin-top: 96px;
-    margin-bottom: 28px;
-  }
-}
-
-@media (max-width: 600px) {
   .index-page-gallery-panel__gallery-heading {
     margin-top: 96px;
     margin-bottom: 28px;

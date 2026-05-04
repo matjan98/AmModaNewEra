@@ -202,7 +202,7 @@ onMounted(async () => {
   margin-bottom: 5vh;
 }
 
-@media (max-width: 750px) {
+@media (max-width: 749.98px) {
   .google-reviews-card--with-margin {
     margin-bottom: 12vh;
   }
@@ -379,7 +379,7 @@ onMounted(async () => {
   filter: drop-shadow(var(--google-reviews-card-mini-shadow));
 }
 
-@media (min-width: 751px) {
+@media (min-width: 750px) {
   .google-reviews-card__google-bubble {
     padding: 8px 10px;
     margin-bottom: 8px;
