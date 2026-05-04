@@ -216,9 +216,9 @@ onUnmounted(() => {
 
 
 .index-page-gallery-panel__panels--gallery {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
   box-sizing: border-box;
   overflow-x: clip;
   border-left: 0;

@@ -18,7 +18,6 @@
               :src="item.photo"
               :alt="item.name"
               class="index-page-product-categories__img index-page__reveal-media-img"
-              loading="lazy"
               @load="emit('imageLoad')"
             >
             <div class="index-page-product-categories__overlay" aria-hidden="true">

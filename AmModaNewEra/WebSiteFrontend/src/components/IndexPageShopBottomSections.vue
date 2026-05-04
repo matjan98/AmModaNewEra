@@ -258,8 +258,8 @@ defineExpose({
   flex-direction: column;
   position: relative;
   left: 50%;
-  width: 100vw;
-  margin-left: -50vw;
+  width: 100svw;
+  margin-left: -50svw;
   min-height: 100vh;
   height: 100vh;
   max-height: 100vh;
@@ -317,7 +317,9 @@ defineExpose({
   top: auto;
   bottom: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
   left: 0;
-  right: 0;
+  right: auto;
+  width: 100svw;
+  box-sizing: border-box;
   height: auto;
   justify-content: center;
   align-items: flex-end;

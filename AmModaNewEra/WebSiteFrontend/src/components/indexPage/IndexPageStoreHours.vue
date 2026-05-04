@@ -94,9 +94,9 @@ defineEmits(['update:expanded'])
 .index-page-store-hours__banner {
   position: relative;
   left: 50%;
-  width: 100dvw;
+  width: 100svw;
   margin: 0;
-  margin-left: -50dvw;
+  margin-left: -50svw;
   padding: clamp(11px, 2.35vw, 17px) clamp(11px, 2.65vw, 19px);
   text-align: center;
   background: rgba(0, 0, 0, 0.6);

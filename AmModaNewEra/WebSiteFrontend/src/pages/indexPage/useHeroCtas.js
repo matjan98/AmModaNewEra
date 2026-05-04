@@ -216,7 +216,10 @@ export function useHeroCtas({
         heroCtaResizeAttached = false
       }
       if (heroCtaScrollAttached) {
-        window.removeEventListener('scroll', scheduleUpdateHeroCtaModes)
+        document.removeEventListener('scroll', scheduleUpdateHeroCtaModes, {
+          capture: true,
+          passive: true,
+        })
         heroCtaScrollAttached = false
       }
       if (heroCtaVisualViewportAttached && window.visualViewport) {
@@ -237,7 +240,7 @@ export function useHeroCtas({
     }
 
     if (!heroCtaScrollAttached) {
-      window.addEventListener('scroll', scheduleUpdateHeroCtaModes, { passive: true })
+      document.addEventListener('scroll', scheduleUpdateHeroCtaModes, { capture: true, passive: true })
       heroCtaScrollAttached = true
     }
 

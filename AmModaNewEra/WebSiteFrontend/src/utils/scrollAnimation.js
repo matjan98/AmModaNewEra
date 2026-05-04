@@ -17,7 +17,7 @@ function getReducedMotionPreferred() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
-function getMaxScrollTop() {
+function getMaxScrollTopWindow() {
   const root = document.documentElement
   const body = document.body
   const scrollHeight = Math.max(root?.scrollHeight ?? 0, body?.scrollHeight ?? 0)
@@ -25,19 +25,35 @@ function getMaxScrollTop() {
   return Math.max(0, scrollHeight - clientHeight)
 }
 
+function getMaxScrollTopElement(el) {
+  return Math.max(0, el.scrollHeight - el.clientHeight)
+}
+
 /**
- * Animates window scrolling to a target `top` value with a controlled duration and easing.
+ * Animates scrolling on `window` or a scrollable element to a target `top` with easing.
  * Returns a cancel function.
  */
-export function animateWindowScrollTo({ top, totalMs = 1500 } = {}) {
+export function animateScrollTo({ scroller = window, top, totalMs = 1500 } = {}) {
   if (typeof window === 'undefined') return () => void 0
+
+  const isWindow = scroller === window
+  if (!isWindow && !(scroller instanceof HTMLElement)) return () => void 0
+
   if (getReducedMotionPreferred()) {
-    window.scrollTo(0, Math.max(0, top ?? 0))
+    if (isWindow) {
+      window.scrollTo(0, Math.max(0, top ?? 0))
+    } else {
+      const max = getMaxScrollTopElement(scroller)
+      scroller.scrollTop = Math.max(0, Math.min(top ?? 0, max))
+    }
     return () => void 0
   }
 
-  const startTop = window.scrollY ?? window.pageYOffset ?? 0
-  const targetTop = Math.max(0, Math.min(top ?? 0, getMaxScrollTop()))
+  const startTop = isWindow
+    ? (window.scrollY ?? window.pageYOffset ?? 0)
+    : scroller.scrollTop
+  const maxScroll = isWindow ? getMaxScrollTopWindow() : getMaxScrollTopElement(scroller)
+  const targetTop = Math.max(0, Math.min(top ?? 0, maxScroll))
   const delta = targetTop - startTop
   if (!Number.isFinite(delta) || Math.abs(delta) < 1) return () => void 0
 
@@ -80,7 +96,11 @@ export function animateWindowScrollTo({ top, totalMs = 1500 } = {}) {
     const easedProgress = easeInOutCubic(t)
 
     const nextTop = lerp(startTop, targetTop, clamp01(easedProgress))
-    window.scrollTo(0, nextTop)
+    if (isWindow) {
+      window.scrollTo(0, nextTop)
+    } else {
+      scroller.scrollTop = nextTop
+    }
 
     if (elapsed < total) {
       rafId = requestAnimationFrame(frame)
@@ -92,4 +112,3 @@ export function animateWindowScrollTo({ top, totalMs = 1500 } = {}) {
   rafId = requestAnimationFrame(frame)
   return cancel
 }
-

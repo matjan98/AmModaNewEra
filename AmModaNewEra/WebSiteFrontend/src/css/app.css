@@ -5,10 +5,22 @@ body,
   background: transparent;
   color: rgba(255, 255, 255, 0.92);
   overflow-x: hidden;
+  max-width: 100%;
+}
+
+@supports (overflow-x: clip) {
+  html,
+  body,
+  #q-app {
+    overflow-x: clip;
+  }
 }
 
 #q-app .q-layout {
   background: transparent;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 #q-app .q-page-container {
@@ -29,16 +41,16 @@ body,
 .am-fullbleed-vw {
   position: relative;
   left: 50%;
-  width: 100vw;
-  margin-left: -50vw;
+  width: 100svw;
+  margin-left: -50svw;
   box-sizing: border-box;
 }
 
 .am-fullbleed-dvw {
   position: relative;
   left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
+  width: 100svw;
+  margin-left: -50svw;
   box-sizing: border-box;
 }
 
@@ -145,13 +157,13 @@ body,
  * This repo enforces per-file class prefixes, so we avoid adding generic classes in templates.
  */
 
-/* Full-bleed blocks (100dvw) */
+/* Full-bleed blocks (100svw — avoids vw/dvw scrollbar overflow on desktop) */
 .index-page-product-categories,
 .index-page-quick-info__root {
   position: relative;
   left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
+  width: 100svw;
+  margin-left: -50svw;
   box-sizing: border-box;
 }
 
@@ -313,8 +325,8 @@ body,
   margin-top: 0;
   margin-bottom: 0;
   left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
+  width: 100svw;
+  margin-left: -50svw;
   background: transparent;
   box-sizing: border-box;
   overflow: visible;
@@ -379,7 +391,9 @@ body,
   top: auto;
   bottom: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
   left: 0;
-  right: 0;
+  right: auto;
+  width: 100svw;
+  box-sizing: border-box;
   height: auto;
   justify-content: center;
   align-items: flex-end;

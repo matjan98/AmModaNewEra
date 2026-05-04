@@ -271,11 +271,13 @@ function toggleHoursFab() {
 }
 
 function scrollToTop() {
-  document.querySelectorAll('.main-layout .q-page-container, .main-layout .q-page').forEach((node) => {
-    if (node instanceof HTMLElement) {
-      node.scrollTo({ top: 0, behavior: 'smooth' })
-    }
-  })
+  document
+    .querySelectorAll('.main-layout .q-page-container, .main-layout .q-page, .index-page__slider-pane')
+    .forEach((node) => {
+      if (node instanceof HTMLElement) {
+        node.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    })
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -284,7 +286,7 @@ function onLogoClick() {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', onWindowScroll, { passive: true })
+  document.addEventListener('scroll', onWindowScroll, { capture: true, passive: true })
   window.addEventListener('resize', onMobileHoursFabPlacementLayout, { passive: true })
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', onMobileHoursFabPlacementLayout)
@@ -294,7 +296,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', onWindowScroll)
+  document.removeEventListener('scroll', onWindowScroll, { capture: true, passive: true })
   window.removeEventListener('resize', onMobileHoursFabPlacementLayout)
   if (window.visualViewport) {
     window.visualViewport.removeEventListener('resize', onMobileHoursFabPlacementLayout)

@@ -16,9 +16,12 @@
     />
     <div class="index-page__shell">
       <main ref="mainRef" class="index-page__main">
-        <div class="index-page__panels-transition-wrap">
-          <transition :name="'index-page__slide-' + panelSlideDirection">
-            <div v-if="activeTab === 'info'" key="info" class="index-page__panels">
+        <div class="index-page__slider-viewport">
+          <div
+            class="index-page__slider-track"
+            :class="`index-page__slider-track--${activeTab}`"
+          >
+            <section ref="infoPaneRef" class="index-page__slider-pane index-page__slider-pane--info">
               <div class="index-page__panels-inner">
                 <IndexPageHeroIntroAtf
                   ref="heroIntroAtfComp"
@@ -30,68 +33,68 @@
                   :on-cta-click="scrollToPageBottomSlow"
                 />
 
-            <IndexPageQuickInfo
-              :phone-tel-href="PHONE_TEL_HREF"
-              :phone-display="PHONE_DISPLAY"
-              :quick-info-today-line="quickInfoTodayLine"
-              :facebook-url="facebookUrl"
-            />
+                <IndexPageQuickInfo
+                  :phone-tel-href="PHONE_TEL_HREF"
+                  :phone-display="PHONE_DISPLAY"
+                  :quick-info-today-line="quickInfoTodayLine"
+                  :facebook-url="facebookUrl"
+                />
 
-            <IndexPageProductCategories
-              :rows="sectionTwoRows"
-              :active-name="activeSectionTwoName"
-              :facebook-url="facebookUrl"
-              @toggle="toggleSectionTwoOverlay"
-              @image-load="onRevealSectionTwoImageLoad"
-            />
+                <IndexPageProductCategories
+                  :rows="sectionTwoRows"
+                  :active-name="activeSectionTwoName"
+                  :facebook-url="facebookUrl"
+                  @toggle="toggleSectionTwoOverlay"
+                  @image-load="onRevealSectionTwoImageLoad"
+                />
 
-            <IndexPageHeroIntroAfter
-              ref="heroIntroAfterComp"
-              :cta-css-vars="heroIntroCtaCssVars"
-              :image-src="heroIntroFirstImage"
-              :address-line="ADDRESS_LINE"
-              :cta-visible="heroIntroCtaVisible"
-              :yellow-top-hidden="heroIntroCtaVisible && !heroIntroAfterRedTakesOver"
-              :cta-floated="heroIntroAfterCtaFloated"
-              :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToPageBottomFast"
-            />
+                <IndexPageHeroIntroAfter
+                  ref="heroIntroAfterComp"
+                  :cta-css-vars="heroIntroCtaCssVars"
+                  :image-src="heroIntroFirstImage"
+                  :address-line="ADDRESS_LINE"
+                  :cta-visible="heroIntroCtaVisible"
+                  :yellow-top-hidden="heroIntroCtaVisible && !heroIntroAfterRedTakesOver"
+                  :cta-floated="heroIntroAfterCtaFloated"
+                  :on-image-load="onHeroIntroImageLoad"
+                  :on-cta-click="scrollToPageBottomFast"
+                />
 
-            <IndexPageStoreHours
-              v-model:expanded="storeHoursExpanded"
-              :opening-hours="OPENING_HOURS"
-              :today-store-day-index="todayStoreDayIndex"
-              :store-hours-heading-label="storeHoursHeadingLabel"
-            />
+                <IndexPageStoreHours
+                  v-model:expanded="storeHoursExpanded"
+                  :opening-hours="OPENING_HOURS"
+                  :today-store-day-index="todayStoreDayIndex"
+                  :store-hours-heading-label="storeHoursHeadingLabel"
+                />
 
-            <IndexPageHeroIntroThird
-              ref="heroIntroThirdComp"
-              :cta-css-vars="heroIntroCtaCssVars"
-              :image-src="heroIntroThirdImage"
-              :cta-visible="heroIntroCtaVisible"
-              :yellow-top-hidden="heroIntroCtaVisible && !heroIntroThirdRedTakesOver"
-              :cta-floated="heroIntroThirdCtaFloated"
-              :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToPageBottomFast"
-            />
+                <IndexPageHeroIntroThird
+                  ref="heroIntroThirdComp"
+                  :cta-css-vars="heroIntroCtaCssVars"
+                  :image-src="heroIntroThirdImage"
+                  :cta-visible="heroIntroCtaVisible"
+                  :yellow-top-hidden="heroIntroCtaVisible && !heroIntroThirdRedTakesOver"
+                  :cta-floated="heroIntroThirdCtaFloated"
+                  :on-image-load="onHeroIntroImageLoad"
+                  :on-cta-click="scrollToPageBottomFast"
+                />
 
-            <IndexPageShopBottomSections
-              ref="shopBottomSectionsRef"
-              :cta-css-vars="heroIntroCtaCssVars"
-              :hero-intro-cta-visible="heroIntroCtaVisible"
-              :hero-intro-facebook-cta-floated="heroIntroFacebookCtaFloated"
-              :facebook-shop-float-pop="facebookShopFloatPop"
-              :facebook-url="facebookUrl"
-              :maps-url="mapsUrl"
-            />
-            </div>
+                <IndexPageShopBottomSections
+                  ref="shopBottomSectionsRef"
+                  :cta-css-vars="heroIntroCtaCssVars"
+                  :hero-intro-cta-visible="heroIntroCtaVisible"
+                  :hero-intro-facebook-cta-floated="heroIntroFacebookCtaFloated"
+                  :facebook-shop-float-pop="facebookShopFloatPop"
+                  :facebook-url="facebookUrl"
+                  :maps-url="mapsUrl"
+                />
+              </div>
+            </section>
+            <section class="index-page__slider-pane index-page__slider-pane--gallery">
+              <IndexPageGalleryPanel
+                :observe-reveal-zoom-targets="observeRevealZoomTargets"
+              />
+            </section>
           </div>
-          <IndexPageGalleryPanel
-            v-else
-            key="gallery"
-            :observe-reveal-zoom-targets="observeRevealZoomTargets"
-          />
-        </transition>
         </div>
       </main>
     </div>
@@ -99,7 +102,8 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import IndexPageGalleryPanel from '../components/IndexPageGalleryPanel.vue'
 import IndexPageShopBottomSections from '../components/IndexPageShopBottomSections.vue'
 import IndexPageHeroIntroAtf from '../components/indexPage/IndexPageHeroIntroAtf.vue'
 import IndexPageHeroIntroAfter from '../components/indexPage/IndexPageHeroIntroAfter.vue'
@@ -115,16 +119,12 @@ import { useHeroCtas } from './indexPage/useHeroCtas.js'
 import { useSectionTwoGrid } from './indexPage/useSectionTwoGrid.js'
 import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
-import { animateWindowScrollTo } from '../utils/scrollAnimation.js'
+import { animateScrollTo } from '../utils/scrollAnimation.js'
 import { SMALL_SCREEN_MAX_WIDTH_PX } from '../constants/breakpoints.js'
 import heroIntroFirstImage from '../assets/main-photos/hero-2.webp'
 import heroIntroSecondImage from '../assets/main-photos/hero-1.webp'
 import heroIntroThirdImage from '../assets/main-photos/hero-3.webp'
 import facebookShopPhoto from '../assets/main-photos/hero-shop.webp'
-
-const IndexPageGalleryPanel = defineAsyncComponent(() =>
-  import('../components/IndexPageGalleryPanel.vue'),
-)
 
 const TAB_STORAGE_KEY = 'index-page-active-tab'
 const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
@@ -142,8 +142,8 @@ function getStoredTab() {
 }
 
 const activeTab = ref(getStoredTab())
-const panelSlideDirection = ref('left')
 const mainRef = ref(null)
+const infoPaneRef = ref(null)
 const shopBottomSectionsRef = ref(null)
 const facebookShopFloatPop = ref(false)
 const heroIntroCtaVisible = ref(false)
@@ -289,14 +289,10 @@ watch(
 
 
 function scrollToPageBottomWithDuration(totalMs) {
-  if (typeof window === 'undefined') return
-  const root = document.documentElement
-  const body = document.body
-  const scrollHeight = Math.max(root?.scrollHeight ?? 0, body?.scrollHeight ?? 0)
-  const clientHeight = root?.clientHeight ?? window.innerHeight ?? 0
-  const maxScrollTop = Math.max(0, scrollHeight - clientHeight)
-
-  animateWindowScrollTo({ top: maxScrollTop, totalMs })
+  const el = infoPaneRef.value
+  if (!el) return
+  const top = Math.max(0, el.scrollHeight - el.clientHeight)
+  animateScrollTo({ scroller: el, top, totalMs })
 }
 
 function scrollToPageBottomFast() {
@@ -340,12 +336,10 @@ function onRevealSectionTwoImageLoad() {
 }
 
 function goToGallery() {
-  panelSlideDirection.value = 'left'
   activeTab.value = 'gallery'
 }
 
 function goToInfo() {
-  panelSlideDirection.value = 'right'
   activeTab.value = 'info'
 }
 
