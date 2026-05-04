@@ -1,12 +1,14 @@
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useIntersectionObserver } from '../../composables/useIntersectionObserver.js'
 
-const HERO_CTA_IO_THRESHOLDS = Array.from({ length: 100 }, (_, i) => i / 99)
+const HERO_CTA_IO_THRESHOLDS = [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
 
 export function useHeroCtas({
-  heroIntroCtaVisible,
   onUpdate,
   getExtraObservedElements,
+  getFacebookPhotoEl,
+  getFacebookSectionEl,
+  heroCtaStackHeightPx = 96,
   heroCtaImageGapPx = 20,
   takeoverEpsilonPx = 0,
 }) {
@@ -34,28 +36,32 @@ export function useHeroCtas({
   const heroIntroAfterBottomCtaInViewport = ref(false)
   const heroIntroThirdBottomCtaInViewport = ref(false)
 
-  const heroIntroAfterYellowVisible = computed(
-    () =>
-      (heroIntroAfterCtaFloated.value && heroIntroCtaVisible.value) ||
-      (heroIntroAfterBottomCtaInViewport.value && heroIntroCtaVisible.value),
-  )
-
-  const heroIntroThirdYellowVisible = computed(
-    () =>
-      (heroIntroThirdCtaFloated.value && heroIntroCtaVisible.value) ||
-      (heroIntroThirdBottomCtaInViewport.value && heroIntroCtaVisible.value),
-  )
+  const heroIntroFacebookCtaFloated = ref(false)
+  const facebookShopCtaPassedOnce = ref(false)
 
   let heroCtaResizeAttached = false
   let heroCtaVisualViewportAttached = false
+  let scheduledRafId = 0
   const heroCtaIntersectionEnabled = ref(false)
 
   const heroCtaIntersection = useIntersectionObserver(
     () => {
-      onHeroCtaIntersection()
+      scheduleUpdateHeroCtaModes()
     },
     { threshold: HERO_CTA_IO_THRESHOLDS, enabled: heroCtaIntersectionEnabled },
   )
+
+  function scheduleUpdateHeroCtaModes() {
+    if (typeof window === 'undefined' || typeof requestAnimationFrame === 'undefined') {
+      updateHeroCtaModes()
+      return
+    }
+    if (scheduledRafId) return
+    scheduledRafId = requestAnimationFrame(() => {
+      scheduledRafId = 0
+      updateHeroCtaModes()
+    })
+  }
 
   function getViewportBottomClientY() {
     const vv = window.visualViewport
@@ -100,6 +106,36 @@ export function useHeroCtas({
     return true
   }
 
+  function computeFacebookShopCtaFloated(photoEl, sectionFallbackEl) {
+    if (facebookShopCtaPassedOnce.value) return false
+
+    const el = photoEl ?? sectionFallbackEl
+    if (!el) return false
+    const rect = el.getBoundingClientRect()
+    if (rect.height <= 0) return false
+
+    const viewportBottom = getViewportBottomClientY()
+    const epsilon = 0.5
+
+    if (rect.bottom <= 0 || rect.top >= viewportBottom) return false
+    if (rect.bottom <= viewportBottom + epsilon) return false
+
+    const floatedCtaCenterY = viewportBottom - heroCtaImageGapPx - heroCtaStackHeightPx / 2
+    const meetImageTop = floatedCtaCenterY - rect.height / 2
+
+    return rect.top > meetImageTop + epsilon
+  }
+
+  function updateFacebookShopSectionPassed() {
+    if (facebookShopCtaPassedOnce.value) return
+    const section = getFacebookSectionEl?.() ?? null
+    if (!section) return
+    const r = section.getBoundingClientRect()
+    if (r.bottom < 0) {
+      facebookShopCtaPassedOnce.value = true
+    }
+  }
+
   function updateHeroCtaModes() {
     heroIntroCtaFloated.value = computeHeroCtaFloated(heroIntroPhotoRef.value, heroIntroRef.value)
 
@@ -130,39 +166,45 @@ export function useHeroCtas({
       heroIntroThirdCtaRef.value,
     )
 
-    onUpdate?.()
-  }
+    heroIntroFacebookCtaFloated.value = computeFacebookShopCtaFloated(
+      getFacebookPhotoEl?.() ?? null,
+      getFacebookSectionEl?.() ?? null,
+    )
+    updateFacebookShopSectionPassed()
 
-  function onHeroCtaIntersection() {
-    updateHeroCtaModes()
+    onUpdate?.()
   }
 
   function setupHeroCtaIntersection(on) {
     if (!on) {
       heroCtaIntersectionEnabled.value = false
       heroCtaIntersection.stop()
+      if (scheduledRafId && typeof cancelAnimationFrame !== 'undefined') {
+        cancelAnimationFrame(scheduledRafId)
+        scheduledRafId = 0
+      }
       if (heroCtaResizeAttached) {
-        window.removeEventListener('resize', updateHeroCtaModes)
+        window.removeEventListener('resize', scheduleUpdateHeroCtaModes)
         heroCtaResizeAttached = false
       }
       if (heroCtaVisualViewportAttached && window.visualViewport) {
         const vv = window.visualViewport
-        vv.removeEventListener('resize', updateHeroCtaModes)
-        vv.removeEventListener('scroll', updateHeroCtaModes)
+        vv.removeEventListener('resize', scheduleUpdateHeroCtaModes)
+        vv.removeEventListener('scroll', scheduleUpdateHeroCtaModes)
         heroCtaVisualViewportAttached = false
       }
       return
     }
 
     if (!heroCtaResizeAttached) {
-      window.addEventListener('resize', updateHeroCtaModes)
+      window.addEventListener('resize', scheduleUpdateHeroCtaModes)
       heroCtaResizeAttached = true
     }
 
     if (!heroCtaVisualViewportAttached && window.visualViewport) {
       const vv = window.visualViewport
-      vv.addEventListener('resize', updateHeroCtaModes)
-      vv.addEventListener('scroll', updateHeroCtaModes)
+      vv.addEventListener('resize', scheduleUpdateHeroCtaModes)
+      vv.addEventListener('scroll', scheduleUpdateHeroCtaModes)
       heroCtaVisualViewportAttached = true
     }
 
@@ -199,8 +241,8 @@ export function useHeroCtas({
     heroIntroThirdCtaFloated,
     heroIntroAfterRedTakesOver,
     heroIntroThirdRedTakesOver,
-    heroIntroAfterYellowVisible,
-    heroIntroThirdYellowVisible,
+    heroIntroFacebookCtaFloated,
+    facebookShopCtaPassedOnce,
     updateHeroCtaModes,
     setupHeroCtaIntersection,
   }

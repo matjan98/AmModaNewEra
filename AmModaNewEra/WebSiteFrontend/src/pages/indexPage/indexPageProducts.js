@@ -1,19 +1,19 @@
-import productsBizuteria from '../../assets/Main photos/Produkty/bizuteria.webp'
-import productsBluzka from '../../assets/Main photos/Produkty/bluzka.webp'
-import productsBonPodarunkowy from '../../assets/Main photos/Produkty/bon_podarunkowy.webp'
-import productsButy from '../../assets/Main photos/Produkty/buty.webp'
-import productsCzapka from '../../assets/Main photos/Produkty/czapka.webp'
-import productsKardigan from '../../assets/Main photos/Produkty/kardigan.webp'
-import productsKomplet from '../../assets/Main photos/Produkty/komplet.webp'
-import productsKurtka from '../../assets/Main photos/Produkty/kurtka.webp'
-import productsMarynarka from '../../assets/Main photos/Produkty/marynarka.webp'
-import productsPeruka from '../../assets/Main photos/Produkty/peruka.webp'
-import productsPlaszcz from '../../assets/Main photos/Produkty/plaszcz.webp'
-import productsPortfel from '../../assets/Main photos/Produkty/portfel.webp'
-import productsRajstopy from '../../assets/Main photos/Produkty/rajstopy.webp'
-import productsSpodnie from '../../assets/Main photos/Produkty/spodnie.webp'
-import productsSukienka from '../../assets/Main photos/Produkty/sukienka.webp'
-import productsTorebka from '../../assets/Main photos/Produkty/torebka.webp'
+import productsBizuteria from '../../assets/main-photos/product-categories/bizuteria.webp'
+import productsBluzka from '../../assets/main-photos/product-categories/bluzka.webp'
+import productsBonPodarunkowy from '../../assets/main-photos/product-categories/bon_podarunkowy.webp'
+import productsButy from '../../assets/main-photos/product-categories/buty.webp'
+import productsCzapka from '../../assets/main-photos/product-categories/czapka.webp'
+import productsKardigan from '../../assets/main-photos/product-categories/kardigan.webp'
+import productsKomplet from '../../assets/main-photos/product-categories/komplet.webp'
+import productsKurtka from '../../assets/main-photos/product-categories/kurtka.webp'
+import productsMarynarka from '../../assets/main-photos/product-categories/marynarka.webp'
+import productsPeruka from '../../assets/main-photos/product-categories/peruka.webp'
+import productsPlaszcz from '../../assets/main-photos/product-categories/plaszcz.webp'
+import productsPortfel from '../../assets/main-photos/product-categories/portfel.webp'
+import productsRajstopy from '../../assets/main-photos/product-categories/rajstopy.webp'
+import productsSpodnie from '../../assets/main-photos/product-categories/spodnie.webp'
+import productsSukienka from '../../assets/main-photos/product-categories/sukienka.webp'
+import productsTorebka from '../../assets/main-photos/product-categories/torebka.webp'
 
 export const sectionTwoItems = [
   { name: 'Sukienki', photo: productsSukienka },
@@ -23,7 +23,7 @@ export const sectionTwoItems = [
   { name: 'Kardigany', photo: productsKardigan },
   { name: 'Kurtki', photo: productsKurtka },
   { name: 'Marynarki', photo: productsMarynarka },
-  { name: 'Plaszcze', photo: productsPlaszcz },
+  { name: 'Płaszcze', photo: productsPlaszcz },
   { name: 'Buty', photo: productsButy },
   { name: 'Czapki', photo: productsCzapka },
   { name: 'Torebki', photo: productsTorebka },
@@ -33,4 +33,3 @@ export const sectionTwoItems = [
   { name: 'Biżuteria', photo: productsBizuteria },
   { name: 'Bony podarunkowe', photo: productsBonPodarunkowy },
 ]
-

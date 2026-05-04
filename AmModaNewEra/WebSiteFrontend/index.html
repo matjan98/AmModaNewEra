@@ -1,29 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
   <head>
     <title><%= productName %></title>
 
     <meta charset="utf-8">
     <meta name="description" content="<%= productDescription %>">
+    <meta name="theme-color" content="#E61971">
     <meta property="og:type" content="website">
     <meta property="og:title" content="<%= productName %>">
     <meta property="og:description" content="<%= productDescription %>">
+    <meta property="og:locale" content="pl_PL">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="<%= productName %>">
     <meta name="twitter:description" content="<%= productDescription %>">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>">
+    <meta name="viewport" content="width=device-width, initial-scale=1<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>">
+
+    <!--
+      TODO: Once production domain is decided, add:
+      <link rel="canonical" href="https://example.com/">
+      <meta property="og:url" content="https://example.com/">
+      <meta property="og:image" content="https://example.com/og-image.webp">
+    -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ClothingStore",
+      "name": "A&M Moda Damska",
+      "description": "Butik z modą damską w Kozach. Sukienki, komplety, bluzki, kurtki, dodatki.",
+      "telephone": "+48503115446",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ul. Bielska 166",
+        "addressLocality": "Kozy",
+        "postalCode": "43-340",
+        "addressCountry": "PL"
+      },
+      "openingHoursSpecification": [
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Monday",    "opens": "09:00", "closes": "18:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Tuesday",   "opens": "09:00", "closes": "18:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "09:00", "closes": "18:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday",  "opens": "09:00", "closes": "18:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Friday",    "opens": "09:00", "closes": "18:00" },
+        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday",  "opens": "09:00", "closes": "14:00" }
+      ],
+      "sameAs": [
+        "https://www.facebook.com/AMModaDamska/"
+      ]
+    }
+    </script>
   </head>
   <body>
     <!-- quasar:entry-point -->

@@ -164,9 +164,7 @@ const todayPillParts = computed(() => {
   line-height: 1.25;
   color: #ffffff;
   border-radius: 8px;
-  background: rgba(255, 105, 180, 0.14);
-  backdrop-filter: blur(12px) saturate(1.35);
-  -webkit-backdrop-filter: blur(12px) saturate(1.35);
+  background: rgba(255, 105, 180, 0.18);
   box-shadow:
     inset 0 0 0 1px rgba(255, 170, 210, 0.5),
     0 1px 12px rgba(255, 120, 180, 0.12);

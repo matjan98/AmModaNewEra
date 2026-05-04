@@ -1,21 +1,22 @@
 <template>
   <section
-    :ref="setHeroIntroThirdEl"
+    ref="rootEl"
     class="index-page__hero-intro index-page__hero-intro--maps-underlay-cover"
     :style="ctaCssVars"
   >
     <div
-      :ref="setHeroIntroThirdPhotoEl"
+      ref="photoEl"
       class="index-page__hero-intro-photo index-page__reveal-media"
     >
       <img
         :src="imageSrc"
         alt=""
         class="index-page__hero-intro-photo-img index-page__reveal-media-img"
+        loading="lazy"
+        decoding="async"
         @load="onImageLoad"
       >
     </div>
-    <!-- AI_ALIAS: heroIntroMain3_topStickyCta ("górny stały") -->
     <div
       class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--top"
       :class="{ 'index-page__hero-intro-sticky-cta--hidden': yellowTopHidden }"
@@ -32,7 +33,7 @@
         </div>
         <div class="index-page__hero-intro-btn-row">
           <button
-            :ref="setHeroIntroThirdTopCtaBtnEl"
+            ref="topCtaBtnEl"
             type="button"
             class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--visible"
             @click="onCtaClick"
@@ -42,12 +43,11 @@
         </div>
       </div>
     </div>
-    <!-- AI_ALIAS: heroIntroMain3_bottomStickyCta ("dolny stały" when not floated; "fixed" when --floated) -->
     <div
       class="index-page__hero-intro-sticky-cta"
       :class="{ 'index-page__hero-intro-sticky-cta--floated': ctaFloated }"
     >
-      <div :ref="setHeroIntroThirdCtaEl" class="index-page__hero-intro-cta-block">
+      <div ref="ctaEl" class="index-page__hero-intro-cta-block">
         <div class="index-page__hero-intro-address-row">
           <p
             class="index-page__hero-intro-address"
@@ -76,6 +76,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 defineProps({
   ctaCssVars: { type: Object, required: true },
   imageSrc: { type: String, required: true },
@@ -84,9 +86,12 @@ defineProps({
   ctaFloated: { type: Boolean, required: true },
   onImageLoad: { type: Function, required: true },
   onCtaClick: { type: Function, required: true },
-  setHeroIntroThirdEl: { type: Function, required: true },
-  setHeroIntroThirdPhotoEl: { type: Function, required: true },
-  setHeroIntroThirdCtaEl: { type: Function, required: true },
-  setHeroIntroThirdTopCtaBtnEl: { type: Function, required: true },
 })
+
+const rootEl = ref(null)
+const photoEl = ref(null)
+const ctaEl = ref(null)
+const topCtaBtnEl = ref(null)
+
+defineExpose({ rootEl, photoEl, ctaEl, topCtaBtnEl })
 </script>

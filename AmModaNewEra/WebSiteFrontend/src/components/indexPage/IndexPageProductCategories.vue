@@ -1,5 +1,5 @@
 <template>
-  <section class="index-page-product-categories" aria-label="Kategorie produktów">
+  <section ref="rootRef" class="index-page-product-categories" aria-label="Kategorie produktów">
     <div class="index-page-product-categories__grid">
       <div
         v-for="(row, rowIndex) in rows"
@@ -30,7 +30,8 @@
                   :href="facebookUrl"
                   target="_blank"
                   rel="noopener"
-                  class="index-page-product-categories__facebook-cta-btn index-page-product-categories__facebook-cta-btn--below index-page-product-categories__facebook-cta-btn--section-two-overlay"
+                  class="index-page-product-categories__facebook-cta-btn index-page-product-categories__facebook-cta-btn--below index-page-product-categories__facebook-cta-btn--section-two-overlay am-shine-glow"
+                  :class="{ 'am-shine-glow--paused': !shineActive }"
                   aria-label="Otwórz Facebook AM Moda Damska w nowej karcie"
                   @click.stop
                 >
@@ -55,6 +56,9 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+import { useIntersectionObserver } from '../../composables/useIntersectionObserver.js'
+
 defineProps({
   rows: {
     type: Array,
@@ -71,6 +75,17 @@ defineProps({
 })
 
 const emit = defineEmits(['toggle', 'imageLoad'])
+
+const rootRef = ref(null)
+const shineActive = ref(false)
+
+useIntersectionObserver(
+  (entry) => {
+    shineActive.value = Boolean(entry?.isIntersecting)
+  },
+  { threshold: 0 },
+  rootRef,
+)
 </script>
 
 <style scoped>
@@ -232,36 +247,6 @@ const emit = defineEmits(['toggle', 'imageLoad'])
   overflow: hidden;
   gap: 10px;
   color: #ffffff;
-  animation: index-page-product-categories-facebook-below-shine-glow 6s ease-in-out infinite;
-}
-
-@keyframes index-page-product-categories-facebook-below-shine-glow {
-  0%,
-  52%,
-  100% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.28),
-      0 10px 34px rgba(24, 119, 242, 0.38),
-      0 0 14px rgba(140, 200, 255, 0.2),
-      0 12px 40px rgba(0, 0, 0, 0.42);
-  }
-  26% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.38),
-      0 12px 42px rgba(24, 119, 242, 0.52),
-      0 0 28px rgba(180, 230, 255, 0.45),
-      0 12px 40px rgba(0, 0, 0, 0.38);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .index-page-product-categories__facebook-cta-btn--below {
-    animation: none;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.28),
-      0 10px 34px rgba(24, 119, 242, 0.38),
-      0 12px 40px rgba(0, 0, 0, 0.42);
-  }
 }
 
 .index-page-product-categories__facebook-cta-btn:focus-visible {

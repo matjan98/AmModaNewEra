@@ -16,7 +16,8 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: [
-      'app.css'
+      'app.css',
+      'index-page.css'
     ],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
@@ -49,9 +50,7 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
-      env: {
-        VITE_API_BASE: process.env.VITE_API_BASE || ''
-      },
+      // env: {},
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

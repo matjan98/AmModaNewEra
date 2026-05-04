@@ -65,39 +65,45 @@ const props = defineProps({
 
 const photoList = ref([])
 const cacheBust = ref(0)
+const productPhotos = ref([])
 
 const photoDims = ref(new Map())
 const pswpLightbox = ref(null)
 
 const photoListWithUrls = computed(() =>
-  photoList.value.map((p) => ({
-    ...p,
-    urlWithCache: getApiUrl(p.url) + '&t=' + cacheBust.value,
-  })),
+  photoList.value.map((p) => {
+    const baseUrl = getApiUrl(p.url)
+    const separator = baseUrl.includes('?') ? '&' : '?'
+    return {
+      ...p,
+      urlWithCache: `${baseUrl}${separator}t=${cacheBust.value}`,
+    }
+  }),
 )
 
-const productPhotos = computed(() => {
-  const files = import.meta.glob('../assets/Product photos/*.{jpg,jpeg,png,webp,gif}', {
-    eager: true,
-    as: 'url',
+async function loadProductPhotos() {
+  const files = import.meta.glob('../assets/gallery/*.{jpg,jpeg,png,webp,gif}', {
+    query: '?url',
+    import: 'default',
   })
 
-  return Object.entries(files)
-    .sort(([a], [b]) => {
-      const aName = a.split('/').pop() ?? a
-      const bName = b.split('/').pop() ?? b
-      const aNum = Number.parseInt(aName, 10)
-      const bNum = Number.parseInt(bName, 10)
+  const sortedEntries = Object.entries(files).sort(([a], [b]) => {
+    const aName = a.split('/').pop() ?? a
+    const bName = b.split('/').pop() ?? b
+    const aNum = Number.parseInt(aName, 10)
+    const bNum = Number.parseInt(bName, 10)
 
-      const aHasNum = Number.isFinite(aNum)
-      const bHasNum = Number.isFinite(bNum)
-      if (aHasNum && bHasNum) return aNum - bNum
-      if (aHasNum) return -1
-      if (bHasNum) return 1
-      return aName.localeCompare(bName)
-    })
-    .map(([, url]) => url)
-})
+    const aHasNum = Number.isFinite(aNum)
+    const bHasNum = Number.isFinite(bNum)
+    if (aHasNum && bHasNum) return aNum - bNum
+    if (aHasNum) return -1
+    if (bHasNum) return 1
+    return aName.localeCompare(bName)
+  })
+
+  const urls = await Promise.all(sortedEntries.map(([, loader]) => loader()))
+  productPhotos.value = urls
+}
 
 const lightboxPhotoList = computed(() => {
   const urls = []
@@ -174,7 +180,8 @@ function onThumbClick(url, ev) {
   lb.loadAndOpen(index)
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await loadProductPhotos()
   loadPhotos()
   for (const url of lightboxPhotoList.value) preloadDims(url)
 
@@ -186,6 +193,8 @@ onMounted(() => {
   })
   lb.init()
   pswpLightbox.value = lb
+  await nextTick()
+  props.observeRevealZoomTargets?.()
 })
 
 onUnmounted(() => {

@@ -1,7 +1,7 @@
 <template>
   <div class="index-page-nav-buttons index-page-nav-buttons__fixed">
     <button
-      v-if="showGalleryNavButton && activeTab === 'info'"
+      v-if="activeTab === 'info'"
       type="button"
       class="index-page-nav-buttons__btn index-page-nav-buttons__btn--right text-primary"
       @click="$emit('goToGallery')"
@@ -26,10 +26,6 @@ defineProps({
   activeTab: {
     type: String,
     required: true,
-  },
-  showGalleryNavButton: {
-    type: Boolean,
-    default: true,
   },
 })
 

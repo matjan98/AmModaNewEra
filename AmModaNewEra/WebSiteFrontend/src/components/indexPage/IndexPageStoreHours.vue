@@ -1,9 +1,7 @@
 <template>
   <section
-    class="index-page-store-hours index-page-store-hours__banner"
-    :class="{ 'index-page-store-hours__banner--intro-visible': introRevealed }"
+    class="index-page-store-hours index-page-store-hours__banner index-page-store-hours__banner--intro-visible"
     :aria-label="`${storeHoursHeadingLabel}, harmonogram tygodnia`"
-    :aria-hidden="introRevealed ? undefined : true"
   >
     <h3 class="index-page-store-hours__heading index-page-store-hours__reveal-line">
       {{ storeHoursHeadingLabel }}
@@ -64,10 +62,6 @@ defineProps({
   expanded: {
     type: Boolean,
     required: true,
-  },
-  introRevealed: {
-    type: Boolean,
-    default: true,
   },
 })
 
@@ -148,7 +142,7 @@ defineEmits(['update:expanded'])
   justify-content: center;
   margin: clamp(12px, 3vw, 19px) auto 0;
   padding: 4px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   background:
     linear-gradient(
@@ -160,7 +154,6 @@ defineEmits(['update:expanded'])
     rgba(10, 10, 14, 0.46);
   backdrop-filter: blur(18px) saturate(1.25);
   -webkit-backdrop-filter: blur(18px) saturate(1.25);
-  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ffffff;
   cursor: pointer;
   box-shadow:
@@ -211,8 +204,6 @@ defineEmits(['update:expanded'])
     ),
     rgba(8, 8, 12, 0.44);
   background-clip: padding-box;
-  backdrop-filter: blur(18px) saturate(1.25);
-  -webkit-backdrop-filter: blur(18px) saturate(1.25);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -242,14 +233,10 @@ defineEmits(['update:expanded'])
   border: none;
   box-shadow: none;
   background: transparent !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
 }
 
 .index-page-store-hours__row--today {
   background: rgba(255, 105, 180, 0.14);
-  backdrop-filter: blur(12px) saturate(1.35);
-  -webkit-backdrop-filter: blur(12px) saturate(1.35);
   border-color: rgba(255, 170, 210, 0.5);
   box-shadow:
     inset 0 0 0 1px rgba(255, 170, 210, 0.5),
@@ -263,8 +250,6 @@ defineEmits(['update:expanded'])
 
 .index-page-store-hours__row:not(.index-page-store-hours__row--today) {
   background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   border: none;
   box-shadow: none;
 }

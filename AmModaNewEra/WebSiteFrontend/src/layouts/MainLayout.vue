@@ -1,12 +1,10 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="main-layout">
     <q-header
-      ref="headerRef"
       class="main-layout__header"
       unelevated
       :class="{
-        'main-layout__header--scrolled': useSidesLayout,
-        'main-layout__header--solid': headerSolidBarActive
+        'main-layout__header--scrolled': useSidesLayout
       }"
     >
       <div class="main-layout__header-inner" :class="{ 'main-layout__header-inner--scrolled': useSidesLayout }">
@@ -32,34 +30,16 @@
             {{ PHONE_DISPLAY }}
           </a>
           <div class="main-layout__hours-toggle-wrap">
-            <button
-              type="button"
-              class="main-layout__open-status"
-              :class="{ 'main-layout__open-status--expanded': hoursExpanded }"
-              @click="hoursExpanded = !hoursExpanded"
-            >
-              <span>
-                <span v-if="isOpenToday">
-                  <span class="main-layout__hours-label">Dzisiaj otwarte:</span>
-                  <span class="main-layout__hours-value">{{ todayHours }}</span>
-                </span>
-                <span v-else>
-                  Dzisiaj zamknięte
-                </span>
-              </span>
-              <q-icon :name="hoursExpanded ? 'expand_less' : 'expand_more'" size="20px" class="main-layout__hours-chevron" />
-            </button>
-            <div v-show="hoursExpanded" class="main-layout__hours-dropdown">
-              <div
-                v-for="row in openingHours"
-                :key="row.label"
-                class="main-layout__hours-row"
-                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
-              >
-                <span class="main-layout__hours-day">{{ row.label }}</span>
-                <span class="main-layout__hours-time">{{ row.hours }}</span>
-              </div>
-            </div>
+            <OpenStatusButton
+              v-model:expanded="hoursExpanded"
+              :is-open-today="isOpenToday"
+              :today-hours="todayHours"
+            />
+            <HoursDropdown
+              v-show="hoursExpanded"
+              :rows="openingHours"
+              :today-day-index="todayDayIndex"
+            />
           </div>
         </div>
 
@@ -74,48 +54,24 @@
             >
               <q-icon name="fa-regular fa-clock" size="22px" />
             </button>
-            <div v-show="hoursExpanded" class="main-layout__hours-dropdown">
-              <div
-                v-for="row in openingHours"
-                :key="row.label"
-                class="main-layout__hours-row"
-                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
-              >
-                <span class="main-layout__hours-day">{{ row.label }}</span>
-                <span class="main-layout__hours-time">{{ row.hours }}</span>
-              </div>
-            </div>
+            <HoursDropdown
+              v-show="hoursExpanded"
+              :rows="openingHours"
+              :today-day-index="todayDayIndex"
+            />
           </div>
 
           <div v-else class="main-layout__hours-toggle-wrap">
-            <button
-              type="button"
-              class="main-layout__open-status"
-              :class="{ 'main-layout__open-status--expanded': hoursExpanded }"
-              @click="hoursExpanded = !hoursExpanded"
-            >
-              <span>
-                <span v-if="isOpenToday">
-                  <span class="main-layout__hours-label">Dzisiaj otwarte:</span>
-                  <span class="main-layout__hours-value">{{ todayHours }}</span>
-                </span>
-                <span v-else>
-                  Dzisiaj zamknięte
-                </span>
-              </span>
-              <q-icon :name="hoursExpanded ? 'expand_less' : 'expand_more'" size="20px" class="main-layout__hours-chevron" />
-            </button>
-            <div v-show="hoursExpanded" class="main-layout__hours-dropdown">
-              <div
-                v-for="row in openingHours"
-                :key="row.label"
-                class="main-layout__hours-row"
-                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
-              >
-                <span class="main-layout__hours-day">{{ row.label }}</span>
-                <span class="main-layout__hours-time">{{ row.hours }}</span>
-              </div>
-            </div>
+            <OpenStatusButton
+              v-model:expanded="hoursExpanded"
+              :is-open-today="isOpenToday"
+              :today-hours="todayHours"
+            />
+            <HoursDropdown
+              v-show="hoursExpanded"
+              :rows="openingHours"
+              :today-day-index="todayDayIndex"
+            />
           </div>
         </div>
 
@@ -189,22 +145,14 @@
                 aria-hidden="true"
               />
             </button>
-            <div
+            <HoursDropdown
               ref="mobileHoursFabPanelRef"
               v-show="hoursExpanded"
-              class="main-layout__mobile-fab-panel main-layout__hours-dropdown"
+              class="main-layout__mobile-fab-panel"
               :class="{ 'main-layout__mobile-fab-panel--flip-up': mobileHoursFabPanelFlipUp }"
-            >
-              <div
-                v-for="row in openingHours"
-                :key="'mobile-' + row.label"
-                class="main-layout__hours-row"
-                :class="{ 'main-layout__hours-row--today': row.dayIndex === todayDayIndex }"
-              >
-                <span class="main-layout__hours-day">{{ row.label }}</span>
-                <span class="main-layout__hours-time">{{ row.hours }}</span>
-              </div>
-            </div>
+              :rows="openingHours"
+              :today-day-index="todayDayIndex"
+            />
           </div>
         </div>
       </div>
@@ -213,48 +161,34 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, provide, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
+import HoursDropdown from '../components/layout/HoursDropdown.vue'
+import OpenStatusButton from '../components/layout/OpenStatusButton.vue'
+
+const HOURS_FAB_PANEL_GAP_PX = 8
 
 const { matches: isSmallScreen } = useIsSmallScreen()
-const useSidesLayout = computed(() => !isSmallScreen.value)
-
-function clearHeaderSolidState() {
-  if (headerSolidifyTimer != null) {
-    clearTimeout(headerSolidifyTimer)
-    headerSolidifyTimer = null
-  }
-  headerSolid.value = false
-}
-
-watch(isSmallScreen, (next, prev) => {
-  if (!next) {
-    clearHeaderSolidState()
-    return
-  }
-  if (!prev && next) {
-    nextTick(() => {
-      updateHeaderSolidFromScroll()
-    })
-  }
+const { todayDayIndex, todayHours, isOpenToday, isStoreOpenNow } = useOpeningHours(OPENING_HOURS, {
+  liveClock: true,
 })
 
 const openingHours = OPENING_HOURS
-
 const hoursExpanded = ref(false)
-
+const phoneFabExpanded = ref(false)
 const mobileHoursFabBtnRef = ref(null)
 const mobileHoursFabPanelRef = ref(null)
-
 const mobileHoursFabPanelFlipUp = ref(false)
-const HOURS_FAB_PANEL_GAP_PX = 8
+
+const useSidesLayout = computed(() => !isSmallScreen.value)
 
 function updateMobileHoursFabPanelPlacement() {
   if (!hoursExpanded.value) return
   const btn = mobileHoursFabBtnRef.value
-  const panel = mobileHoursFabPanelRef.value
+  const panelComp = mobileHoursFabPanelRef.value
+  const panel = panelComp?.rootEl ?? panelComp
   if (!btn || !panel) return
 
   const btnRect = btn.getBoundingClientRect()
@@ -298,80 +232,6 @@ watch(hoursExpanded, (open) => {
   })
 })
 
-
-const { todayDayIndex, todayHours, isOpenToday, isStoreOpenNow } = useOpeningHours(openingHours, {
-  liveClock: true,
-})
-
-const headerRef = ref(null)
-provide('layoutHeaderRef', headerRef)
-
-
-const headerSolid = ref(false)
-
-const headerSolidBarActive = computed(() => headerSolid.value && isSmallScreen.value)
-let headerSolidifyTimer = null
-const HEADER_SOLID_DELAY_MS = 100
-
-const HEADER_TOP_SCROLL_EPSILON_PX = 2
-
-
-let headerScrollRootListeners = []
-
-function getEffectiveScrollY() {
-  let y = window.scrollY ?? window.pageYOffset ?? 0
-  const use = (v) => {
-    if (typeof v === 'number' && !Number.isNaN(v)) y = Math.max(y, v)
-  }
-  use(document.documentElement?.scrollTop)
-  use(document.body?.scrollTop)
-  if (document.scrollingElement) use(document.scrollingElement.scrollTop)
-  document.querySelectorAll('.main-layout .q-page-container, .main-layout .q-page').forEach((node) => {
-    if (node instanceof HTMLElement) use(node.scrollTop)
-  })
-  return y
-}
-
-function refreshHeaderScrollRootListeners() {
-  headerScrollRootListeners.forEach(({ el, handler }) => {
-    el.removeEventListener('scroll', handler)
-  })
-  headerScrollRootListeners = []
-  const handler = () => {
-    onWindowScroll()
-  }
-  document.querySelectorAll('.main-layout .q-page-container, .main-layout .q-page').forEach((node) => {
-    if (!(node instanceof HTMLElement)) return
-    node.addEventListener('scroll', handler, { passive: true })
-    headerScrollRootListeners.push({ el: node, handler })
-  })
-}
-
-function updateHeaderSolidFromScroll() {
-  if (!isSmallScreen.value) {
-    clearHeaderSolidState()
-    return
-  }
-  const y = getEffectiveScrollY()
-  if (y <= HEADER_TOP_SCROLL_EPSILON_PX) {
-    clearHeaderSolidState()
-    return
-  }
-  if (headerSolid.value) return
-  if (headerSolidifyTimer != null) return
-  headerSolidifyTimer = window.setTimeout(() => {
-    headerSolidifyTimer = null
-    if (!isSmallScreen.value) {
-      clearHeaderSolidState()
-      return
-    }
-    const y2 = getEffectiveScrollY()
-    if (y2 > HEADER_TOP_SCROLL_EPSILON_PX) {
-      headerSolid.value = true
-    }
-  }, HEADER_SOLID_DELAY_MS)
-}
-
 function closeHoursDropdown() {
   hoursExpanded.value = false
 }
@@ -381,11 +241,9 @@ function closePhoneFab() {
 }
 
 function onWindowScroll() {
-  updateHeaderSolidFromScroll()
   if (hoursExpanded.value) closeHoursDropdown()
   if (phoneFabExpanded.value) closePhoneFab()
 }
-
 
 function onDocumentPointerDownOutsideHours(event) {
   const target = event.target
@@ -401,8 +259,6 @@ function onDocumentPointerDownOutsideHours(event) {
     if (!target.closest('.main-layout__mobile-fab-phone')) closePhoneFab()
   }
 }
-
-const phoneFabExpanded = ref(false)
 
 function togglePhoneFab() {
   phoneFabExpanded.value = !phoneFabExpanded.value
@@ -429,10 +285,6 @@ function onLogoClick() {
 
 onMounted(() => {
   window.addEventListener('scroll', onWindowScroll, { passive: true })
-  nextTick(() => {
-    refreshHeaderScrollRootListeners()
-    updateHeaderSolidFromScroll()
-  })
   window.addEventListener('resize', onMobileHoursFabPlacementLayout, { passive: true })
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', onMobileHoursFabPlacementLayout)
@@ -440,15 +292,8 @@ onMounted(() => {
   }
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
 })
+
 onUnmounted(() => {
-  if (headerSolidifyTimer != null) {
-    clearTimeout(headerSolidifyTimer)
-    headerSolidifyTimer = null
-  }
-  headerScrollRootListeners.forEach(({ el, handler }) => {
-    el.removeEventListener('scroll', handler)
-  })
-  headerScrollRootListeners = []
   window.removeEventListener('scroll', onWindowScroll)
   window.removeEventListener('resize', onMobileHoursFabPlacementLayout)
   if (window.visualViewport) {
@@ -472,13 +317,6 @@ onUnmounted(() => {
   -webkit-backdrop-filter: none;
   border-bottom: none;
   overflow: visible;
-  transition: background-color 0.5s ease;
-}
-
-
-.main-layout__header.main-layout__header--solid {
-  background: transparent;
-  border-bottom: none;
 }
 
 .main-layout__page-container {
@@ -723,9 +561,7 @@ onUnmounted(() => {
   min-height: 34px;
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  background: rgba(255, 255, 255, 0.85);
   box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
@@ -759,116 +595,9 @@ onUnmounted(() => {
   position: relative;
 }
 
-.main-layout__open-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 30px;
-  padding: 6px 11px;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  background: transparent;
-  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-
-.main-layout__header .main-layout__open-status,
-.main-layout__header button.main-layout__open-status {
-  padding: 6px 13px;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.78) !important;
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.95) !important;
-  box-shadow:
-    0 4px 18px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  color: #141414 !important;
-  -webkit-text-fill-color: #141414;
-  transition: background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.main-layout__header .main-layout__open-status:hover,
-.main-layout__header button.main-layout__open-status:hover {
-  background: rgba(255, 255, 255, 0.92) !important;
-  box-shadow:
-    0 6px 22px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-}
-
-.main-layout__header .main-layout__open-status span {
-  color: inherit !important;
-}
-
-.main-layout__header .main-layout__open-status :deep(.q-icon),
-.main-layout__header .main-layout__open-status .main-layout__hours-chevron {
+.main-layout__header .main-layout__open-status :deep(.q-icon) {
   color: #141414 !important;
   opacity: 1 !important;
-}
-
-.main-layout__hours-chevron {
-  margin-left: 2px;
-  flex-shrink: 0;
-}
-
-.main-layout__hours-value {
-  margin-left: 10px;
-  font-weight: 600;
-}
-
-.main-layout__hours-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 6px;
-  min-width: 260px;
-  max-width: calc(100vw - 24px);
-  padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(18px) saturate(1.25);
-  -webkit-backdrop-filter: blur(18px) saturate(1.25);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  z-index: 1100;
-  box-sizing: border-box;
-}
-
-.main-layout__hours-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 20px;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  margin: 0 -8px;
-  color: #1a1a1a;
-  border-radius: 6px;
-}
-
-.main-layout__hours-row--today {
-  background: rgba(0, 0, 0, 0.055);
-}
-
-.main-layout__hours-day {
-  text-transform: capitalize;
-  color: rgba(0, 0, 0, 0.52);
-  flex-shrink: 0;
-  font-weight: 400;
-}
-
-.main-layout__hours-time {
-  font-weight: 600;
-  white-space: nowrap;
-  text-align: right;
-  flex-shrink: 0;
-  color: #121212;
 }
 
 .main-layout__fab-column {
@@ -1214,5 +943,119 @@ onUnmounted(() => {
   height: 22px;
   display: block;
   flex-shrink: 0;
+}
+</style>
+
+<style>
+/* Shared hours-related styles (unscoped so child components HoursDropdown.vue
+ * and OpenStatusButton.vue can pick them up). */
+.main-layout__open-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 6px 11px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.main-layout__header .main-layout__open-status,
+.main-layout__header button.main-layout__open-status {
+  padding: 6px 13px;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  color: #141414 !important;
+  -webkit-text-fill-color: #141414;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.main-layout__header .main-layout__open-status:hover,
+.main-layout__header button.main-layout__open-status:hover {
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.main-layout__header .main-layout__open-status span {
+  color: inherit !important;
+}
+
+.main-layout__header .main-layout__open-status .main-layout__hours-chevron {
+  color: #141414 !important;
+  opacity: 1 !important;
+}
+
+.main-layout__hours-chevron {
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.main-layout__hours-value {
+  margin-left: 10px;
+  font-weight: 600;
+}
+
+.main-layout__hours-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  min-width: 260px;
+  max-width: calc(100vw - 24px);
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  z-index: 1100;
+  box-sizing: border-box;
+}
+
+.main-layout__hours-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  margin: 0 -8px;
+  color: #1a1a1a;
+  border-radius: 6px;
+}
+
+.main-layout__hours-row--today {
+  background: rgba(0, 0, 0, 0.055);
+}
+
+.main-layout__hours-day {
+  text-transform: capitalize;
+  color: rgba(0, 0, 0, 0.52);
+  flex-shrink: 0;
+  font-weight: 400;
+}
+
+.main-layout__hours-time {
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: right;
+  flex-shrink: 0;
+  color: #121212;
 }
 </style>

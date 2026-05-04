@@ -1,17 +1,19 @@
 <template>
   <section
-    :ref="setHeroIntroAtfEl"
+    ref="rootEl"
     class="index-page__hero-intro"
     :style="ctaCssVars"
   >
     <div
-      :ref="setHeroIntroAtfPhotoEl"
+      ref="photoEl"
       class="index-page__hero-intro-photo index-page__reveal-media"
     >
       <img
         :src="imageSrc"
         alt="AM Moda"
         class="index-page__hero-intro-photo-img index-page__reveal-media-img"
+        decoding="async"
+        fetchpriority="high"
         @load="onImageLoad"
       >
     </div>
@@ -19,7 +21,7 @@
       class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--first"
       :class="{ 'index-page__hero-intro-sticky-cta--floated': ctaFloated }"
     >
-      <div :ref="setHeroIntroAtfCtaEl" class="index-page__hero-intro-cta-block">
+      <div ref="ctaEl" class="index-page__hero-intro-cta-block">
         <div class="index-page__hero-intro-address-row">
           <div
             class="index-page__hero-intro-google-mini"
@@ -44,6 +46,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import GoogleReviewsCard from '../GoogleReviewsCard.vue'
 
 defineProps({
@@ -53,8 +56,11 @@ defineProps({
   ctaFloated: { type: Boolean, required: true },
   onImageLoad: { type: Function, required: true },
   onCtaClick: { type: Function, required: true },
-  setHeroIntroAtfEl: { type: Function, required: true },
-  setHeroIntroAtfPhotoEl: { type: Function, required: true },
-  setHeroIntroAtfCtaEl: { type: Function, required: true },
 })
+
+const rootEl = ref(null)
+const photoEl = ref(null)
+const ctaEl = ref(null)
+
+defineExpose({ rootEl, photoEl, ctaEl })
 </script>

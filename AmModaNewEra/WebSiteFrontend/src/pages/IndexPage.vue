@@ -11,7 +11,6 @@
 
     <IndexPageNavButtons
       :active-tab="activeTab"
-      :show-gallery-nav-button="SHOW_GALLERY_NAV_BUTTON"
       @go-to-gallery="goToGallery"
       @go-to-info="goToInfo"
     />
@@ -22,15 +21,13 @@
             <div v-if="activeTab === 'info'" key="info" class="index-page__panels">
               <div class="index-page__panels-inner">
                 <IndexPageHeroIntroAtf
+                  ref="heroIntroAtfComp"
                   :cta-css-vars="heroIntroCtaCssVars"
                   :image-src="heroIntroSecondImage"
                   :cta-visible="heroIntroCtaVisible"
                   :cta-floated="heroIntroCtaFloated"
                   :on-image-load="onHeroIntroImageLoad"
                   :on-cta-click="scrollToPageBottomSlow"
-                  :set-hero-intro-atf-el="setHeroIntroAtfEl"
-                  :set-hero-intro-atf-photo-el="setHeroIntroAtfPhotoEl"
-                  :set-hero-intro-atf-cta-el="setHeroIntroAtfCtaEl"
                 />
 
             <IndexPageQuickInfo
@@ -49,6 +46,7 @@
             />
 
             <IndexPageHeroIntroAfter
+              ref="heroIntroAfterComp"
               :cta-css-vars="heroIntroCtaCssVars"
               :image-src="heroIntroFirstImage"
               :address-line="ADDRESS_LINE"
@@ -57,10 +55,6 @@
               :cta-floated="heroIntroAfterCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
               :on-cta-click="scrollToPageBottomFast"
-              :set-hero-intro-after-el="setHeroIntroAfterEl"
-              :set-hero-intro-after-photo-el="setHeroIntroAfterPhotoEl"
-              :set-hero-intro-after-cta-el="setHeroIntroAfterCtaEl"
-              :set-hero-intro-after-top-cta-btn-el="setHeroIntroAfterTopCtaBtnEl"
             />
 
             <IndexPageStoreHours
@@ -68,10 +62,10 @@
               :opening-hours="OPENING_HOURS"
               :today-store-day-index="todayStoreDayIndex"
               :store-hours-heading-label="storeHoursHeadingLabel"
-              :intro-revealed="storeHoursIntroRevealed"
             />
 
             <IndexPageHeroIntroThird
+              ref="heroIntroThirdComp"
               :cta-css-vars="heroIntroCtaCssVars"
               :image-src="heroIntroThirdImage"
               :cta-visible="heroIntroCtaVisible"
@@ -79,10 +73,6 @@
               :cta-floated="heroIntroThirdCtaFloated"
               :on-image-load="onHeroIntroImageLoad"
               :on-cta-click="scrollToPageBottomFast"
-              :set-hero-intro-third-el="setHeroIntroThirdEl"
-              :set-hero-intro-third-photo-el="setHeroIntroThirdPhotoEl"
-              :set-hero-intro-third-cta-el="setHeroIntroThirdCtaEl"
-              :set-hero-intro-third-top-cta-btn-el="setHeroIntroThirdTopCtaBtnEl"
             />
 
             <IndexPageShopBottomSections
@@ -109,9 +99,8 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import IndexPageShopBottomSections from '../components/IndexPageShopBottomSections.vue'
-import IndexPageGalleryPanel from '../components/IndexPageGalleryPanel.vue'
 import IndexPageHeroIntroAtf from '../components/indexPage/IndexPageHeroIntroAtf.vue'
 import IndexPageHeroIntroAfter from '../components/indexPage/IndexPageHeroIntroAfter.vue'
 import IndexPageHeroIntroThird from '../components/indexPage/IndexPageHeroIntroThird.vue'
@@ -128,15 +117,20 @@ import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { animateWindowScrollTo } from '../utils/scrollAnimation.js'
 import { SMALL_SCREEN_MAX_WIDTH_PX } from '../constants/breakpoints.js'
-import heroIntroFirstImage from '../assets/Main photos/main2.webp'
-import heroIntroSecondImage from '../assets/Main photos/atf_photo.webp'
-import heroIntroThirdImage from '../assets/Main photos/main3.webp'
-import facebookShopPhoto from '../assets/Main photos/shop.webp'
+import heroIntroFirstImage from '../assets/main-photos/hero-2.webp'
+import heroIntroSecondImage from '../assets/main-photos/hero-1.webp'
+import heroIntroThirdImage from '../assets/main-photos/hero-3.webp'
+import facebookShopPhoto from '../assets/main-photos/hero-shop.webp'
+
+const IndexPageGalleryPanel = defineAsyncComponent(() =>
+  import('../components/IndexPageGalleryPanel.vue'),
+)
 
 const TAB_STORAGE_KEY = 'index-page-active-tab'
-
-const SHOW_GALLERY_NAV_BUTTON = true
-
+const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
+const HERO_CTA_STACK_HEIGHT_PX = 96
+const HERO_CTA_ADDRESS_ROW_HEIGHT_PX = 49
+const HERO_CTA_BUTTON_ROW_HEIGHT_PX = 47
 
 function getStoredTab() {
   try {
@@ -148,6 +142,29 @@ function getStoredTab() {
 }
 
 const activeTab = ref(getStoredTab())
+const panelSlideDirection = ref('left')
+const mainRef = ref(null)
+const shopBottomSectionsRef = ref(null)
+const facebookShopFloatPop = ref(false)
+const heroIntroCtaVisible = ref(false)
+const storeHoursExpanded = ref(false)
+
+let facebookShopFloatSettleTimer = null
+
+const { sectionTwoRows, updateSectionTwoWindowWidth } = useSectionTwoGrid({
+  sectionTwoItems,
+  breakpointPx: SMALL_SCREEN_MAX_WIDTH_PX,
+})
+
+const {
+  activeSectionTwoName,
+  onSectionTwoOverlayDocumentPointerDown,
+  onSectionTwoOverlayKeydown,
+  toggleSectionTwoOverlay,
+} = useSectionTwoOverlay()
+
+const { observeRevealZoomTargets, scheduleRevealZoomAfterLayout, setupRevealZoomObserver } =
+  useRevealZoom({ mainRef })
 
 watch(activeTab, (value) => {
   try {
@@ -170,39 +187,6 @@ watch(activeTab, (value) => {
   }
 })
 
-const panelSlideDirection = ref('left')
-const mainRef = ref(null)
-const shopBottomSectionsRef = ref(null)
-
-const { sectionTwoRows, updateSectionTwoWindowWidth } = useSectionTwoGrid({
-  sectionTwoItems,
-  breakpointPx: SMALL_SCREEN_MAX_WIDTH_PX,
-})
-
-const {
-  activeSectionTwoName,
-  onSectionTwoOverlayDocumentPointerDown,
-  onSectionTwoOverlayKeydown,
-  toggleSectionTwoOverlay,
-} = useSectionTwoOverlay()
-
-const { observeRevealZoomTargets, scheduleRevealZoomAfterLayout, setupRevealZoomObserver } =
-  useRevealZoom({ mainRef })
-
-const heroIntroFacebookCtaFloated = ref(false)
-
-const facebookShopFloatPop = ref(false)
-let facebookShopFloatSettleTimer = null
-const facebookShopCtaPassedOnce = ref(false)
-const heroIntroCtaVisible = ref(false)
-const storeHoursExpanded = ref(false)
-const storeHoursIntroRevealed = true
-
-const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
-const HERO_CTA_STACK_HEIGHT_PX = 96
-const HERO_CTA_ADDRESS_ROW_HEIGHT_PX = 49
-const HERO_CTA_BUTTON_ROW_HEIGHT_PX = 47
-
 const heroIntroCtaCssVars = computed(() => ({
   '--hero-cta-img-gap': `${HERO_CTA_IMAGE_BOTTOM_GAP_PX}px`,
   '--hero-cta-stack-height': `${HERO_CTA_STACK_HEIGHT_PX}px`,
@@ -210,21 +194,18 @@ const heroIntroCtaCssVars = computed(() => ({
   '--hero-cta-button-row-height': `${HERO_CTA_BUTTON_ROW_HEIGHT_PX}px`,
 }))
 
-function updateFacebookCtaModes() {
-  const prevFbFloat = heroIntroFacebookCtaFloated.value
-  const shop = shopBottomSectionsRef.value
-  heroIntroFacebookCtaFloated.value = computeHeroFacebookCtaFloated(
-    shop?.heroIntroFacebookPhotoRef?.value ?? null,
-    shop?.heroIntroFacebookRef?.value ?? null,
-  )
+let prevFacebookShopFloated = false
 
-  if (!heroIntroFacebookCtaFloated.value) {
+function onHeroCtasUpdate() {
+  const isFloated = heroIntroFacebookCtaFloated.value
+
+  if (!isFloated) {
     if (typeof window !== 'undefined' && facebookShopFloatSettleTimer != null) {
       clearTimeout(facebookShopFloatSettleTimer)
       facebookShopFloatSettleTimer = null
     }
     facebookShopFloatPop.value = false
-  } else if (!prevFbFloat && heroIntroFacebookCtaFloated.value) {
+  } else if (!prevFacebookShopFloated) {
     if (
       typeof window !== 'undefined' &&
       window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
@@ -236,11 +217,10 @@ function updateFacebookCtaModes() {
     }
   }
 
-  updateFacebookShopSectionPassed()
+  prevFacebookShopFloated = isFloated
 }
 
 const {
-  getViewportBottomClientY,
   heroIntroRef,
   heroIntroPhotoRef,
   heroIntroCtaRef,
@@ -257,51 +237,54 @@ const {
   heroIntroThirdCtaFloated,
   heroIntroAfterRedTakesOver,
   heroIntroThirdRedTakesOver,
+  heroIntroFacebookCtaFloated,
   updateHeroCtaModes,
   setupHeroCtaIntersection,
 } = useHeroCtas({
-  heroIntroCtaVisible,
-  onUpdate: updateFacebookCtaModes,
+  onUpdate: onHeroCtasUpdate,
   getExtraObservedElements: () => [shopBottomSectionsRef.value?.heroIntroFacebookRef?.value],
+  getFacebookPhotoEl: () => shopBottomSectionsRef.value?.heroIntroFacebookPhotoRef?.value ?? null,
+  getFacebookSectionEl: () => shopBottomSectionsRef.value?.heroIntroFacebookRef?.value ?? null,
+  heroCtaStackHeightPx: HERO_CTA_STACK_HEIGHT_PX,
   heroCtaImageGapPx: HERO_CTA_IMAGE_BOTTOM_GAP_PX,
   takeoverEpsilonPx: -12,
 })
 
-const setHeroIntroAtfEl = (el) => {
-  heroIntroRef.value = el
-}
-const setHeroIntroAtfPhotoEl = (el) => {
-  heroIntroPhotoRef.value = el
-}
-const setHeroIntroAtfCtaEl = (el) => {
-  heroIntroCtaRef.value = el
-}
+const heroIntroAtfComp = ref(null)
+const heroIntroAfterComp = ref(null)
+const heroIntroThirdComp = ref(null)
 
-const setHeroIntroAfterEl = (el) => {
-  heroIntroAfterRef.value = el
-}
-const setHeroIntroAfterPhotoEl = (el) => {
-  heroIntroAfterPhotoRef.value = el
-}
-const setHeroIntroAfterCtaEl = (el) => {
-  heroIntroAfterCtaRef.value = el
-}
-const setHeroIntroAfterTopCtaBtnEl = (el) => {
-  heroIntroAfterTopCtaBtnRef.value = el
-}
+watch(
+  heroIntroAtfComp,
+  (comp) => {
+    heroIntroRef.value = comp?.rootEl ?? null
+    heroIntroPhotoRef.value = comp?.photoEl ?? null
+    heroIntroCtaRef.value = comp?.ctaEl ?? null
+  },
+  { flush: 'post' },
+)
 
-const setHeroIntroThirdEl = (el) => {
-  heroIntroThirdRef.value = el
-}
-const setHeroIntroThirdPhotoEl = (el) => {
-  heroIntroThirdPhotoRef.value = el
-}
-const setHeroIntroThirdCtaEl = (el) => {
-  heroIntroThirdCtaRef.value = el
-}
-const setHeroIntroThirdTopCtaBtnEl = (el) => {
-  heroIntroThirdTopCtaBtnRef.value = el
-}
+watch(
+  heroIntroAfterComp,
+  (comp) => {
+    heroIntroAfterRef.value = comp?.rootEl ?? null
+    heroIntroAfterPhotoRef.value = comp?.photoEl ?? null
+    heroIntroAfterCtaRef.value = comp?.ctaEl ?? null
+    heroIntroAfterTopCtaBtnRef.value = comp?.topCtaBtnEl ?? null
+  },
+  { flush: 'post' },
+)
+
+watch(
+  heroIntroThirdComp,
+  (comp) => {
+    heroIntroThirdRef.value = comp?.rootEl ?? null
+    heroIntroThirdPhotoRef.value = comp?.photoEl ?? null
+    heroIntroThirdCtaRef.value = comp?.ctaEl ?? null
+    heroIntroThirdTopCtaBtnRef.value = comp?.topCtaBtnEl ?? null
+  },
+  { flush: 'post' },
+)
 
 
 function scrollToPageBottomWithDuration(totalMs) {
@@ -321,40 +304,6 @@ function scrollToPageBottomFast() {
 
 function scrollToPageBottomSlow() {
   scrollToPageBottomWithDuration(2500)
-}
-
-function computeHeroFacebookCtaFloated(photoEl, sectionFallbackEl) {
-  if (facebookShopCtaPassedOnce.value) return false
-
-  const el = photoEl ?? sectionFallbackEl
-  if (!el) return false
-  const rect = el.getBoundingClientRect()
-  if (rect.height <= 0) return false
-
-  const viewportBottom = getViewportBottomClientY()
-  const epsilon = 0.5
-
-  if (rect.bottom <= 0 || rect.top >= viewportBottom) return false
-
-  const stackH = HERO_CTA_STACK_HEIGHT_PX
-  const gap = HERO_CTA_IMAGE_BOTTOM_GAP_PX
-  const floatedCtaCenterY = viewportBottom - gap - stackH / 2
-
-  const meetImageTop = floatedCtaCenterY - rect.height / 2
-
-  if (rect.bottom <= viewportBottom + epsilon) return false
-
-  return rect.top > meetImageTop + epsilon
-}
-
-function updateFacebookShopSectionPassed() {
-  if (facebookShopCtaPassedOnce.value) return
-  const section = shopBottomSectionsRef.value?.heroIntroFacebookRef?.value
-  if (!section) return
-  const r = section.getBoundingClientRect()
-  if (r.bottom < 0) {
-    facebookShopCtaPassedOnce.value = true
-  }
 }
 
 function scheduleFacebookShopFloatSettle() {
@@ -406,6 +355,23 @@ const mapsUrl = MAPS_URL
 const { todayDayIndex: todayStoreDayIndex, todayLine: quickInfoTodayLine, storeHoursHeadingLabel } =
   useOpeningHours(OPENING_HOURS)
 
+let mainResizeObserver = null
+
+async function decodeVisibleHeroImages() {
+  const root = mainRef.value
+  if (!root) return
+  const imgs = Array.from(root.querySelectorAll('.index-page__hero-intro-photo-img'))
+  if (imgs.length === 0) return
+  const decodePromises = imgs.map((img) => {
+    if (typeof img.decode === 'function') return img.decode().catch(() => {})
+    return Promise.resolve()
+  })
+  await Promise.race([
+    Promise.all(decodePromises),
+    new Promise((resolve) => window.setTimeout(resolve, 1500)),
+  ])
+}
+
 onMounted(async () => {
   updateSectionTwoWindowWidth()
   document.addEventListener('pointerdown', onSectionTwoOverlayDocumentPointerDown, {
@@ -415,175 +381,38 @@ onMounted(async () => {
   await nextTick()
   if (activeTab.value === 'info') {
     setupHeroCtaIntersection(true)
-    setupRevealZoomObserver(true)
-  } else {
-    setupRevealZoomObserver(true)
   }
+  setupRevealZoomObserver(true)
   scheduleRevealZoomAfterLayout()
-  window.setTimeout(() => observeRevealZoomTargets(), 120)
-  window.setTimeout(() => observeRevealZoomTargets(), 480)
   window.addEventListener('resize', onRevealZoomWindowResize, { passive: true })
-  await nextTick()
+
+  if (typeof ResizeObserver !== 'undefined' && mainRef.value) {
+    mainResizeObserver = new ResizeObserver(() => {
+      observeRevealZoomTargets()
+      updateHeroCtaModes()
+    })
+    mainResizeObserver.observe(mainRef.value)
+  }
+
+  await decodeVisibleHeroImages()
+  observeRevealZoomTargets()
   updateHeroCtaModes()
-  window.setTimeout(() => {
-    updateHeroCtaModes()
-    heroIntroCtaVisible.value = true
-  }, 300)
+  heroIntroCtaVisible.value = true
 })
+
 onUnmounted(() => {
   setupHeroCtaIntersection(false)
   setupRevealZoomObserver(false)
   window.removeEventListener('resize', onRevealZoomWindowResize)
   document.removeEventListener('pointerdown', onSectionTwoOverlayDocumentPointerDown)
   window.removeEventListener('keydown', onSectionTwoOverlayKeydown)
+  if (mainResizeObserver) {
+    mainResizeObserver.disconnect()
+    mainResizeObserver = null
+  }
   if (facebookShopFloatSettleTimer != null) {
     clearTimeout(facebookShopFloatSettleTimer)
     facebookShopFloatSettleTimer = null
   }
 })
 </script>
-
-<style>
-.index-page {
-  --index-address-above-cta-shadow:
-  0 2px 5px rgb(0, 0, 0),
-  0 0 10px rgb(0, 0, 0);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.92);
-  min-height: 100vh;
-  
-  padding: 0;
-  box-sizing: border-box;
-  position: relative;
-  isolation: isolate;
-}
-
-.index-page__fixed-bottom-photo {
-  position: fixed;
-  inset: 0;
-  width: 100dvw;
-  height: 100dvh;
-  overflow: hidden;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.index-page__fixed-bottom-photo-img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  object-position: center center;
-}
-
-.index-page__shell {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  position: relative;
-  z-index: 2;
-}
-
-.index-page__main {
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  background: transparent;
-  border-radius: 0;
-  overflow: visible;
-}
-
-
-.index-page__panels-transition-wrap {
-  position: relative;
-  min-height: 50vh;
-}
-
-.index-page__panels {
-  position: relative;
-  left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
-  
-  overflow: visible;
-  overflow-x: clip;
-  box-sizing: border-box;
-}
-
-.index-page__panels-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 6px 0;
-  box-sizing: border-box;
-  background: transparent;
-}
-
-
-.index-page__slide-left-enter-active,
-.index-page__slide-left-leave-active,
-.index-page__slide-right-enter-active,
-.index-page__slide-right-leave-active {
-  position: absolute;
-  left: 50%;
-  margin-left: -50dvw;
-  top: 0;
-  width: 100dvw;
-  transition: transform 0.3s ease;
-}
-
-.index-page__slide-left-enter-active,
-.index-page__slide-right-enter-active {
-  z-index: 2;
-}
-
-.index-page__slide-left-leave-active,
-.index-page__slide-right-leave-active {
-  z-index: 1;
-}
-
-.index-page__slide-left-enter-from {
-  transform: translateX(100%);
-}
-
-.index-page__slide-left-enter-to {
-  transform: translateX(0);
-}
-
-.index-page__slide-left-leave-from {
-  transform: translateX(0);
-}
-
-.index-page__slide-left-leave-to {
-  transform: translateX(-100%);
-}
-
-.index-page__slide-right-enter-from {
-  transform: translateX(-100%);
-}
-
-.index-page__slide-right-enter-to {
-  transform: translateX(0);
-}
-
-.index-page__slide-right-leave-from {
-  transform: translateX(0);
-}
-
-.index-page__slide-right-leave-to {
-  transform: translateX(100%);
-}
-
-@media (max-width: 749.98px) {
-  .index-page {
-    padding: 0;
-  }
-
-  .index-page__shell {
-    padding: 0 10px;
-    gap: 16px;
-  }
-}
-</style>

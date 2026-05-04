@@ -13,7 +13,8 @@
         :href="facebookUrl"
         target="_blank"
         rel="noopener"
-        class="index-page-shop-bottom-sections__facebook-cta-btn index-page-shop-bottom-sections__facebook-cta-btn--below"
+        class="index-page-shop-bottom-sections__facebook-cta-btn index-page-shop-bottom-sections__facebook-cta-btn--below am-shine-glow"
+        :class="{ 'am-shine-glow--paused': !facebookShopFollowInView }"
         aria-label="Otwórz profil AM Moda Damska na Facebooku"
       >
         Przejdź na Facebook
@@ -1398,46 +1399,12 @@ defineExpose({
   }
 }
 
-/* “Przejdź na Facebook” above shop hero */
+/* "Przejdź na Facebook" above shop hero (animation provided by am-shine-glow utility in app.css) */
 .index-page-shop-bottom-sections__facebook-cta-btn--below {
   position: relative;
   overflow: hidden;
   gap: 15px;
   color: #ffffff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 10px 34px rgba(0, 176, 255, 0.42),
-    0 12px 40px rgba(0, 0, 0, 0.42);
-  animation: index-page-facebook-below-shine-glow 6s ease-in-out infinite;
-}
-
-@keyframes index-page-facebook-below-shine-glow {
-  0%,
-  52%,
-  100% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.28),
-      0 10px 34px rgba(24, 119, 242, 0.38),
-      0 0 14px rgba(140, 200, 255, 0.2),
-      0 12px 40px rgba(0, 0, 0, 0.42);
-  }
-  26% {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.38),
-      0 12px 42px rgba(24, 119, 242, 0.52),
-      0 0 28px rgba(180, 230, 255, 0.45),
-      0 12px 40px rgba(0, 0, 0, 0.38);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .index-page-shop-bottom-sections__facebook-cta-btn--below {
-    animation: none;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.28),
-      0 10px 34px rgba(24, 119, 242, 0.38),
-      0 12px 40px rgba(0, 0, 0, 0.42);
-  }
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn:not(.index-page-shop-bottom-sections__facebook-cta-btn--below):not(.index-page-shop-bottom-sections__quick-info-fb):hover {
