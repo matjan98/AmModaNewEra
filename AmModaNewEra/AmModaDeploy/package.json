@@ -1,0 +1,9 @@
+{
+  "name": "ammoda-deploy-frontend-runner",
+  "private": true,
+  "description": "Delegates Quasar/npm commands to ../WebSiteFrontend so you can run the dev server from this folder.",
+  "scripts": {
+    "dev": "npm --prefix ../WebSiteFrontend run dev",
+    "quasar-cli": "npm --prefix ../WebSiteFrontend exec -- quasar"
+  }
+}

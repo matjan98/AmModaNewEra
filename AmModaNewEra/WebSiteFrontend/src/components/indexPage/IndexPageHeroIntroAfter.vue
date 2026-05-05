@@ -13,6 +13,7 @@
         alt=""
         class="index-page__hero-intro-photo-img index-page__reveal-media-img"
         decoding="async"
+        fetchpriority="low"
         @load="onImageLoad"
       >
     </div>

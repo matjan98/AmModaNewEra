@@ -18,6 +18,8 @@
               :src="item.photo"
               :alt="item.name"
               class="index-page-product-categories__img index-page__reveal-media-img"
+              :loading="rowIndex > 0 ? 'lazy' : null"
+              decoding="async"
               @load="emit('imageLoad')"
             >
             <div class="index-page-product-categories__overlay" aria-hidden="true">

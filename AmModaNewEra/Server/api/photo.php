@@ -25,6 +25,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $photosDir = __DIR__ . '/../photos';
 
+/**
+ * @return array{0: string, 1: int} [etag quoted, mtime unix]
+ */
+function photo_cache_meta(string $filePath): array
+{
+    $mtime = is_file($filePath) ? (int) (@filemtime($filePath) ?: 0) : 0;
+    $size = is_file($filePath) ? (int) (@filesize($filePath) ?: 0) : 0;
+    $etag = '"' . $mtime . '-' . $size . '"';
+
+    return [$etag, $mtime];
+}
+
+function photo_send_cache_headers(string $etag, int $mtime): void
+{
+    header('ETag: ' . $etag);
+    header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
+    header('Cache-Control: public, max-age=86400');
+}
+
+/**
+ * @return bool True if client cache is valid (304 sent).
+ */
+function photo_try_not_modified(string $etag, int $mtime): bool
+{
+    photo_send_cache_headers($etag, $mtime);
+
+    $ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? '';
+    if ($ifNoneMatch !== '') {
+        $candidates = array_map('trim', explode(',', $ifNoneMatch));
+        foreach ($candidates as $candidate) {
+            if ($candidate === $etag || $candidate === 'W/' . $etag) {
+                http_response_code(304);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    $ifModifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? '';
+    if ($ifModifiedSince !== '' && $mtime > 0) {
+        $since = @strtotime($ifModifiedSince);
+        if ($since !== false && $since >= $mtime) {
+            http_response_code(304);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 if (isset($_GET['list']) && $_GET['list'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
@@ -33,14 +84,16 @@ if (isset($_GET['list']) && $_GET['list'] === '1') {
         foreach (glob($photosDir . '/photo_*.*') ?: [] as $path) {
             $basename = basename($path);
             if (preg_match('/^photo_[a-f0-9.]+\.(jpe?g|png|gif|webp)$/i', $basename)) {
+                $mtime = is_file($path) ? (int) (@filemtime($path) ?: 0) : 0;
                 $photos[] = [
                     'id' => $basename,
-                    'url' => 'api/photo.php?img=1&id=' . rawurlencode($basename),
+                    'v' => $mtime,
+                    'url' => 'api/photo.php?img=1&id=' . rawurlencode($basename) . '&v=' . $mtime,
                 ];
             }
         }
     }
-    
+
     usort($photos, function ($a, $b) use ($photosDir) {
         $tA = filemtime($photosDir . '/' . $a['id']) ?: 0;
         $tB = filemtime($photosDir . '/' . $b['id']) ?: 0;
@@ -65,8 +118,11 @@ if (isset($_GET['img']) && $_GET['img'] === '1' && !empty($_GET['id'])) {
             ];
             $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
             $mime = $mimes[$ext] ?? 'application/octet-stream';
+            [$etag, $mtime] = photo_cache_meta($filePath);
+            if (photo_try_not_modified($etag, $mtime)) {
+                exit;
+            }
             header('Content-Type: ' . $mime);
-            header('Cache-Control: no-cache');
             readfile($filePath);
             exit;
         }
@@ -98,8 +154,11 @@ if (isset($_GET['img']) && $_GET['img'] === '1') {
     ];
     $ext = strtolower(pathinfo($mainPath, PATHINFO_EXTENSION));
     $mime = $mimes[$ext] ?? 'application/octet-stream';
+    [$etag, $mtime] = photo_cache_meta($mainPath);
+    if (photo_try_not_modified($etag, $mtime)) {
+        exit;
+    }
     header('Content-Type: ' . $mime);
-    header('Cache-Control: no-cache');
     readfile($mainPath);
     exit;
 }
@@ -115,5 +174,6 @@ if ($mainPath === null || !is_file($mainPath)) {
     exit;
 }
 
-$url = 'api/photo.php?img=1';
+$mtime = (int) (@filemtime($mainPath) ?: 0);
+$url = 'api/photo.php?img=1&v=' . $mtime;
 echo json_encode(['ok' => true, 'hasPhoto' => true, 'url' => $url]);

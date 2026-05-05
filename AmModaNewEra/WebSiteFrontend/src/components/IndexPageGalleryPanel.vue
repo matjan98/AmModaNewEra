@@ -12,12 +12,15 @@
               v-for="photo in photoListWithUrls"
               :key="photo.id"
               class="index-page-gallery-panel__thumb-wrap index-page-gallery-panel__reveal-media"
-              @click="onThumbClick(photo.urlWithCache, $event)"
+              @click="onThumbClick(photo.urlResolved, $event)"
             >
               <img
-                :src="photo.urlWithCache"
+                :src="photo.urlResolved"
                 :alt="'Zdjęcie ' + photo.id"
                 class="index-page-gallery-panel__thumb index-page-gallery-panel__reveal-media-img"
+                loading="lazy"
+                decoding="async"
+                @load="onGalleryThumbLoad(photo.urlResolved, $event)"
               >
             </div>
           </template>
@@ -38,6 +41,9 @@
               :src="photo"
               alt="Produkt AM Moda Damska"
               class="index-page-gallery-panel__thumb index-page-gallery-panel__reveal-media-img"
+              loading="lazy"
+              decoding="async"
+              @load="onGalleryThumbLoad(photo, $event)"
             >
           </div>
         </div>
@@ -51,10 +57,12 @@
 <script setup>
 import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import 'photoswipe/style.css'
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
 import { getApiUrl } from '../utils/apiUrl.js'
 import { apiGetJson } from '../utils/apiJson.js'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
+
+defineOptions({ name: 'IndexPageGalleryPanel' })
 
 const props = defineProps({
   observeRevealZoomTargets: {
@@ -64,7 +72,6 @@ const props = defineProps({
 })
 
 const photoList = ref([])
-const cacheBust = ref(0)
 const productPhotos = ref([])
 
 const photoDims = ref(new Map())
@@ -72,11 +79,11 @@ const pswpLightbox = ref(null)
 
 const photoListWithUrls = computed(() =>
   photoList.value.map((p) => {
-    const baseUrl = getApiUrl(p.url)
-    const separator = baseUrl.includes('?') ? '&' : '?'
+    const path = typeof p.url === 'string' ? p.url : ''
+    const baseUrl = getApiUrl(path)
     return {
       ...p,
-      urlWithCache: `${baseUrl}${separator}t=${cacheBust.value}`,
+      urlResolved: baseUrl,
     }
   }),
 )
@@ -108,7 +115,7 @@ async function loadProductPhotos() {
 const lightboxPhotoList = computed(() => {
   const urls = []
   if (photoListWithUrls.value.length) {
-    urls.push(...photoListWithUrls.value.map((p) => p.urlWithCache))
+    urls.push(...photoListWithUrls.value.map((p) => p.urlResolved))
   }
   urls.push(...productPhotos.value)
   return urls
@@ -142,13 +149,9 @@ function setDimsFromImgEl(url, imgEl) {
   if (w && h) setDims(url, w, h)
 }
 
-function preloadDims(url) {
-  if (!url) return
-  if (photoDims.value.has(url)) return
-  const img = new Image()
-  img.decoding = 'async'
-  img.onload = () => setDims(url, img.naturalWidth, img.naturalHeight)
-  img.src = url
+function onGalleryThumbLoad(url, ev) {
+  const imgEl = ev?.target
+  setDimsFromImgEl(url, imgEl)
 }
 
 async function loadPhotos() {
@@ -157,7 +160,6 @@ async function loadPhotos() {
   const data = res.ok ? res.data : null
   if (data?.ok && Array.isArray(data.photos)) {
     photoList.value = data.photos
-    cacheBust.value = Date.now()
   } else {
     photoList.value = []
   }
@@ -183,7 +185,6 @@ function onThumbClick(url, ev) {
 onMounted(async () => {
   await loadProductPhotos()
   loadPhotos()
-  for (const url of lightboxPhotoList.value) preloadDims(url)
 
   const lb = new PhotoSwipeLightbox({
     dataSource: slides.value,
@@ -195,6 +196,10 @@ onMounted(async () => {
   pswpLightbox.value = lb
   await nextTick()
   props.observeRevealZoomTargets?.()
+})
+
+onActivated(() => {
+  nextTick(() => props.observeRevealZoomTargets?.())
 })
 
 onUnmounted(() => {

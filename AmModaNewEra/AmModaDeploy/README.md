@@ -4,9 +4,23 @@ Konsolowa aplikacja do pełnego deploymentu strony ammoda.pl (frontend + backend
 
 ## Lokalny development frontendu
 
-Ten katalog (`AmModaDeploy`) to aplikacja .NET do deployu — **nie** jest to projekt Quasar. Uruchamianie `quasar dev` stąd kończy się błędem `Unknown command "dev"` (globalny CLI nie widzi projektu Quasar).
+Ten katalog (`AmModaDeploy`) to aplikacja .NET do deployu — **nie** jest to projekt Quasar, więc **globalne** `quasar dev` uruchomione stąd nadal nie zadziała (globalny CLI nie widzi `quasar.config.js`).
 
-Frontend Quasar znajduje się w katalogu **`WebSiteFrontend`** obok tego folderu. Lokalny serwer deweloperski:
+Frontend Quasar jest w **`WebSiteFrontend`**. Z katalogu **`AmModaDeploy`** możesz odpalić ten sam serwer co wcześniej z frontendu:
+
+```bash
+# Wymagane raz w WebSiteFrontend: npm install
+cd AmModaNewEra/AmModaDeploy
+
+npm run dev
+# lub pełne polecenie Quasar (np. dev, build, …):
+npm run quasar-cli -- dev
+
+# Windows — skrót (odpowiednik quasar dev z katalogu WebSiteFrontend):
+.\quasar.cmd dev
+```
+
+Bezpośrednio z folderu frontendu (jak dotychczas):
 
 ```bash
 cd AmModaNewEra/WebSiteFrontend

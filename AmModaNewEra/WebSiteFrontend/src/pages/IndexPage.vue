@@ -6,6 +6,7 @@
         alt=""
         class="index-page__fixed-bottom-photo-img"
         decoding="async"
+        fetchpriority="low"
       >
     </div>
 
@@ -18,80 +19,15 @@
       <main ref="mainRef" class="index-page__main">
         <div class="index-page__panels-transition-wrap">
           <transition :name="'index-page__slide-' + panelSlideDirection">
-            <div v-if="activeTab === 'info'" key="info" class="index-page__panels">
-              <div class="index-page__panels-inner">
-                <IndexPageHeroIntroAtf
-                  ref="heroIntroAtfComp"
-                  :cta-css-vars="heroIntroCtaCssVars"
-                  :image-src="heroIntroSecondImage"
-                  :cta-visible="heroIntroCtaVisible"
-                  :cta-floated="heroIntroCtaFloated"
-                  :on-image-load="onHeroIntroImageLoad"
-                  :on-cta-click="scrollToPageBottomSlow"
-                />
-
-            <IndexPageQuickInfo
-              :phone-tel-href="PHONE_TEL_HREF"
-              :phone-display="PHONE_DISPLAY"
-              :quick-info-today-line="quickInfoTodayLine"
-              :facebook-url="facebookUrl"
-            />
-
-            <IndexPageProductCategories
-              :rows="sectionTwoRows"
-              :active-name="activeSectionTwoName"
-              :facebook-url="facebookUrl"
-              @toggle="toggleSectionTwoOverlay"
-              @image-load="onRevealSectionTwoImageLoad"
-            />
-
-            <IndexPageHeroIntroAfter
-              ref="heroIntroAfterComp"
-              :cta-css-vars="heroIntroCtaCssVars"
-              :image-src="heroIntroFirstImage"
-              :address-line="ADDRESS_LINE"
-              :cta-visible="heroIntroCtaVisible"
-              :yellow-top-hidden="heroIntroCtaVisible && !heroIntroAfterRedTakesOver"
-              :cta-floated="heroIntroAfterCtaFloated"
-              :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToPageBottomFast"
-            />
-
-            <IndexPageStoreHours
-              v-model:expanded="storeHoursExpanded"
-              :opening-hours="OPENING_HOURS"
-              :today-store-day-index="todayStoreDayIndex"
-              :store-hours-heading-label="storeHoursHeadingLabel"
-            />
-
-            <IndexPageHeroIntroThird
-              ref="heroIntroThirdComp"
-              :cta-css-vars="heroIntroCtaCssVars"
-              :image-src="heroIntroThirdImage"
-              :cta-visible="heroIntroCtaVisible"
-              :yellow-top-hidden="heroIntroCtaVisible && !heroIntroThirdRedTakesOver"
-              :cta-floated="heroIntroThirdCtaFloated"
-              :on-image-load="onHeroIntroImageLoad"
-              :on-cta-click="scrollToPageBottomFast"
-            />
-
-            <IndexPageShopBottomSections
-              ref="shopBottomSectionsRef"
-              :cta-css-vars="heroIntroCtaCssVars"
-              :hero-intro-cta-visible="heroIntroCtaVisible"
-              :hero-intro-facebook-cta-floated="heroIntroFacebookCtaFloated"
-              :facebook-shop-float-pop="facebookShopFloatPop"
-              :facebook-url="facebookUrl"
-              :maps-url="mapsUrl"
-            />
-            </div>
-          </div>
-          <IndexPageGalleryPanel
-            v-else
-            key="gallery"
-            :observe-reveal-zoom-targets="observeRevealZoomTargets"
-          />
-        </transition>
+            <keep-alive :include="['IndexPageGalleryPanel', 'IndexPageInfoPanels']">
+              <component
+                :is="activeTab === 'info' ? IndexPageInfoPanels : IndexPageGalleryPanel"
+                :key="activeTab"
+                ref="activePanelRef"
+                v-bind="panelBindings"
+              />
+            </keep-alive>
+          </transition>
         </div>
       </main>
     </div>
@@ -99,16 +35,10 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import IndexPageShopBottomSections from '../components/IndexPageShopBottomSections.vue'
-import IndexPageHeroIntroAtf from '../components/indexPage/IndexPageHeroIntroAtf.vue'
-import IndexPageHeroIntroAfter from '../components/indexPage/IndexPageHeroIntroAfter.vue'
-import IndexPageHeroIntroThird from '../components/indexPage/IndexPageHeroIntroThird.vue'
+import { computed, defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, unref, watch } from 'vue'
 import IndexPageNavButtons from '../components/indexPage/IndexPageNavButtons.vue'
-import IndexPageProductCategories from '../components/indexPage/IndexPageProductCategories.vue'
-import IndexPageQuickInfo from '../components/indexPage/IndexPageQuickInfo.vue'
-import IndexPageStoreHours from '../components/indexPage/IndexPageStoreHours.vue'
-import { ADDRESS_LINE, FACEBOOK_URL, MAPS_URL, OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
+import IndexPageInfoPanels from './indexPage/IndexPageInfoPanels.vue'
+import { OPENING_HOURS } from '../constants/siteInfo.js'
 import { sectionTwoItems } from './indexPage/indexPageProducts.js'
 import { useRevealZoom } from './indexPage/useRevealZoom.js'
 import { useHeroCtas } from './indexPage/useHeroCtas.js'
@@ -117,9 +47,6 @@ import { useSectionTwoOverlay } from './indexPage/useSectionTwoOverlay.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { animateWindowScrollTo } from '../utils/scrollAnimation.js'
 import { SMALL_SCREEN_MAX_WIDTH_PX } from '../constants/breakpoints.js'
-import heroIntroFirstImage from '../assets/main-photos/hero-2.webp'
-import heroIntroSecondImage from '../assets/main-photos/hero-1.webp'
-import heroIntroThirdImage from '../assets/main-photos/hero-3.webp'
 import facebookShopPhoto from '../assets/main-photos/hero-shop.webp'
 
 const IndexPageGalleryPanel = defineAsyncComponent(() =>
@@ -144,6 +71,7 @@ function getStoredTab() {
 const activeTab = ref(getStoredTab())
 const panelSlideDirection = ref('left')
 const mainRef = ref(null)
+const activePanelRef = ref(null)
 const shopBottomSectionsRef = ref(null)
 const facebookShopFloatPop = ref(false)
 const heroIntroCtaVisible = ref(false)
@@ -166,26 +94,8 @@ const {
 const { observeRevealZoomTargets, scheduleRevealZoomAfterLayout, setupRevealZoomObserver } =
   useRevealZoom({ mainRef })
 
-watch(activeTab, (value) => {
-  try {
-    localStorage.setItem(TAB_STORAGE_KEY, value)
-  } catch {
-    void 0
-  }
-  setupRevealZoomObserver(false)
-  if (value === 'info') {
-    nextTick(() => {
-      setupHeroCtaIntersection(true)
-      setupRevealZoomObserver(true)
-      updateHeroCtaModes()
-    })
-  } else {
-    setupHeroCtaIntersection(false)
-    nextTick(() => {
-      setupRevealZoomObserver(true)
-    })
-  }
-})
+const { todayDayIndex: todayStoreDayIndex, todayLine: quickInfoTodayLine, storeHoursHeadingLabel } =
+  useOpeningHours(OPENING_HOURS)
 
 const heroIntroCtaCssVars = computed(() => ({
   '--hero-cta-img-gap': `${HERO_CTA_IMAGE_BOTTOM_GAP_PX}px`,
@@ -251,42 +161,109 @@ const {
   takeoverEpsilonPx: 0,
 })
 
-const heroIntroAtfComp = ref(null)
-const heroIntroAfterComp = ref(null)
-const heroIntroThirdComp = ref(null)
+const panelBindings = computed(() => {
+  if (activeTab.value === 'gallery') {
+    return { observeRevealZoomTargets }
+  }
+  return {
+    heroIntroCtaCssVars: heroIntroCtaCssVars.value,
+    heroIntroCtaVisible: heroIntroCtaVisible.value,
+    heroIntroCtaFloated: heroIntroCtaFloated.value,
+    heroIntroAfterCtaFloated: heroIntroAfterCtaFloated.value,
+    heroIntroThirdCtaFloated: heroIntroThirdCtaFloated.value,
+    heroIntroAfterRedTakesOver: heroIntroAfterRedTakesOver.value,
+    heroIntroThirdRedTakesOver: heroIntroThirdRedTakesOver.value,
+    heroIntroFacebookCtaFloated: heroIntroFacebookCtaFloated.value,
+    facebookShopFloatPop: facebookShopFloatPop.value,
+    storeHoursExpanded: storeHoursExpanded.value,
+    sectionTwoRows: sectionTwoRows.value,
+    activeSectionTwoName: activeSectionTwoName.value,
+    quickInfoTodayLine: quickInfoTodayLine.value,
+    todayStoreDayIndex: todayStoreDayIndex.value,
+    storeHoursHeadingLabel: storeHoursHeadingLabel.value,
+    onHeroIntroImageLoad,
+    onRevealSectionTwoImageLoad,
+    scrollToPageBottomSlow,
+    scrollToPageBottomFast,
+    toggleSectionTwoOverlay,
+    'onUpdate:storeHoursExpanded': (v) => {
+      storeHoursExpanded.value = v
+    },
+  }
+})
 
-watch(
-  heroIntroAtfComp,
-  (comp) => {
-    heroIntroRef.value = comp?.rootEl ?? null
-    heroIntroPhotoRef.value = comp?.photoEl ?? null
-    heroIntroCtaRef.value = comp?.ctaEl ?? null
-  },
-  { flush: 'post' },
-)
+watch(activeTab, (value) => {
+  try {
+    localStorage.setItem(TAB_STORAGE_KEY, value)
+  } catch {
+    void 0
+  }
+  setupRevealZoomObserver(false)
+  if (value === 'info') {
+    nextTick(() => {
+      setupHeroCtaIntersection(true)
+      setupRevealZoomObserver(true)
+      updateHeroCtaModes()
+    })
+  } else {
+    setupHeroCtaIntersection(false)
+    nextTick(() => {
+      setupRevealZoomObserver(true)
+    })
+  }
+})
 
-watch(
-  heroIntroAfterComp,
-  (comp) => {
-    heroIntroAfterRef.value = comp?.rootEl ?? null
-    heroIntroAfterPhotoRef.value = comp?.photoEl ?? null
-    heroIntroAfterCtaRef.value = comp?.ctaEl ?? null
-    heroIntroAfterTopCtaBtnRef.value = comp?.topCtaBtnEl ?? null
-  },
-  { flush: 'post' },
-)
+function clearHeroLayoutRefs() {
+  heroIntroRef.value = null
+  heroIntroPhotoRef.value = null
+  heroIntroCtaRef.value = null
+  heroIntroAfterRef.value = null
+  heroIntroAfterPhotoRef.value = null
+  heroIntroAfterCtaRef.value = null
+  heroIntroAfterTopCtaBtnRef.value = null
+  heroIntroThirdRef.value = null
+  heroIntroThirdPhotoRef.value = null
+  heroIntroThirdCtaRef.value = null
+  heroIntroThirdTopCtaBtnRef.value = null
+  shopBottomSectionsRef.value = null
+}
 
-watch(
-  heroIntroThirdComp,
-  (comp) => {
-    heroIntroThirdRef.value = comp?.rootEl ?? null
-    heroIntroThirdPhotoRef.value = comp?.photoEl ?? null
-    heroIntroThirdCtaRef.value = comp?.ctaEl ?? null
-    heroIntroThirdTopCtaBtnRef.value = comp?.topCtaBtnEl ?? null
-  },
-  { flush: 'post' },
-)
+function syncHeroRefsFromInfoPanel() {
+  if (activeTab.value !== 'info') {
+    clearHeroLayoutRefs()
+    return
+  }
+  const panel = activePanelRef.value
+  if (!panel) {
+    clearHeroLayoutRefs()
+    return
+  }
 
+  const atf = unref(panel.heroIntroAtfComp)
+  const after = unref(panel.heroIntroAfterComp)
+  const third = unref(panel.heroIntroThirdComp)
+  const shop = unref(panel.shopBottomSectionsRef)
+
+  heroIntroRef.value = atf?.rootEl ?? null
+  heroIntroPhotoRef.value = atf?.photoEl ?? null
+  heroIntroCtaRef.value = atf?.ctaEl ?? null
+
+  heroIntroAfterRef.value = after?.rootEl ?? null
+  heroIntroAfterPhotoRef.value = after?.photoEl ?? null
+  heroIntroAfterCtaRef.value = after?.ctaEl ?? null
+  heroIntroAfterTopCtaBtnRef.value = after?.topCtaBtnEl ?? null
+
+  heroIntroThirdRef.value = third?.rootEl ?? null
+  heroIntroThirdPhotoRef.value = third?.photoEl ?? null
+  heroIntroThirdCtaRef.value = third?.ctaEl ?? null
+  heroIntroThirdTopCtaBtnRef.value = third?.topCtaBtnEl ?? null
+
+  shopBottomSectionsRef.value = shop ?? null
+}
+
+watch([activeTab, activePanelRef], () => nextTick(() => syncHeroRefsFromInfoPanel()), {
+  flush: 'post',
+})
 
 function scrollToPageBottomWithDuration(totalMs) {
   if (typeof window === 'undefined') return
@@ -321,7 +298,6 @@ function scheduleFacebookShopFloatSettle() {
   })
 }
 
-
 function onRevealZoomWindowResize() {
   updateSectionTwoWindowWidth()
   observeRevealZoomTargets()
@@ -348,13 +324,6 @@ function goToInfo() {
   panelSlideDirection.value = 'right'
   activeTab.value = 'info'
 }
-
-const facebookUrl = FACEBOOK_URL
-
-const mapsUrl = MAPS_URL
-
-const { todayDayIndex: todayStoreDayIndex, todayLine: quickInfoTodayLine, storeHoursHeadingLabel } =
-  useOpeningHours(OPENING_HOURS)
 
 let mainResizeObserver = null
 
@@ -399,6 +368,7 @@ onMounted(async () => {
   observeRevealZoomTargets()
   updateHeroCtaModes()
   heroIntroCtaVisible.value = true
+  syncHeroRefsFromInfoPanel()
 })
 
 onUnmounted(() => {
