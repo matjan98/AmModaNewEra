@@ -84,7 +84,7 @@
   margin-left: -50dvw;
   top: 0;
   width: 100dvw;
-  transition: transform 0.3s ease;
+  transition: transform 1s ease;
 }
 
 .index-page__slide-left-enter-active,

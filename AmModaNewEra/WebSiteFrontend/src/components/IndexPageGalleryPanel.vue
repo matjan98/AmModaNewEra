@@ -1,6 +1,6 @@
 <template>
   <div
-    class="index-page-gallery-panel index-page-gallery-panel__panels index-page-gallery-panel__panels--gallery"
+    class="index-page__panels index-page-gallery-panel index-page-gallery-panel__panels index-page-gallery-panel__panels--gallery"
     :class="{ 'index-page-gallery-panel__panels--empty': !photoListWithUrls.length }"
   >
     <div class="index-page-gallery-panel__panels-inner">
@@ -216,9 +216,6 @@ onUnmounted(() => {
 
 
 .index-page-gallery-panel__panels--gallery {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
   box-sizing: border-box;
   overflow-x: clip;
   border-left: 0;

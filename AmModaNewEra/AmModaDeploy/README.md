@@ -2,6 +2,18 @@
 
 Konsolowa aplikacja do pełnego deploymentu strony ammoda.pl (frontend + backend) na hostingu FTP.
 
+## Lokalny development frontendu
+
+Ten katalog (`AmModaDeploy`) to aplikacja .NET do deployu — **nie** jest to projekt Quasar. Uruchamianie `quasar dev` stąd kończy się błędem `Unknown command "dev"` (globalny CLI nie widzi projektu Quasar).
+
+Frontend Quasar znajduje się w katalogu **`WebSiteFrontend`** obok tego folderu. Lokalny serwer deweloperski:
+
+```bash
+cd AmModaNewEra/WebSiteFrontend
+npm install   # raz lub po zmianach zależności
+npm run dev   # synchronizacja favicon + quasar dev
+```
+
 ## Konfiguracja sekretów użytkownika
 
 Aplikacja korzysta z mechanizmu `dotnet user-secrets`. Po wejściu do katalogu `AmModaDeploy` wykonaj następujące polecenia:

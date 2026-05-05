@@ -12,7 +12,6 @@
         :src="imageSrc"
         alt=""
         class="index-page__hero-intro-photo-img index-page__reveal-media-img"
-        loading="lazy"
         decoding="async"
         @load="onImageLoad"
       >
