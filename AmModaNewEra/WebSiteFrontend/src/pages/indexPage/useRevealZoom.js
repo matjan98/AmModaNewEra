@@ -55,7 +55,6 @@ export function useRevealZoom({ mainRef }) {
   }
 
   return {
-    teardownRevealZoomObserver,
     observeRevealZoomTargets,
     setupRevealZoomObserver,
     scheduleRevealZoomAfterLayout,

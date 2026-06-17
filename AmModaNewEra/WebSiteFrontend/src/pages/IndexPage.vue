@@ -80,7 +80,10 @@ import { useRevealZoom } from './indexPage/useRevealZoom.js'
 import { useHeroCtas } from './indexPage/useHeroCtas.js'
 
 import { useOpeningHours } from '../composables/useOpeningHours.js'
+import { prefetchGoogleReviews } from '../composables/useGoogleReviews.js'
 import fixedBottomPhoto from '../assets/main-photos/background.webp'
+
+void prefetchGoogleReviews()
 
 
 
@@ -130,15 +133,7 @@ const mainRef = ref(null)
 
 const activePanelRef = ref(null)
 
-const shopBottomSectionsRef = ref(null)
-
-const facebookShopFloatPop = ref(false)
-
 const heroIntroCtaVisible = ref(false)
-
-
-
-let facebookShopFloatSettleTimer = null
 
 
 
@@ -168,58 +163,6 @@ const heroIntroCtaCssVars = computed(() => ({
 
 
 
-let prevFacebookShopFloated = false
-
-
-
-function onHeroCtasUpdate() {
-
-  const isFloated = heroIntroFacebookCtaFloated.value
-
-
-
-  if (!isFloated) {
-
-    if (typeof window !== 'undefined' && facebookShopFloatSettleTimer != null) {
-
-      clearTimeout(facebookShopFloatSettleTimer)
-
-      facebookShopFloatSettleTimer = null
-
-    }
-
-    facebookShopFloatPop.value = false
-
-  } else if (!prevFacebookShopFloated) {
-
-    if (
-
-      typeof window !== 'undefined' &&
-
-      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-
-    ) {
-
-      facebookShopFloatPop.value = false
-
-    } else {
-
-      facebookShopFloatPop.value = true
-
-      scheduleFacebookShopFloatSettle()
-
-    }
-
-  }
-
-
-
-  prevFacebookShopFloated = isFloated
-
-}
-
-
-
 const {
 
   heroIntroRef,
@@ -230,27 +173,11 @@ const {
 
   heroIntroCtaFloated,
 
-  heroIntroFacebookCtaFloated,
-
   updateHeroCtaModes,
 
   setupHeroCtaIntersection,
 
-} = useHeroCtas({
-
-  onUpdate: onHeroCtasUpdate,
-
-  getExtraObservedElements: () => [shopBottomSectionsRef.value?.heroIntroFacebookRef?.value],
-
-  getFacebookPhotoEl: () => shopBottomSectionsRef.value?.heroIntroFacebookPhotoRef?.value ?? null,
-
-  getFacebookSectionEl: () => shopBottomSectionsRef.value?.heroIntroFacebookRef?.value ?? null,
-
-  heroCtaStackHeightPx: HERO_CTA_STACK_HEIGHT_PX,
-
-  heroCtaImageGapPx: HERO_CTA_IMAGE_BOTTOM_GAP_PX,
-
-})
+} = useHeroCtas()
 
 
 
@@ -269,10 +196,6 @@ const panelBindings = computed(() => {
     heroIntroCtaVisible: heroIntroCtaVisible.value,
 
     heroIntroCtaFloated: heroIntroCtaFloated.value,
-
-    heroIntroFacebookCtaFloated: heroIntroFacebookCtaFloated.value,
-
-    facebookShopFloatPop: facebookShopFloatPop.value,
 
     todayStoreDayIndex: todayStoreDayIndex.value,
 
@@ -332,8 +255,6 @@ function clearHeroLayoutRefs() {
 
   heroIntroCtaRef.value = null
 
-  shopBottomSectionsRef.value = null
-
 }
 
 
@@ -362,8 +283,6 @@ function syncHeroRefsFromInfoPanel() {
 
   const atf = unref(panel.heroIntroAtfComp)
 
-  const shop = unref(panel.shopBottomSectionsRef)
-
 
 
   heroIntroRef.value = atf?.rootEl ?? null
@@ -371,10 +290,6 @@ function syncHeroRefsFromInfoPanel() {
   heroIntroPhotoRef.value = atf?.photoEl ?? null
 
   heroIntroCtaRef.value = atf?.ctaEl ?? null
-
-
-
-  shopBottomSectionsRef.value = shop ?? null
 
 }
 
@@ -385,34 +300,6 @@ watch([activeTab, activePanelRef], () => nextTick(() => syncHeroRefsFromInfoPane
   flush: 'post',
 
 })
-
-
-
-function scheduleFacebookShopFloatSettle() {
-
-  if (typeof window === 'undefined') return
-
-  if (facebookShopFloatSettleTimer != null) {
-
-    clearTimeout(facebookShopFloatSettleTimer)
-
-    facebookShopFloatSettleTimer = null
-
-  }
-
-  nextTick(() => {
-
-    facebookShopFloatSettleTimer = window.setTimeout(() => {
-
-      facebookShopFloatPop.value = false
-
-      facebookShopFloatSettleTimer = null
-
-    }, 48)
-
-  })
-
-}
 
 
 
@@ -555,14 +442,6 @@ onUnmounted(() => {
     mainResizeObserver.disconnect()
 
     mainResizeObserver = null
-
-  }
-
-  if (facebookShopFloatSettleTimer != null) {
-
-    clearTimeout(facebookShopFloatSettleTimer)
-
-    facebookShopFloatSettleTimer = null
 
   }
 

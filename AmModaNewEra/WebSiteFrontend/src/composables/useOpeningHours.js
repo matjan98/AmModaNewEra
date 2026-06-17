@@ -1,7 +1,6 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const DEFAULT_CLOSED_LABEL = 'Zamknięte'
-const DEFAULT_OPEN_PREFIX = 'Otwarte!'
 const DEFAULT_OPEN_HEADING_LABEL = 'Dziś otwarte!'
 const DEFAULT_SUNDAY_HEADING_LABEL = 'Godziny otwarcia'
 
@@ -20,11 +19,10 @@ function parseOpeningRangeMinutes(hoursStr) {
  * Shared store opening-hours logic.
  *
  * @param {Array<{dayIndex:number,label:string,hours:string}>} openingHours
- * @param {{ liveClock?: boolean, closedLabel?: string, openPrefix?: string }} [options]
+ * @param {{ liveClock?: boolean, closedLabel?: string }} [options]
  */
 export function useOpeningHours(openingHours, options = {}) {
   const closedLabel = options.closedLabel ?? DEFAULT_CLOSED_LABEL
-  const openPrefix = options.openPrefix ?? DEFAULT_OPEN_PREFIX
   const liveClock = options.liveClock === true
 
   const now = ref(new Date())
@@ -34,12 +32,6 @@ export function useOpeningHours(openingHours, options = {}) {
   const todayRow = computed(() => openingHours?.find((h) => h.dayIndex === todayDayIndex.value) ?? null)
   const todayHours = computed(() => todayRow.value?.hours ?? closedLabel)
   const isOpenToday = computed(() => todayHours.value !== closedLabel)
-
-  const todayLine = computed(() => {
-    const hours = todayHours.value
-    if (!hours || hours === closedLabel) return closedLabel
-    return `${openPrefix} ${hours}`
-  })
 
   const storeHoursHeadingLabel = computed(() =>
     todayDayIndex.value === 0 ? DEFAULT_SUNDAY_HEADING_LABEL : DEFAULT_OPEN_HEADING_LABEL,
@@ -72,7 +64,6 @@ export function useOpeningHours(openingHours, options = {}) {
     todayDayIndex,
     todayRow,
     todayHours,
-    todayLine,
     isOpenToday,
     isStoreOpenNow,
     storeHoursHeadingLabel,

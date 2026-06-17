@@ -2,8 +2,10 @@
   <section
     ref="rootEl"
     class="index-page__hero-intro"
+    :class="{ 'index-page__hero-intro--maps-cta-inview': ctaVisible }"
     :style="ctaCssVars"
   >
+    <h1 class="index-page__seo-heading">A&amp;M Moda Damska – butik z modą damską w Kozach</h1>
     <div
       ref="photoEl"
       class="index-page__hero-intro-photo index-page__reveal-media"
@@ -18,7 +20,7 @@
       >
     </div>
     <div
-      class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--first"
+      class="index-page__hero-intro-sticky-cta index-page__hero-intro-sticky-cta--first index-page-maps-cta-host"
       :class="{ 'index-page__hero-intro-sticky-cta--floated': ctaFloated }"
     >
       <div ref="ctaEl" class="index-page__hero-intro-cta-block">
@@ -35,11 +37,23 @@
             :href="mapsUrl"
             target="_blank"
             rel="noopener"
-            class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--solid"
-            :class="{ 'index-page__hero-intro-cta-btn--visible': ctaVisible }"
+            class="index-page-shop-bottom-sections__facebook-cta-btn index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay"
+            :class="{ 'index-page-shop-bottom-sections__facebook-cta-btn--visible': ctaVisible }"
             aria-label="Otwórz nawigację do sklepu w Google Maps"
           >
-            Nawiguj
+            <span class="index-page-shop-bottom-sections__facebook-cta-btn-textstack">
+              <span class="index-page-shop-bottom-sections__facebook-cta-btn-label">Nawiguj</span>
+              <span class="index-page-shop-bottom-sections__facebook-cta-btn-subline">Google Maps</span>
+            </span>
+            <img
+              :src="googleMapsPinImg"
+              alt=""
+              width="26"
+              height="36"
+              class="index-page-shop-bottom-sections__facebook-cta-btn-maps-pin"
+              aria-hidden="true"
+              decoding="async"
+            >
           </a>
         </div>
       </div>
@@ -49,6 +63,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import googleMapsPinImg from '../../assets/google-maps.png'
 import { ADDRESS_LINE, MAPS_URL } from '../../constants/siteInfo.js'
 
 defineProps({

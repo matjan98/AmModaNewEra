@@ -4,21 +4,12 @@ import { useIntersectionObserver } from '../../composables/useIntersectionObserv
 /** Dense enough for section enter/leave; scroll listener handles continuous updates. */
 const HERO_CTA_IO_THRESHOLDS = Array.from({ length: 21 }, (_, i) => i / 20)
 
-export function useHeroCtas({
-  onUpdate,
-  getExtraObservedElements,
-  getFacebookPhotoEl,
-  getFacebookSectionEl,
-  heroCtaStackHeightPx = 96,
-  heroCtaImageGapPx = 20,
-}) {
+export function useHeroCtas() {
   const heroIntroRef = ref(null)
   const heroIntroPhotoRef = ref(null)
   const heroIntroCtaRef = ref(null)
 
   const heroIntroCtaFloated = ref(false)
-  const heroIntroFacebookCtaFloated = ref(false)
-  const facebookShopCtaPassedOnce = ref(false)
 
   let heroCtaResizeAttached = false
   let heroCtaScrollAttached = false
@@ -67,46 +58,8 @@ export function useHeroCtas({
     return rect.bottom > viewportBottom - epsilon
   }
 
-  function computeFacebookShopCtaFloated(photoEl, sectionFallbackEl) {
-    if (facebookShopCtaPassedOnce.value) return false
-
-    const el = photoEl ?? sectionFallbackEl
-    if (!el) return false
-    const rect = el.getBoundingClientRect()
-    if (rect.height <= 0) return false
-
-    const viewportBottom = getViewportBottomClientY()
-    const epsilon = 0.5
-
-    if (rect.bottom <= 0 || rect.top >= viewportBottom) return false
-    if (rect.bottom <= viewportBottom + epsilon) return false
-
-    const floatedCtaCenterY = viewportBottom - heroCtaImageGapPx - heroCtaStackHeightPx / 2
-    const meetImageTop = floatedCtaCenterY - rect.height / 2
-
-    return rect.top > meetImageTop + epsilon
-  }
-
-  function updateFacebookShopSectionPassed() {
-    if (facebookShopCtaPassedOnce.value) return
-    const section = getFacebookSectionEl?.() ?? null
-    if (!section) return
-    const r = section.getBoundingClientRect()
-    if (r.bottom < 0) {
-      facebookShopCtaPassedOnce.value = true
-    }
-  }
-
   function updateHeroCtaModes() {
     heroIntroCtaFloated.value = computeHeroCtaFloated(heroIntroPhotoRef.value, heroIntroRef.value)
-
-    heroIntroFacebookCtaFloated.value = computeFacebookShopCtaFloated(
-      getFacebookPhotoEl?.() ?? null,
-      getFacebookSectionEl?.() ?? null,
-    )
-    updateFacebookShopSectionPassed()
-
-    onUpdate?.()
   }
 
   function setupHeroCtaIntersection(on) {
@@ -158,22 +111,17 @@ export function useHeroCtas({
 
     heroCtaIntersection.stop()
     heroCtaIntersectionEnabled.value = true
-    const extraEls = getExtraObservedElements?.() ?? []
-    const sections = [heroIntroRef.value, ...extraEls]
-    for (const el of sections) {
-      if (el) heroCtaIntersection.observe(el)
+    if (heroIntroRef.value) {
+      heroCtaIntersection.observe(heroIntroRef.value)
     }
     updateHeroCtaModes()
   }
 
   return {
-    getViewportBottomClientY,
     heroIntroRef,
     heroIntroPhotoRef,
     heroIntroCtaRef,
     heroIntroCtaFloated,
-    heroIntroFacebookCtaFloated,
-    facebookShopCtaPassedOnce,
     updateHeroCtaModes,
     setupHeroCtaIntersection,
   }

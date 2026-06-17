@@ -52,8 +52,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { apiGetJson } from '../utils/apiJson.js'
+import { useGoogleReviews } from '../composables/useGoogleReviews.js'
 
 defineProps({
   withMargin: {
@@ -66,47 +65,7 @@ defineProps({
   },
 })
 
-const FALLBACK_RATING = 4.7
-const FALLBACK_RATING_COUNT = 171
-
-const rating = ref(FALLBACK_RATING)
-const ratingCount = ref(FALLBACK_RATING_COUNT)
-
-const ratingDisplay = computed(() => rating.value.toFixed(1).replace('.', ','))
-
-const starIcons = computed(() => {
-  const value = rating.value
-  const full = Math.floor(value)
-  const fractional = value - full
-  const hasHalf = fractional >= 0.25 && fractional < 0.75
-  const fullCount = fractional >= 0.75 ? full + 1 : full
-  const icons = []
-  for (let i = 0; i < fullCount; i += 1) icons.push('star')
-  if (hasHalf) icons.push('star_half')
-  while (icons.length < 5) icons.push('star_border')
-  return icons.slice(0, 5)
-})
-
-const opinionsLabel = computed(() => {
-  const n = ratingCount.value
-  const abs = Math.abs(n)
-  const lastTwo = abs % 100
-  const last = abs % 10
-  if (abs === 1) return 'opinia'
-  if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return 'opinie'
-  return 'opinii'
-})
-
-onMounted(async () => {
-  const res = await apiGetJson('api/reviews.php')
-  if (!res.ok) return
-  const data = res.data
-  if (!data || data.ok !== true) return
-  const fetchedRating = Number(data.rating)
-  const fetchedCount = Number(data.ratingCount)
-  if (Number.isFinite(fetchedRating) && fetchedRating > 0) rating.value = fetchedRating
-  if (Number.isFinite(fetchedCount) && fetchedCount >= 0) ratingCount.value = fetchedCount
-})
+const { ratingCount, ratingDisplay, starIcons, opinionsLabel } = useGoogleReviews()
 </script>
 
 <style scoped>
@@ -120,7 +79,7 @@ onMounted(async () => {
 }
 
 .google-reviews-card--full-container {
-  height: 10vh;
+  height: auto;
   align-items: center;
   justify-content: center;
 }

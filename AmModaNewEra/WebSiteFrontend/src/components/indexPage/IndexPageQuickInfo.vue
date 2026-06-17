@@ -4,7 +4,23 @@
     :aria-label="`${storeHoursHeadingLabel}, kontakt i skróty`"
   >
     <div class="index-page-quick-info__inner">
-      <div class="index-page-quick-info__contact-block">
+      <div
+        v-if="homepageNewsSectionEnabled"
+        class="index-page-quick-info__news-block"
+        aria-label="Aktualności sklepu"
+      >
+        <h3 class="index-page-quick-info__hours-heading index-page-quick-info__news-heading">
+          Aktualności:
+        </h3>
+        <p class="index-page-quick-info__news-text">
+          {{ homepageNewsSectionText }}
+        </p>
+      </div>
+
+      <div
+        class="index-page-quick-info__contact-block"
+        :class="{ 'index-page-quick-info__contact-block--with-top-divider': homepageNewsSectionEnabled }"
+      >
         <div class="index-page-quick-info__row">
           <span class="index-page-quick-info__label">Kontakt:</span>
           <a
@@ -32,19 +48,6 @@
             />
           </a>
         </div>
-      </div>
-
-      <div
-        v-if="homepageNewsSectionEnabled"
-        class="index-page-quick-info__news-block"
-        aria-label="Aktualności sklepu"
-      >
-        <h3 class="index-page-quick-info__hours-heading index-page-quick-info__news-heading">
-          Aktualności:
-        </h3>
-        <p class="index-page-quick-info__news-text">
-          {{ homepageNewsSectionText }}
-        </p>
       </div>
 
       <div class="index-page-quick-info__hours-block">
@@ -145,6 +148,28 @@ defineProps({
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
+  padding: clamp(28px, 6vw, 36px) 0;
+}
+
+.index-page-quick-info__contact-block::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 50vw + 5vw);
+  width: calc(100vw - 10vw);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  bottom: 0;
+}
+
+.index-page-quick-info__contact-block--with-top-divider::before {
+  content: '';
+  position: absolute;
+  left: calc(50% - 50vw + 5vw);
+  width: calc(100vw - 10vw);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  top: 0;
 }
 
 .index-page-quick-info__row {
@@ -225,27 +250,7 @@ defineProps({
 }
 
 .index-page-quick-info__news-block {
-  position: relative;
-  padding: clamp(14px, 3vw, 18px) 0;
   text-align: center;
-}
-
-.index-page-quick-info__news-block::before,
-.index-page-quick-info__news-block::after {
-  content: '';
-  position: absolute;
-  left: clamp(12px, 4vw, 24px);
-  right: clamp(12px, 4vw, 24px);
-  height: 1px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.index-page-quick-info__news-block::before {
-  top: 0;
-}
-
-.index-page-quick-info__news-block::after {
-  bottom: 0;
 }
 
 .index-page-quick-info__news-heading {

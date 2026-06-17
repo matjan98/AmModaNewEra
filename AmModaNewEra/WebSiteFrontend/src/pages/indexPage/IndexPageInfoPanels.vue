@@ -29,13 +29,7 @@
       </div>
 
       <IndexPageShopBottomSections
-        ref="shopBottomSectionsRef"
-        :cta-css-vars="heroIntroCtaCssVars"
-        :hero-intro-cta-visible="heroIntroCtaVisible"
-        :hero-intro-facebook-cta-floated="heroIntroFacebookCtaFloated"
-        :facebook-shop-float-pop="facebookShopFloatPop"
         :facebook-url="FACEBOOK_URL"
-        :maps-url="MAPS_URL"
       />
     </div>
   </div>
@@ -46,10 +40,10 @@ import { computed, ref } from 'vue'
 import IndexPageShopBottomSections from '../../components/IndexPageShopBottomSections.vue'
 import IndexPageHeroIntroAtf from '../../components/indexPage/IndexPageHeroIntroAtf.vue'
 import IndexPageQuickInfo from '../../components/indexPage/IndexPageQuickInfo.vue'
+import { useHeroImagePreload } from '../../composables/useHeroImagePreload.js'
 import { useIsSmallScreen } from '../../composables/useIsSmallScreen.js'
 import {
   FACEBOOK_URL,
-  MAPS_URL,
   OPENING_HOURS,
   PHONE_DISPLAY,
   PHONE_TEL_HREF,
@@ -64,24 +58,25 @@ const heroIntroImage = computed(() =>
   isSmallScreen.value ? heroIntroMobileImage : heroIntroDesktopImage,
 )
 
+useHeroImagePreload({
+  mobile: heroIntroMobileImage,
+  desktop: heroIntroDesktopImage,
+})
+
 defineOptions({ name: 'IndexPageInfoPanels' })
 
 defineProps({
   heroIntroCtaCssVars: { type: Object, required: true },
   heroIntroCtaVisible: { type: Boolean, required: true },
   heroIntroCtaFloated: { type: Boolean, required: true },
-  heroIntroFacebookCtaFloated: { type: Boolean, required: true },
-  facebookShopFloatPop: { type: Boolean, required: true },
   todayStoreDayIndex: { type: Number, required: true },
   storeHoursHeadingLabel: { type: String, required: true },
   onHeroIntroImageLoad: { type: Function, required: true },
 })
 
 const heroIntroAtfComp = ref(null)
-const shopBottomSectionsRef = ref(null)
 
 defineExpose({
   heroIntroAtfComp,
-  shopBottomSectionsRef,
 })
 </script>
