@@ -11,13 +11,13 @@
             <div
               v-for="photo in photoListWithUrls"
               :key="photo.id"
-              class="index-page-gallery-panel__thumb-wrap index-page-gallery-panel__reveal-media"
+              class="index-page-gallery-panel__thumb-wrap index-page__reveal-media"
               @click="onThumbClick(photo.urlResolved, $event)"
             >
               <img
                 :src="photo.urlResolved"
                 :alt="'Zdjęcie ' + photo.id"
-                class="index-page-gallery-panel__thumb index-page-gallery-panel__reveal-media-img"
+                class="index-page-gallery-panel__thumb index-page__reveal-media-img"
                 loading="lazy"
                 decoding="async"
                 @load="onGalleryThumbLoad(photo.urlResolved, $event)"
@@ -34,13 +34,13 @@
           <div
             v-for="photo in productPhotos"
             :key="photo"
-            class="index-page-gallery-panel__thumb-wrap index-page-gallery-panel__reveal-media"
+            class="index-page-gallery-panel__thumb-wrap index-page__reveal-media"
             @click="onThumbClick(photo, $event)"
           >
             <img
               :src="photo"
               alt="Produkt AM Moda Damska"
-              class="index-page-gallery-panel__thumb index-page-gallery-panel__reveal-media-img"
+              class="index-page-gallery-panel__thumb index-page__reveal-media-img"
               loading="lazy"
               decoding="async"
               @load="onGalleryThumbLoad(photo, $event)"
@@ -233,13 +233,16 @@ onUnmounted(() => {
 }
 
 .index-page-gallery-panel__gallery-heading {
-  margin: 28px 0 32px;
+  margin: 40px 0 32px;
   font-size: clamp(1.35rem, 4.2vw, 2.1rem);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-align: center;
   color: rgba(255, 255, 255, 0.9);
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.85),
+    0 0 22px rgba(0, 0, 0, 0.55);
 }
 
 .index-page-gallery-panel__gallery {
@@ -289,30 +292,6 @@ onUnmounted(() => {
   padding: 20px 0;
 }
 
-.index-page-gallery-panel__error-wrap {
-  margin-top: 16px;
-  text-align: center;
-}
-
-.index-page-gallery-panel__error {
-  display: inline-block;
-  width: fit-content;
-  max-width: 100%;
-  border-radius: 12px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  min-height: 0;
-  background: #b71c1c !important;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-}
-
-.index-page-gallery-panel__error :deep(.q-banner__content) {
-  padding: 0;
-  min-height: 0;
-}
-
-
 :deep(.pswp) {
   --pswp-bg: rgba(8, 8, 12, 0.92);
   --pswp-placeholder-bg: rgba(255, 255, 255, 0.06);
@@ -332,13 +311,13 @@ onUnmounted(() => {
   opacity: 1;
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-gallery-panel__section--gallery {
     margin-top: 4vh;
   }
 
   .index-page-gallery-panel__gallery-heading {
-    margin-top: 96px;
+    margin-top: 112px;
     margin-bottom: 28px;
   }
 

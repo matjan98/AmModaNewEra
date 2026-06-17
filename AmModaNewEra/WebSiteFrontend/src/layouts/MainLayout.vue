@@ -1,12 +1,23 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="main-layout">
     <q-header
+      ref="headerEl"
       class="main-layout__header"
       unelevated
       :class="{
         'main-layout__header--scrolled': useSidesLayout
       }"
     >
+      <div v-if="isSmallScreen" class="main-layout__mobile-status-row">
+        <div class="main-layout__hours-toggle-wrap main-layout__mobile-status-wrap">
+          <OpenStatusButton
+            :expandable="false"
+            :is-open-today="isOpenToday"
+            :today-hours="todayHours"
+          />
+        </div>
+      </div>
+
       <div class="main-layout__header-inner" :class="{ 'main-layout__header-inner--scrolled': useSidesLayout }">
         <div class="main-layout__brand" :class="{ 'main-layout__brand--center': useSidesLayout }">
           <a
@@ -16,7 +27,7 @@
             @click.prevent="onLogoClick"
           >
             <img
-              src="../assets/logo.png"
+              src="../assets/logo.webp"
               alt="AM Moda Damska"
               class="main-layout__logo"
               :class="{ 'main-layout__logo--compact': useSidesLayout }"
@@ -96,153 +107,45 @@
     <q-page-container class="main-layout__page-container">
       <router-view />
     </q-page-container>
-
-    <div class="main-layout__fab-column">
-      <div class="main-layout__mobile-fab-stack">
-        <div class="main-layout__mobile-fab-phone">
-          <div class="main-layout__mobile-fab-wrap">
-            <button
-              type="button"
-              class="main-layout__mobile-fab-btn"
-              :class="{ 'main-layout__mobile-fab-btn--active': phoneFabExpanded }"
-              aria-label="Zadzwoń"
-              :aria-expanded="phoneFabExpanded"
-              @click="togglePhoneFab"
-            >
-              <q-icon name="phone" size="22px" />
-              <span
-                v-if="isStoreOpenNow"
-                class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-0"
-                aria-hidden="true"
-              />
-            </button>
-            <div
-              v-show="phoneFabExpanded"
-              class="main-layout__mobile-fab-panel main-layout__mobile-fab-panel--phone"
-            >
-              <a :href="PHONE_TEL_HREF" class="main-layout__mobile-fab-phone-link">
-                <span class="main-layout__mobile-fab-phone-label">Zadzwoń:</span>
-                <span class="main-layout__mobile-fab-phone-number">{{ PHONE_DISPLAY }}</span>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="main-layout__mobile-fab-hours">
-          <div class="main-layout__mobile-fab-wrap">
-            <button
-              ref="mobileHoursFabBtnRef"
-              type="button"
-              class="main-layout__mobile-fab-btn"
-              :class="{ 'main-layout__mobile-fab-btn--active': hoursExpanded }"
-              aria-label="Godziny otwarcia"
-              :aria-expanded="hoursExpanded"
-              @click="toggleHoursFab"
-            >
-              <q-icon name="fa-regular fa-clock" size="22px" />
-              <span
-                v-if="isStoreOpenNow"
-                class="main-layout__fab-status-dot main-layout__fab-status-dot--delay-1"
-                aria-hidden="true"
-              />
-            </button>
-            <HoursDropdown
-              ref="mobileHoursFabPanelRef"
-              v-show="hoursExpanded"
-              class="main-layout__mobile-fab-panel"
-              :class="{ 'main-layout__mobile-fab-panel--flip-up': mobileHoursFabPanelFlipUp }"
-              :rows="openingHours"
-              :today-day-index="todayDayIndex"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
   </q-layout>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
 import HoursDropdown from '../components/layout/HoursDropdown.vue'
 import OpenStatusButton from '../components/layout/OpenStatusButton.vue'
 
-const HOURS_FAB_PANEL_GAP_PX = 8
-
 const { matches: isSmallScreen } = useIsSmallScreen()
-const { todayDayIndex, todayHours, isOpenToday, isStoreOpenNow } = useOpeningHours(OPENING_HOURS, {
+const { todayDayIndex, todayHours, isOpenToday } = useOpeningHours(OPENING_HOURS, {
   liveClock: true,
 })
 
 const openingHours = OPENING_HOURS
 const hoursExpanded = ref(false)
-const phoneFabExpanded = ref(false)
-const mobileHoursFabBtnRef = ref(null)
-const mobileHoursFabPanelRef = ref(null)
-const mobileHoursFabPanelFlipUp = ref(false)
+const headerEl = ref(null)
+
+let headerResizeObserver = null
 
 const useSidesLayout = computed(() => !isSmallScreen.value)
 
-function updateMobileHoursFabPanelPlacement() {
-  if (!hoursExpanded.value) return
-  const btn = mobileHoursFabBtnRef.value
-  const panelComp = mobileHoursFabPanelRef.value
-  const panel = panelComp?.rootEl ?? panelComp
-  if (!btn || !panel) return
+function updateHeaderHeightCssVar() {
+  const headerComponent = headerEl.value
+  const el = headerComponent?.$el ?? headerComponent
+  if (!el || typeof el.getBoundingClientRect !== 'function') return
 
-  const btnRect = btn.getBoundingClientRect()
-  const vv = window.visualViewport
-  const viewTop = vv?.offsetTop ?? 0
-  const viewBottom = vv ? vv.offsetTop + vv.height : window.innerHeight
-
-  const pr = panel.getBoundingClientRect()
-  let panelH = pr.height
-  if (panelH < 2) {
-    panelH = panel.scrollHeight
-  }
-
-  const gap = HOURS_FAB_PANEL_GAP_PX
-  const spaceAbove = btnRect.top - viewTop
-  const spaceBelow = viewBottom - btnRect.bottom
-  const need = panelH + gap
-
-  if (spaceBelow >= need) {
-    mobileHoursFabPanelFlipUp.value = false
-  } else if (spaceAbove >= need) {
-    mobileHoursFabPanelFlipUp.value = true
-  } else {
-    mobileHoursFabPanelFlipUp.value = spaceAbove > spaceBelow
-  }
+  const height = Math.ceil(el.getBoundingClientRect().height)
+  document.documentElement.style.setProperty('--main-layout-header-height', `${height}px`)
 }
-
-function onMobileHoursFabPlacementLayout() {
-  if (hoursExpanded.value) updateMobileHoursFabPanelPlacement()
-}
-
-watch(hoursExpanded, (open) => {
-  if (!open) {
-    mobileHoursFabPanelFlipUp.value = false
-    return
-  }
-  nextTick(() => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => updateMobileHoursFabPanelPlacement())
-    })
-  })
-})
 
 function closeHoursDropdown() {
   hoursExpanded.value = false
 }
 
-function closePhoneFab() {
-  phoneFabExpanded.value = false
-}
-
 function onWindowScroll() {
   if (hoursExpanded.value) closeHoursDropdown()
-  if (phoneFabExpanded.value) closePhoneFab()
 }
 
 function onDocumentPointerDownOutsideHours(event) {
@@ -250,24 +153,10 @@ function onDocumentPointerDownOutsideHours(event) {
   if (!(target instanceof Node)) return
 
   if (hoursExpanded.value) {
-    const inLegacyHours = target.closest('.main-layout__hours-toggle-wrap')
-    const inMobileHours = target.closest('.main-layout__mobile-fab-hours')
-    if (!inLegacyHours && !inMobileHours) closeHoursDropdown()
+    const inHoursToggle = target.closest('.main-layout__hours-toggle-wrap')
+    const inMobileStatus = target.closest('.main-layout__mobile-status-row')
+    if (!inHoursToggle && !inMobileStatus) closeHoursDropdown()
   }
-
-  if (phoneFabExpanded.value) {
-    if (!target.closest('.main-layout__mobile-fab-phone')) closePhoneFab()
-  }
-}
-
-function togglePhoneFab() {
-  phoneFabExpanded.value = !phoneFabExpanded.value
-  if (phoneFabExpanded.value) hoursExpanded.value = false
-}
-
-function toggleHoursFab() {
-  hoursExpanded.value = !hoursExpanded.value
-  if (hoursExpanded.value) phoneFabExpanded.value = false
 }
 
 function scrollToTop() {
@@ -285,29 +174,35 @@ function onLogoClick() {
 
 onMounted(() => {
   window.addEventListener('scroll', onWindowScroll, { passive: true })
-  window.addEventListener('resize', onMobileHoursFabPlacementLayout, { passive: true })
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', onMobileHoursFabPlacementLayout)
-    window.visualViewport.addEventListener('scroll', onMobileHoursFabPlacementLayout)
-  }
+  window.addEventListener('resize', updateHeaderHeightCssVar, { passive: true })
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
+
+  nextTick(() => {
+    updateHeaderHeightCssVar()
+    const headerComponent = headerEl.value
+    const el = headerComponent?.$el ?? headerComponent
+    if (el && typeof ResizeObserver !== 'undefined') {
+      headerResizeObserver = new ResizeObserver(() => updateHeaderHeightCssVar())
+      headerResizeObserver.observe(el)
+    }
+  })
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onWindowScroll)
-  window.removeEventListener('resize', onMobileHoursFabPlacementLayout)
-  if (window.visualViewport) {
-    window.visualViewport.removeEventListener('resize', onMobileHoursFabPlacementLayout)
-    window.visualViewport.removeEventListener('scroll', onMobileHoursFabPlacementLayout)
-  }
+  window.removeEventListener('resize', updateHeaderHeightCssVar)
   document.removeEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
+  if (headerResizeObserver) {
+    headerResizeObserver.disconnect()
+    headerResizeObserver = null
+  }
 })
 </script>
 
 <style scoped>
 .main-layout {
   min-height: 100vh;
-  background: transparent;
+  background: var(--am-page-bg, #bababa);
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -327,6 +222,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   padding: 13px;
+  background: transparent;
   transition: padding 0.3s ease;
   overflow: visible;
   min-height: 0;
@@ -362,7 +258,7 @@ onUnmounted(() => {
   min-height: unset;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
     gap: 9px;
     min-height: 90px;
@@ -600,45 +496,7 @@ onUnmounted(() => {
   opacity: 1 !important;
 }
 
-.main-layout__fab-column {
-  position: fixed;
-  right: max(16px, env(safe-area-inset-right, 0px));
-  z-index: 6000;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-  pointer-events: none;
-}
-
-.main-layout__fab-column > * {
-  pointer-events: auto;
-}
-
-.main-layout__mobile-fab-phone,
-.main-layout__mobile-fab-hours,
-.main-layout__facebook-fab {
-  transform: translate3d(calc(100% + 28px), 0, 0);
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
-}
-
-.main-layout__fab-column--entered .main-layout__mobile-fab-phone {
-  transform: translate3d(0, 0, 0);
-  transition-delay: 0s;
-}
-
-.main-layout__fab-column--entered .main-layout__mobile-fab-hours {
-  transform: translate3d(0, 0, 0);
-  transition-delay: 0.1s;
-}
-
-.main-layout__fab-column--entered .main-layout__facebook-fab {
-  transform: translate3d(0, 0, 0);
-  transition-delay: 0.2s;
-}
-
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .main-layout__phone-link,
   .main-layout__open-status {
     font-size: 1.05rem;
@@ -647,47 +505,105 @@ onUnmounted(() => {
   .main-layout__hours-row {
     font-size: 1.05rem;
   }
-
-  .main-layout__fab-column {
-    top: auto;
-    bottom: max(18px, env(safe-area-inset-bottom, 0px));
-    transform: none;
-    
-    right: max(40px, env(safe-area-inset-right, 0px));
-  }
-
-  .main-layout__fab-column--entered .main-layout__facebook-fab {
-    transition-delay: 0s;
-  }
-
-  .main-layout__mobile-fab-stack {
-    display: none;
-  }
-
-  .main-layout__facebook-fab {
-    width: 42px;
-    height: 42px;
-    border-radius: 99px;
-  }
-
-  .main-layout__facebook-fab-icon {
-    width: 22px;
-    height: 22px;
-  }
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
+  .main-layout {
+    --main-layout-header-bg:
+      linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.02) 38%,
+        rgba(0, 0, 0, 0.06) 100%
+      ),
+      rgba(10, 10, 14, 0.9);
+  }
+
+  .main-layout__header,
   .main-layout__header :deep(.q-header__content) {
-    padding: 8px 16px;
+    background: var(--main-layout-header-bg);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .main-layout__header :deep(.q-header__content) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .main-layout__header-inner {
+    padding: 0 16px;
+    box-sizing: border-box;
   }
 
   .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
-    min-height: 50px;
+    min-height: 0;
+    gap: 0;
+  }
+
+  .main-layout__mobile-status-row {
+    display: flex;
+    width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+
+  .main-layout__mobile-status-wrap {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: clamp(1.28rem, 5.4vw, 1.52rem);
+    font-weight: 600;
+    line-height: 1.1;
+    min-height: 0;
+    max-height: none;
+    padding: 5px 16px;
+    border-radius: 0;
     gap: 8px;
   }
 
+  .main-layout__mobile-status-wrap .main-layout__open-status span {
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__hours-value {
+    margin-left: clamp(6px, 2vw, 10px);
+    font-weight: 700;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status :deep(.q-icon) {
+    font-size: 1.2em !important;
+  }
+
+  .main-layout__mobile-status-dropdown.main-layout__hours-dropdown {
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    min-width: unset;
+    max-width: none;
+  }
+
   .main-layout__brand {
-    top: 5px;
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin: 0;
+    padding: 5px 0;
+    box-sizing: border-box;
   }
 
   .main-layout__contact--below {
@@ -716,233 +632,9 @@ onUnmounted(() => {
     max-width: min(320px, calc(100vw - 24px));
   }
 
-  .main-layout__fab-column {
-    top: calc(50% - 30vh);
-    bottom: auto;
-    
-    transform: translateY(calc(-50% + 20px));
-  }
-
   .main-layout__contact--below {
     display: none !important;
   }
- 
-  .main-layout__fab-column {
-    display: none !important;
-  }
-
-  .main-layout__mobile-fab-stack {
-    position: relative;
-    z-index: 6201;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
-  }
-
-  .main-layout__mobile-fab-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 99px;
-  }
-
-  .main-layout__facebook-fab {
-    width: 42px;
-    height: 42px;
-    border-radius: 99px;
-  }
-}
-
-.main-layout__mobile-fab-wrap {
-  position: relative;
-}
-
-.main-layout__mobile-fab-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  margin: 0;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 99px;
-  background: transparent;
-  color: #ffffff;
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.main-layout__mobile-fab-btn:hover {
-  border-color: rgba(255, 255, 255, 0.85);
-}
-
-.main-layout__mobile-fab-btn:focus-visible {
-  outline: 2px solid rgba(230, 25, 113, 0.9);
-  outline-offset: 2px;
-}
-
-.main-layout__mobile-fab-btn--active {
-  border-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
-}
-
-.main-layout__mobile-fab-panel {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 8px);
-  z-index: 6100;
-  box-sizing: border-box;
-}
-
-.main-layout__mobile-fab-panel.main-layout__hours-dropdown {
-  top: calc(100% + 8px);
-  bottom: auto;
-  margin-top: 0;
-  left: auto;
-  min-width: min(280px, calc(100vw - 48px));
-  max-width: calc(100vw - 24px);
-}
-
-.main-layout__mobile-fab-panel.main-layout__hours-dropdown.main-layout__mobile-fab-panel--flip-up {
-  top: auto;
-  bottom: calc(100% + 8px);
-}
-
-.main-layout__mobile-fab-panel--phone {
-  min-width: 0;
-  max-width: calc(100vw - 48px);
-  padding: 6px 11px;
-  background: rgba(14, 14, 18, 0.92);
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-  box-shadow:
-    0 14px 44px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.main-layout__mobile-fab-phone-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.96);
-  text-align: center;
-  text-decoration: none;
-}
-
-.main-layout__mobile-fab-phone-label {
-  display: block;
-  font-size: 0.82rem;
-  font-weight: 400;
-  line-height: 1.2;
-  color: rgba(255, 255, 255, 0.52);
-}
-
-.main-layout__mobile-fab-phone-number {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 600;
-  white-space: nowrap;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-}
-
-.main-layout__mobile-fab-phone-link:hover .main-layout__mobile-fab-phone-number {
-  text-decoration: underline;
-}
-
-.main-layout__facebook-fab {
-  position: relative;
-  z-index: 6199;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  margin: 0;
-  background: #1877f2;
-  border: 1px solid rgba(255, 255, 255, 0.38);
-  border-radius: 99px;
-  color: #ffffff;
-  text-decoration: none;
-  box-sizing: border-box;
-}
-
-.main-layout__facebook-fab:hover {
-  border-color: rgba(255, 255, 255, 0.55);
-  background: #166fe5;
-}
-
-.main-layout__facebook-fab:focus-visible {
-  outline: 2px solid rgba(230, 25, 113, 0.9);
-  outline-offset: 2px;
-}
-
-.main-layout__fab-status-dot {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #34c759;
-  border: 1px solid #0a0a0a;
-  box-sizing: border-box;
-  pointer-events: none;
-  z-index: 1;
-  animation: main-layout-fab-dot-pulse 5s ease-in-out infinite;
-  animation-delay: 0s;
-}
-
-.main-layout__fab-status-dot--delay-0 {
-  animation-delay: 0s;
-}
-
-.main-layout__fab-status-dot--delay-1 {
-  animation-delay: 0.1s;
-}
-
-.main-layout__fab-status-dot--delay-fb {
-  animation-delay: 0s;
-}
-
-.main-layout__facebook-fab .main-layout__fab-status-dot {
-  border-color: rgba(255, 255, 255, 0.55);
-}
-
-@keyframes main-layout-fab-dot-pulse {
-  
-  0%,
-  80% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .main-layout__fab-status-dot {
-    animation: none;
-  }
-}
-
-.main-layout__facebook-fab-icon {
-  width: 22px;
-  height: 22px;
-  display: block;
-  flex-shrink: 0;
 }
 </style>
 
@@ -963,6 +655,11 @@ onUnmounted(() => {
   cursor: pointer;
   background: transparent;
   transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.main-layout__open-status--static {
+  cursor: default;
+  pointer-events: none;
 }
 
 .main-layout__header .main-layout__open-status,
@@ -993,9 +690,59 @@ onUnmounted(() => {
   color: inherit !important;
 }
 
-.main-layout__header .main-layout__open-status .main-layout__hours-chevron {
+.main-layout__header .main-layout__open-status :deep(.q-icon) {
   color: #141414 !important;
   opacity: 1 !important;
+}
+
+@media (min-width: 1000px) {
+  .main-layout__header .main-layout__open-status--open-today,
+  .main-layout__header .main-layout__open-status--open-today span {
+    color: #141414 !important;
+    -webkit-text-fill-color: #141414 !important;
+  }
+
+  .main-layout__header .main-layout__open-status--open-today :deep(.q-icon) {
+    color: #141414 !important;
+  }
+}
+
+@media (max-width: 999.98px) {
+  .main-layout__mobile-status-wrap .main-layout__open-status,
+  .main-layout__mobile-status-wrap button.main-layout__open-status {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: transparent !important;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status--open-today,
+  .main-layout__mobile-status-wrap button.main-layout__open-status--open-today {
+    background: transparent !important;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status:hover,
+  .main-layout__mobile-status-wrap button.main-layout__open-status:hover,
+  .main-layout__mobile-status-wrap .main-layout__open-status--open-today:hover,
+  .main-layout__mobile-status-wrap button.main-layout__open-status--open-today:hover {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status,
+  .main-layout__mobile-status-wrap button.main-layout__open-status,
+  .main-layout__mobile-status-wrap .main-layout__open-status span,
+  .main-layout__mobile-status-wrap .main-layout__open-status--open-today,
+  .main-layout__mobile-status-wrap .main-layout__open-status--open-today span {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status :deep(.q-icon) {
+    color: #ffffff !important;
+  }
 }
 
 .main-layout__hours-chevron {

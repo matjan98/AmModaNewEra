@@ -28,16 +28,8 @@ export default defineConfig((/* ctx */) => {
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
-      // 'ionicons-v4',
-      // 'mdi-v7',
       'fontawesome-v6',
-      // 'eva-icons',
-      // 'themify',
-      // 'line-awesome',
-      'roboto-font-latin-ext', // same as Roboto but with Polish/latin-ext support in all weights
-
-      // 'roboto-font', // use roboto-font-latin-ext for proper ę, ą, ó etc.
-      'material-icons', // optional, you are not bound to it
+      'material-icons',
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
@@ -90,7 +82,7 @@ export default defineConfig((/* ctx */) => {
         }
       },
 
-      iconSet: 'material-icons', // Quasar icon set
+      iconSet: 'material-icons',
       // lang: 'en-US', // Quasar language pack
 
       // For special cases outside of where the auto-import strategy can have an impact

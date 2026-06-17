@@ -1,9 +1,15 @@
 <template>
-  <button
-    type="button"
+  <component
+    :is="expandable ? 'button' : 'div'"
+    :type="expandable ? 'button' : undefined"
     class="main-layout__open-status"
-    :class="{ 'main-layout__open-status--expanded': expanded }"
-    @click="$emit('update:expanded', !expanded)"
+    :class="{
+      'main-layout__open-status--expanded': expandable && expanded,
+      'main-layout__open-status--open-today': isOpenToday,
+      'main-layout__open-status--static': !expandable,
+    }"
+    :role="expandable ? undefined : 'status'"
+    @click="onClick"
   >
     <span>
       <span v-if="isOpenToday">
@@ -15,15 +21,16 @@
       </span>
     </span>
     <q-icon
+      v-if="expandable"
       :name="expanded ? 'expand_less' : 'expand_more'"
       size="20px"
       class="main-layout__hours-chevron"
     />
-  </button>
+  </component>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   isOpenToday: {
     type: Boolean,
     required: true,
@@ -34,9 +41,18 @@ defineProps({
   },
   expanded: {
     type: Boolean,
-    required: true,
+    default: false,
+  },
+  expandable: {
+    type: Boolean,
+    default: true,
   },
 })
 
-defineEmits(['update:expanded'])
+const emit = defineEmits(['update:expanded'])
+
+function onClick() {
+  if (!props.expandable) return
+  emit('update:expanded', !props.expanded)
+}
 </script>

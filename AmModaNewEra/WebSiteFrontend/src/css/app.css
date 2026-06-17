@@ -1,202 +1,59 @@
+:root {
+  --q-primary: #E61971;
+  --am-page-bg: #bababa;
+}
+
 html,
 body,
 #q-app {
   font-family: 'Poppins', sans-serif;
-  background: transparent;
+  background: var(--am-page-bg);
   color: rgba(255, 255, 255, 0.92);
   overflow-x: hidden;
 }
 
 #q-app .q-layout {
-  background: transparent;
+  background: var(--am-page-bg);
 }
 
 #q-app .q-page-container {
-  background: transparent;
+  background: var(--am-page-bg);
 }
 
 #q-app .q-page {
-  background: transparent;
-}
-
-
-:root {
-  --q-primary: #E61971;
-}
-
-/* Global shared UI utilities (am- prefix to avoid collisions) */
-
-.am-fullbleed-vw {
-  position: relative;
-  left: 50%;
-  width: 100vw;
-  margin-left: -50vw;
-  box-sizing: border-box;
-}
-
-.am-fullbleed-dvw {
-  position: relative;
-  left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
-  box-sizing: border-box;
-}
-
-.am-glass-panel {
-  --am-glass-bg: rgba(255, 255, 255, 0.06);
-  --am-glass-border: rgba(255, 255, 255, 0.12);
-  --am-glass-blur: 14px;
-  --am-glass-saturate: 1.1;
-  background: var(--am-glass-bg);
-  backdrop-filter: blur(var(--am-glass-blur)) saturate(var(--am-glass-saturate));
-  -webkit-backdrop-filter: blur(var(--am-glass-blur)) saturate(var(--am-glass-saturate));
-  border: 1px solid var(--am-glass-border);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 34px rgba(0, 0, 0, 0.35);
-}
-
-.am-glass-card {
-  --am-glass-bg: rgba(255, 255, 255, 0.06);
-  --am-glass-border: rgba(255, 255, 255, 0.12);
-  --am-glass-blur: 14px;
-  --am-glass-saturate: 1.1;
-  background: var(--am-glass-bg);
-  backdrop-filter: blur(var(--am-glass-blur)) saturate(var(--am-glass-saturate));
-  -webkit-backdrop-filter: blur(var(--am-glass-blur)) saturate(var(--am-glass-saturate));
-  border: 1px solid var(--am-glass-border);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 12px 24px rgba(0, 0, 0, 0.55);
-}
-
-.am-focus-ring:focus-visible {
-  outline: 2px solid var(--am-focus-ring, rgba(230, 25, 113, 0.7));
-  outline-offset: 3px;
-}
-
-.am-btn-glass {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 22px;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.96);
-  font-weight: 600;
-  font-size: 1rem;
-  background: rgba(14, 14, 18, 0.72);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 32px rgba(0, 0, 0, 0.45);
-  transition:
-    background 0.22s ease,
-    border-color 0.22s ease,
-    transform 0.18s ease,
-    box-shadow 0.22s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.am-btn-facebook {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 12px 18px;
-  text-decoration: none;
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.25;
-  border-radius: 12px;
-  border: 1px solid rgba(185, 245, 255, 0.6);
-  background: linear-gradient(
-    145deg,
-    rgba(46, 210, 255, 0.54) 0%,
-    rgba(0, 176, 255, 0.44) 45%,
-    rgba(0, 142, 235, 0.48) 100%
-  );
-  backdrop-filter: blur(18px) saturate(1.45);
-  -webkit-backdrop-filter: blur(18px) saturate(1.45);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 10px 34px rgba(0, 176, 255, 0.42),
-    0 12px 40px rgba(0, 0, 0, 0.42);
-  transition: background 0.22s ease, border-color 0.22s ease, transform 0.18s ease, box-shadow 0.22s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.am-btn-facebook:hover {
-  background: linear-gradient(
-    145deg,
-    rgba(88, 230, 255, 0.58) 0%,
-    rgba(28, 198, 255, 0.52) 45%,
-    rgba(0, 160, 245, 0.58) 100%
-  );
-  border-color: rgba(210, 250, 255, 0.66);
-  transform: translateY(-1px);
+  background: var(--am-page-bg);
 }
 
 /* Shared styles applied via existing component BEM class names.
  * This repo enforces per-file class prefixes, so we avoid adding generic classes in templates.
  */
 
-/* Full-bleed blocks (100dvw) */
-.index-page-product-categories,
-.index-page-quick-info__root {
-  position: relative;
-  left: 50%;
-  width: 100dvw;
-  margin-left: -50dvw;
-  box-sizing: border-box;
-}
-
-/* Glass panel surface */
-.index-page-gallery-panel__panels--gallery,
-.index-page-shop-bottom-sections__facebook-shop-follow {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 34px rgba(0, 0, 0, 0.35);
-}
-
+/* Gallery panel surface (no backdrop blur — glass effect lives on the reviews card) */
 .index-page-gallery-panel__panels--gallery {
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.index-page-shop-bottom-sections__facebook-shop-follow {
+  background: transparent;
+  box-shadow: none;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Glass card surface */
 .google-reviews-card__inner {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(3px) saturate(1.1);
+  -webkit-backdrop-filter: blur(5px) saturate(1.1);
 }
 
 .index-page-gallery-panel__thumb-wrap {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 12px 24px rgba(0, 0, 0, 0.55);
 }
 
 /* Base dark glass CTA button */
-.index-page-shop-bottom-sections__facebook-cta-btn,
-.index-page-product-categories__facebook-cta-btn {
+.index-page-shop-bottom-sections__facebook-cta-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -224,7 +81,6 @@ body,
 
 /* Facebook gradient CTA */
 .index-page-shop-bottom-sections__facebook-cta-btn--below,
-.index-page-product-categories__facebook-cta-btn--below,
 .index-page-quick-info__facebook-btn {
   color: #ffffff;
   background: linear-gradient(
@@ -243,7 +99,6 @@ body,
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn--below:hover,
-.index-page-product-categories__facebook-cta-btn--below:hover,
 .index-page-quick-info__facebook-btn:hover {
   background: linear-gradient(
     145deg,
@@ -361,19 +216,6 @@ body,
   pointer-events: none;
 }
 
-.index-page__hero-intro-sticky-cta--top {
-  align-items: flex-start;
-  padding-top: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-top, 0px));
-  padding-bottom: 0;
-}
-
-.index-page__hero-intro-sticky-cta--hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-
 .index-page__hero-intro-sticky-cta--floated {
   position: fixed;
   top: auto;
@@ -465,141 +307,36 @@ body,
   transform: translateY(0);
 }
 
-
-.index-page__hero-intro-cta-btn {
-  pointer-events: auto;
-  cursor: pointer;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-width: 140px;
-  margin: 0;
-  padding: 12px 22px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: normal;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.96);
-  background: rgba(14, 14, 18, 0.72);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 10px 32px rgba(0, 0, 0, 0.45);
-  isolation: isolate;
-  opacity: 0;
-  transform: scale(0.94);
-  transform-origin: center center;
-  transition:
-    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.35s ease,
-    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    min-width 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease;
+.index-page__hero-intro-address--atf {
+  font-size: clamp(1.35rem, 5.2vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  white-space: normal;
 }
 
-button.index-page__hero-intro-cta-btn {
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-
-@media (max-width: 749.98px) {
-  .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop) {
-    --hero-cta-stack-height: 90px;
-    --hero-cta-address-row-height: 34px;
-    --hero-cta-button-row-height: 56px;
+@media (max-width: 999.98px) {
+  .index-page__hero-intro-cta-block {
+    --hero-cta-stack-height: 136px;
+    --hero-cta-address-row-height: 52px;
+    --hero-cta-button-row-height: 84px;
   }
 
-  .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop)
-    .index-page__hero-intro-address-row {
+  .index-page__hero-intro-cta-block .index-page__hero-intro-address-row {
     align-items: flex-end;
   }
 
-  .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop)
-    .index-page__hero-intro-btn-row {
+  .index-page__hero-intro-cta-block .index-page__hero-intro-btn-row {
     align-items: flex-start;
   }
 
-  .index-page__hero-intro-address:not(.index-page__hero-intro-address--facebook-shop-last) {
-    font-size: clamp(0.68rem, 3.45vw, 1.14rem);
-    line-height: 1.18;
-  }
-
-  .index-page__hero-intro-cta-btn {
-    min-width: 130px;
-    padding: 12px 17px;
-    font-size: 0.8rem;
-    border-radius: 4px;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:hover {
-    min-width: 118px;
-    padding: 12px 15px;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:active {
-    min-width: 114px;
-    padding: 11px 14px;
+  .index-page__hero-intro-address--atf {
+    font-size: clamp(1.22rem, 4.9vw, 1.78rem);
+    line-height: 1.2;
   }
 }
 
-.index-page__hero-intro-cta-btn--visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-
-.index-page__hero-intro-cta-btn--visible:hover {
-  min-width: 126px;
-  padding: 10px 18px;
-}
-
-.index-page__hero-intro-cta-btn--visible:active {
-  min-width: 122px;
-  padding: 9px 16px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .index-page__hero-intro-cta-btn {
-    opacity: 1;
-    transform: none;
-    transition:
-      padding 0.45s ease,
-      min-width 0.45s ease;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:hover {
-    min-width: 126px;
-    padding: 10px 18px;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:active {
-    min-width: 122px;
-    padding: 9px 16px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) and (max-width: 749.98px) {
-  .index-page__hero-intro-cta-btn--visible:hover {
-    min-width: 118px;
-    padding: 7px 13px;
-  }
-
-  .index-page__hero-intro-cta-btn--visible:active {
-    min-width: 114px;
-    padding: 6px 12px;
-  }
-}
-
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page__hero-intro {
     margin-top: 0;
   }
@@ -618,10 +355,6 @@ button.index-page__hero-intro-cta-btn {
 
   .index-page__hero-intro-sticky-cta {
     padding: 0 12px max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px));
-  }
-
-  .index-page__hero-intro-sticky-cta--top {
-    padding: max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-top, 0px)) 12px 0;
   }
 
   .index-page__hero-intro-sticky-cta--floated {
@@ -700,83 +433,453 @@ button.index-page__hero-intro-cta-btn {
   max-height: none;
 }
 
-.index-page__hero-intro-google-mini {
-  width: 100%;
+/* Maps navigate CTA (animated border) — shared by top hero */
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
+  position: relative;
+  border-radius: 22px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0) scale(1);
+  transition:
+    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
+  gap: 20px;
+  padding: 12px 22px 12px 30px;
+  border-radius: 22px;
+  align-items: center;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.18s ease,
+    box-shadow 0.22s ease,
+    padding 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    gap 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    #42a5f5 0%,
+    #42a5f5 calc(15% - var(--border-blend, 3%)),
+    #1e88e5 calc(15% + var(--border-blend, 3%)),
+    #1e88e5 calc(30% - var(--border-blend, 3%)),
+    #f44336 calc(30% + var(--border-blend, 3%)),
+    #f44336 calc(50% - var(--border-blend, 3%)),
+    #ffc107 calc(50% + var(--border-blend, 3%)),
+    #ffc107 calc(70% - var(--border-blend, 3%)),
+    #4caf50 calc(70% + var(--border-blend, 3%)),
+    #4caf50 100%
+  );
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.98;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible::before {
+  animation: index-page-maps-cta-border-shift var(--mapsCtaBorderShiftDuration, 14s) linear infinite;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
+  --mapsCtaBorderShiftDuration: 3s;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.45s ease 0.05s,
-              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
-  pointer-events: auto;
+  gap: 2px;
+  text-align: center;
+  transform: translateY(-2px);
 }
 
-.index-page__hero-intro-google-mini--visible {
-  opacity: 1;
-  transform: translateY(0);
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-label {
+  letter-spacing: 0.08em;
+  font-size: clamp(0.525rem, 1.375vw, 0.61rem);
+  font-weight: 600;
+  transition: none;
 }
 
-.index-page__hero-intro-cta-btn--solid {
-  font-size: 1rem;
+.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+  font-size: clamp(0.26rem, 0.825vw, 0.31rem);
   font-weight: 500;
-  letter-spacing: 0.03em;
-  color: #141414;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.2);
-}
-
-.index-page__hero-intro-cta-btn--solid.index-page__hero-intro-cta-btn--visible:hover {
-  background: #f3f3f3;
-  border-color: rgba(0, 0, 0, 0.2);
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
-}
-
-.index-page__hero-intro-cta-btn--solid.index-page__hero-intro-cta-btn--visible:active {
-  background: #e8e8e8;
-}
-
-
-@media (max-width: 749.98px) {
-  .index-page__hero-intro-cta-btn--solid {
-    font-size: 0.84rem;
-    font-weight: 500;
-  }
-}
-
-@media (max-width: 749.98px) {
-  .index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
-    padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
-  }
-}
-
-/* Index page hero: styles previously colocated with IndexPageHeroIntroThird.vue */
-
-.index-page__hero-intro--maps-underlay-cover {
-  z-index: 1650;
-}
-
-.index-page__hero-intro-quote {
-  text-shadow:
-    0 2px 5px rgb(0, 0, 0),
-    0 0 10px rgb(0, 0, 0);
-}
-
-.index-page__hero-intro-quote-text {
-  display: inline;
-}
-
-.index-page__hero-intro-quote-signature {
-  display: block;
-  width: 100%;
-  text-align: right;
-  margin-top: 2px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
   line-height: 1.05;
-  font-size: 0.82em;
-  letter-spacing: 0.03em;
-  color: #ffffff;
-  opacity: 1;
+  transition: none;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+  flex-shrink: 0;
+  display: block;
+  width: 26px;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+@keyframes index-page-maps-cta-border-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay:not(.index-page-shop-bottom-sections__facebook-cta-btn--visible) {
+  transition:
+    transform 0.26s cubic-bezier(0.42, 0, 0.58, 1),
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
+  gap: 22px;
+  padding: 13px 24px 13px 33px;
+  border-radius: 22px;
+  transform: translateY(0) scale(1.177);
+  transition:
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.index-page-maps-cta-host.index-page__hero-intro-sticky-cta--floated
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
+  transform: translateY(0) scale(1);
+  border-radius: 22px;
+  transition:
+    transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
+  transform: translateY(0) scale(1.2);
+}
+
+.index-page-maps-cta-host.index-page__hero-intro-sticky-cta--floated
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
+  transform: translateY(0) scale(1.03);
+}
+
+.index-page-maps-cta-host
+  .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay
+  .index-page-shop-bottom-sections__facebook-cta-btn-label {
+  font-size: clamp(1.05rem, 2.75vw, 1.22rem);
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-label {
+  font-size: clamp(1.155rem, 3.025vw, 1.342rem);
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay
+  .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+  font-size: clamp(0.52rem, 1.65vw, 0.62rem);
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+  font-size: clamp(0.572rem, 1.815vw, 0.682rem);
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+  width: 29px;
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
+  gap: 3px;
+}
+
+@keyframes index-page-maps-cta-reveal-link-not-floated-mobile {
+  0% {
+    padding: 11px 19px 11px 23px;
+    gap: 17px;
+    border-radius: 22px;
+    transform: translateY(0) scale(1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 14px 38px rgba(0, 0, 0, 0.52);
+  }
+
+  100% {
+    padding: 13px 24px 13px 33px;
+    gap: 22px;
+    border-radius: 22px;
+    transform: translateY(0) scale(1.177);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 10px 32px rgba(0, 0, 0, 0.45);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-link-not-floated-desktop {
+  0% {
+    padding: 14px 26px 14px 30px;
+    gap: 22px;
+    border-radius: 22px;
+    transform: translateY(0) scale(1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      0 18px 46px rgba(0, 0, 0, 0.52);
+  }
+
+  100% {
+    padding: 13px 24px 13px 33px;
+    gap: 22px;
+    border-radius: 22px;
+    transform: translateY(0) scale(1.177);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 10px 32px rgba(0, 0, 0, 0.45);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-label-not-floated-mobile {
+  0% {
+    font-size: clamp(0.71rem, 3.35vw, 0.89rem);
+  }
+
+  100% {
+    font-size: clamp(1.155rem, 3.025vw, 1.342rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-label-not-floated-desktop {
+  0% {
+    font-size: clamp(0.92rem, 1.65vw, 1.14rem);
+  }
+
+  100% {
+    font-size: clamp(1.155rem, 3.025vw, 1.342rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-sub-not-floated-mobile {
+  0% {
+    font-size: clamp(0.34rem, 1.85vw, 0.43rem);
+  }
+
+  100% {
+    font-size: clamp(0.572rem, 1.815vw, 0.682rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-sub-not-floated-desktop {
+  0% {
+    font-size: clamp(0.46rem, 0.95vw, 0.56rem);
+  }
+
+  100% {
+    font-size: clamp(0.572rem, 1.815vw, 0.682rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-textstack-not-floated-mobile {
+  0% {
+    gap: 3px;
+    transform: translateY(-1px);
+  }
+
+  100% {
+    gap: 3px;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-textstack-not-floated-desktop {
+  0% {
+    gap: 4px;
+    transform: translateY(-1px);
+  }
+
+  100% {
+    gap: 3px;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-pin-not-floated-mobile {
+  0% {
+    width: 26px;
+  }
+
+  100% {
+    width: 29px;
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-pin-not-floated-desktop {
+  0% {
+    width: 30px;
+  }
+
+  100% {
+    width: 29px;
+  }
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
+  animation: index-page-maps-cta-reveal-link-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
+  animation: index-page-maps-cta-reveal-textstack-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-label {
+  animation: index-page-maps-cta-reveal-label-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+  animation: index-page-maps-cta-reveal-sub-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.index-page__hero-intro--maps-cta-inview
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+  animation: index-page-maps-cta-reveal-pin-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@media (min-width: 1000px) {
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
+    animation-name: index-page-maps-cta-reveal-link-not-floated-desktop;
+  }
+
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
+    animation-name: index-page-maps-cta-reveal-textstack-not-floated-desktop;
+  }
+
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-label {
+    animation-name: index-page-maps-cta-reveal-label-not-floated-desktop;
+  }
+
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+    animation-name: index-page-maps-cta-reveal-sub-not-floated-desktop;
+  }
+
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+    animation: index-page-maps-cta-reveal-pin-not-floated-desktop 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
+    transition: none;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay::before {
+    animation: none !important;
+    background-position: 0% 50%;
+  }
+
+  .index-page-maps-cta-host:not(.index-page__hero-intro-sticky-cta--floated)
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
+    transform: translateY(0) scale(1);
+    transition: none;
+  }
+
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible,
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-textstack,
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-label,
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-subline,
+  .index-page__hero-intro--maps-cta-inview
+    .index-page-maps-cta-host
+    .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+    .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+    animation: none !important;
+  }
 }
