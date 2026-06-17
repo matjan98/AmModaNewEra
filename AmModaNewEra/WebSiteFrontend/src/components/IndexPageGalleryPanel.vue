@@ -233,13 +233,16 @@ onUnmounted(() => {
 }
 
 .index-page-gallery-panel__gallery-heading {
-  margin: 28px 0 32px;
+  margin: 40px 0 32px;
   font-size: clamp(1.35rem, 4.2vw, 2.1rem);
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-align: center;
   color: rgba(255, 255, 255, 0.9);
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.85),
+    0 0 22px rgba(0, 0, 0, 0.55);
 }
 
 .index-page-gallery-panel__gallery {
@@ -332,13 +335,13 @@ onUnmounted(() => {
   opacity: 1;
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-gallery-panel__section--gallery {
     margin-top: 4vh;
   }
 
   .index-page-gallery-panel__gallery-heading {
-    margin-top: 96px;
+    margin-top: 112px;
     margin-bottom: 28px;
   }
 

@@ -23,22 +23,24 @@
     >
       <div ref="ctaEl" class="index-page__hero-intro-cta-block">
         <div class="index-page__hero-intro-address-row">
-          <div
-            class="index-page__hero-intro-google-mini"
-            :class="{ 'index-page__hero-intro-google-mini--visible': ctaVisible }"
+          <p
+            class="index-page__hero-intro-address index-page__hero-intro-address--atf"
+            :class="{ 'index-page__hero-intro-address--visible': ctaVisible }"
           >
-            <GoogleReviewsCard variant="mini" :with-margin="false" />
-          </div>
+            {{ addressLine }}
+          </p>
         </div>
         <div class="index-page__hero-intro-btn-row">
-          <button
-            type="button"
+          <a
+            :href="mapsUrl"
+            target="_blank"
+            rel="noopener"
             class="index-page__hero-intro-cta-btn index-page__hero-intro-cta-btn--solid"
             :class="{ 'index-page__hero-intro-cta-btn--visible': ctaVisible }"
-            @click="onCtaClick"
+            aria-label="Otwórz nawigację do sklepu w Google Maps"
           >
-            Odwiedź nas
-          </button>
+            Nawiguj
+          </a>
         </div>
       </div>
     </div>
@@ -47,7 +49,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import GoogleReviewsCard from '../GoogleReviewsCard.vue'
+import { ADDRESS_LINE, MAPS_URL } from '../../constants/siteInfo.js'
 
 defineProps({
   ctaCssVars: { type: Object, required: true },
@@ -55,8 +57,10 @@ defineProps({
   ctaVisible: { type: Boolean, required: true },
   ctaFloated: { type: Boolean, required: true },
   onImageLoad: { type: Function, required: true },
-  onCtaClick: { type: Function, required: true },
 })
+
+const addressLine = ADDRESS_LINE
+const mapsUrl = MAPS_URL
 
 const rootEl = ref(null)
 const photoEl = ref(null)

@@ -7,7 +7,7 @@
       @click="$emit('goToGallery')"
     >
       <span>Galeria</span>
-      <q-icon name="chevron_right" size="20px" class="index-page-nav-buttons__arrow" />
+      <q-icon name="chevron_right" size="24px" class="index-page-nav-buttons__arrow" />
     </button>
     <button
       v-if="activeTab === 'gallery'"
@@ -15,8 +15,8 @@
       class="index-page-nav-buttons__btn index-page-nav-buttons__btn--left text-primary"
       @click="$emit('goToInfo')"
     >
-      <q-icon name="chevron_left" size="20px" class="index-page-nav-buttons__arrow" />
-      <span>Informacje</span>
+      <q-icon name="chevron_left" size="24px" class="index-page-nav-buttons__arrow" />
+      <span>Wróć</span>
     </button>
   </div>
 </template>
@@ -35,7 +35,7 @@ defineEmits(['goToGallery', 'goToInfo'])
 <style scoped>
 .index-page-nav-buttons__fixed {
   position: fixed;
-  top: 100px;
+  top: calc(var(--main-layout-header-height, 140px) + 20px);
   left: 0;
   right: 0;
   bottom: auto;
@@ -49,12 +49,12 @@ defineEmits(['goToGallery', 'goToInfo'])
 
 .index-page-nav-buttons__btn {
   position: fixed;
-  top: 100px;
-  font-weight: 700;
+  top: calc(var(--main-layout-header-height, 140px) + 20px);
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 18px;
+  gap: 3px;
+  padding: 10px 12px;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 999px;
@@ -62,9 +62,11 @@ defineEmits(['goToGallery', 'goToInfo'])
     0 10px 28px rgba(0, 0, 0, 0.28),
     0 2px 10px rgba(0, 0, 0, 0.18);
   cursor: pointer;
-  font-family: 'Dancing Script', cursive;
-  font-size: clamp(1.35rem, 0.5vw + 1.2rem, 1.9rem);
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(1.375rem, 0.7vw + 1.15rem, 1.625rem);
   letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
   transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
@@ -77,32 +79,24 @@ defineEmits(['goToGallery', 'goToInfo'])
 }
 
 .index-page-nav-buttons__btn--right {
-  right: 16px;
+  right: 8px;
   left: auto;
+  padding-right: 6px;
 }
 
 .index-page-nav-buttons__btn--left {
-  left: 16px;
+  left: 8px;
   right: auto;
+  padding-left: 6px;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .index-page-nav-buttons__btn--right {
-    right: 32px;
+    right: 16px;
   }
 
   .index-page-nav-buttons__btn--left {
-    left: 32px;
-  }
-}
-
-@media (max-width: 749.98px) {
-  .index-page-nav-buttons__fixed {
-    top: 54px;
-  }
-
-  .index-page-nav-buttons__btn {
-    top: 54px;
+    left: 16px;
   }
 }
 

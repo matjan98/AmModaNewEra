@@ -1,5 +1,6 @@
 <template>
-  <div class="index-page-shop-bottom-sections index-page-shop-bottom-sections__root">
+  <div class="index-page-shop-bottom-sections">
+    <div class="index-page-shop-bottom-sections__root">
     <!-- 1) Facebook CTA above shop block -->
     <section
       ref="facebookShopFollowRef"
@@ -59,7 +60,10 @@
               Kozy, ul. Bielska 166
             </p>
           </div>
-          <div class="index-page-shop-bottom-sections__hero-intro-btn-row">
+          <div
+            ref="bigMapsCtaRowRef"
+            class="index-page-shop-bottom-sections__hero-intro-btn-row"
+          >
             <a
               ref="bigMapsCtaBtnRef"
               :href="mapsUrl"
@@ -100,10 +104,14 @@
         </span>
       </p>
       <a
+        :key="smallFixedShrinkEpoch"
         :href="mapsUrl"
         target="_blank"
         rel="noopener"
         class="index-page-shop-bottom-sections__facebook-cta-btn index-page-shop-bottom-sections__facebook-cta-btn--small-fixed"
+        :class="{
+          'index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in': smallFixedShrinkIn,
+        }"
         aria-label="Otwórz nawigację do sklepu w Google Maps"
       >
         <span class="index-page-shop-bottom-sections__facebook-cta-btn-textstack">
@@ -121,28 +129,18 @@
         />
       </a>
     </div>
+    </div>
 
     <div class="index-page-shop-bottom-sections__google-reviews-slot" aria-label="Ocena Google">
-      <GoogleReviewsCard
-        v-if="isSmallScreen"
-        variant="mini"
-        :with-margin="false"
-        class="index-page-shop-bottom-sections__google-reviews"
-      />
-      <GoogleReviewsCard
-        v-else
-        :with-margin="false"
-        class="index-page-shop-bottom-sections__google-reviews"
-      />
+      <GoogleReviewsCard class="index-page-shop-bottom-sections__google-reviews" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 import googleMapsPinImg from '../assets/google-maps.png'
-import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
 import { useIntersectionObserver } from '../composables/useIntersectionObserver.js'
 
 defineProps({
@@ -177,15 +175,40 @@ const heroIntroFacebookRef = ref(null)
 const heroIntroFacebookPhotoRef = ref(null)
 const heroIntroFacebookCtaRef = ref(null)
 const bigMapsCtaBtnRef = ref(null)
+const bigMapsCtaRowRef = ref(null)
 const heroIntroFacebookInView = ref(false)
 const facebookShopFollowInView = ref(false)
-const bigMapsCtaFullyVisible = ref(false)
-const { matches: isSmallScreen } = useIsSmallScreen()
+const heroMapsCtaVisible = ref(false)
+const smallFixedMapsCtaActive = ref(false)
 
-const bigMapsCtaVisible = computed(() => Boolean(bigMapsCtaFullyVisible.value))
-const smallFixedMapsCtaVisible = computed(() =>
-  Boolean(facebookShopFollowInView.value && !bigMapsCtaFullyVisible.value)
-)
+const CTA_VIEWPORT_TOLERANCE_PX = 2
+const CTA_SWAP_HYSTERESIS_PX = 1
+
+const bigMapsCtaVisible = computed(() => Boolean(heroMapsCtaVisible.value))
+const smallFixedMapsCtaVisible = computed(() => Boolean(smallFixedMapsCtaActive.value))
+
+const pendingSmallFixedShrink = ref(false)
+const smallFixedShrinkIn = ref(false)
+const smallFixedShrinkEpoch = ref(0)
+
+watch(heroMapsCtaVisible, (visible, prevVisible) => {
+  if (prevVisible === true && !visible) {
+    pendingSmallFixedShrink.value = true
+  }
+})
+
+watch(smallFixedMapsCtaVisible, (visible) => {
+  if (visible && pendingSmallFixedShrink.value) {
+    pendingSmallFixedShrink.value = false
+    smallFixedShrinkIn.value = true
+    smallFixedShrinkEpoch.value += 1
+    return
+  }
+
+  if (!visible) {
+    smallFixedShrinkIn.value = false
+  }
+})
 
 const isElementFullyInViewport = (el, tolerancePx = 2) => {
   if (!el || typeof el.getBoundingClientRect !== 'function') return false
@@ -201,6 +224,32 @@ const isElementFullyInViewport = (el, tolerancePx = 2) => {
   )
 }
 
+const syncMapsCtaVisibility = (rowEl, ratio) => {
+  const facebookOk = facebookShopFollowInView.value
+  const enterTolerance = CTA_VIEWPORT_TOLERANCE_PX - CTA_SWAP_HYSTERESIS_PX
+  const exitTolerance = CTA_VIEWPORT_TOLERANCE_PX + CTA_SWAP_HYSTERESIS_PX
+
+  if (ratio <= 0 || !rowEl) {
+    heroMapsCtaVisible.value = false
+    smallFixedMapsCtaActive.value = facebookOk
+    return
+  }
+
+  if (heroMapsCtaVisible.value) {
+    heroMapsCtaVisible.value = isElementFullyInViewport(rowEl, exitTolerance)
+  } else {
+    heroMapsCtaVisible.value = isElementFullyInViewport(rowEl, enterTolerance)
+  }
+
+  if (smallFixedMapsCtaActive.value) {
+    smallFixedMapsCtaActive.value =
+      facebookOk && !isElementFullyInViewport(rowEl, enterTolerance)
+  } else {
+    smallFixedMapsCtaActive.value =
+      facebookOk && !isElementFullyInViewport(rowEl, exitTolerance)
+  }
+}
+
 useIntersectionObserver(
   (entry) => {
     heroIntroFacebookInView.value = Boolean(entry?.isIntersecting)
@@ -212,6 +261,13 @@ useIntersectionObserver(
 useIntersectionObserver(
   (entry) => {
     facebookShopFollowInView.value = Boolean(entry?.isIntersecting)
+    const rowEl = bigMapsCtaRowRef.value
+    if (!rowEl) {
+      smallFixedMapsCtaActive.value = facebookShopFollowInView.value && !heroMapsCtaVisible.value
+      return
+    }
+    const ratio = entry?.isIntersecting ? Math.max(entry?.intersectionRatio ?? 0, 0.01) : 0
+    syncMapsCtaVisibility(rowEl, ratio)
   },
   { threshold: 0 },
   facebookShopFollowRef,
@@ -219,20 +275,11 @@ useIntersectionObserver(
 
 useIntersectionObserver(
   (entry) => {
-    const el = bigMapsCtaBtnRef.value
-    if (!el) return
+    // Measure the unscaled button row (never the scaled <a>) so hover/scroll scale
+    // changes on the button cannot toggle visibility and cause edge flicker.
+    const rowEl = bigMapsCtaRowRef.value
     const ratio = entry?.intersectionRatio ?? 0
-    if (ratio <= 0) {
-      bigMapsCtaFullyVisible.value = false
-      return
-    }
-
-    if (ratio >= 0.98) {
-      bigMapsCtaFullyVisible.value = isElementFullyInViewport(el, 2)
-      return
-    }
-
-    bigMapsCtaFullyVisible.value = false
+    syncMapsCtaVisibility(rowEl, ratio)
   },
   { threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.95, 0.98, 0.99, 1] },
   bigMapsCtaBtnRef,
@@ -248,11 +295,23 @@ defineExpose({
 </script>
 
 <style scoped>
+.index-page-shop-bottom-sections {
+  box-sizing: border-box;
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+}
+
 .index-page-shop-bottom-sections__root {
   --index-address-above-cta-shadow:
     0 1px 2px rgba(0, 0, 0, 0.75),
     0 2px 12px rgba(0, 0, 0, 0.55),
     0 4px 24px rgba(0, 0, 0, 0.4);
+  --index-address-above-cta-icon-filter:
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75))
+    drop-shadow(0 2px 12px rgba(0, 0, 0, 0.55))
+    drop-shadow(0 4px 24px rgba(0, 0, 0, 0.4));
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -348,7 +407,7 @@ defineExpose({
   max-height: none;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
       .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     )
@@ -378,7 +437,7 @@ defineExpose({
     line-height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
       .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     )
@@ -393,6 +452,7 @@ defineExpose({
   )
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
   transform: translateY(0) scale(1);
+  border-radius: 22px;
   transition:
     transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
     background 0.22s ease,
@@ -419,7 +479,7 @@ defineExpose({
   transition: none;
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     font-size: clamp(0.325rem, 2.9vw, 1.08rem);
@@ -428,7 +488,7 @@ defineExpose({
   }
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     transform: translateY(-20px);
@@ -437,7 +497,8 @@ defineExpose({
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
-  transform: translateY(0) scale(1.07);
+  border-radius: 22px;
+  transform: translateY(0) scale(1.177);
   transition: none;
 }
 
@@ -492,7 +553,7 @@ defineExpose({
     line-height 0.26s cubic-bezier(0.42, 0, 0.58, 1);
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     font-size: clamp(0.325rem, 2.9vw, 1.08rem);
@@ -501,7 +562,7 @@ defineExpose({
   }
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
     transform: translateY(-20px);
@@ -510,7 +571,10 @@ defineExpose({
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible {
-  transform: translateY(0) scale(1.07);
+  gap: 22px;
+  padding: 13px 24px 13px 33px;
+  border-radius: 22px;
+  transform: translateY(0) scale(1.177);
   transition:
     transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
     background 0.22s ease,
@@ -615,7 +679,7 @@ defineExpose({
   transform: translateY(0);
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--floated {
     padding: 0 12px;
   }
@@ -635,6 +699,7 @@ defineExpose({
 /* Nawiguj on shop hero */
 .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
   position: relative;
+  border-radius: 22px;
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -762,7 +827,7 @@ defineExpose({
   0% {
     padding: 11px 19px 11px 23px;
     gap: 17px;
-    border-radius: 13px;
+    border-radius: 22px;
     transform: translateY(0) scale(1);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -770,10 +835,10 @@ defineExpose({
   }
 
   100% {
-    padding: 12px 22px 12px 30px;
-    gap: 20px;
-    border-radius: 12px;
-    transform: translateY(0) scale(1.07);
+    padding: 13px 24px 13px 33px;
+    gap: 22px;
+    border-radius: 22px;
+    transform: translateY(0) scale(1.177);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 10px 32px rgba(0, 0, 0, 0.45);
@@ -784,7 +849,7 @@ defineExpose({
   0% {
     padding: 14px 26px 14px 30px;
     gap: 22px;
-    border-radius: 15px;
+    border-radius: 22px;
     transform: translateY(0) scale(1);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.11),
@@ -792,10 +857,10 @@ defineExpose({
   }
 
   100% {
-    padding: 12px 22px 12px 30px;
-    gap: 20px;
-    border-radius: 12px;
-    transform: translateY(0) scale(1.07);
+    padding: 13px 24px 13px 33px;
+    gap: 22px;
+    border-radius: 22px;
+    transform: translateY(0) scale(1.177);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 10px 32px rgba(0, 0, 0, 0.45);
@@ -806,7 +871,7 @@ defineExpose({
   0% {
     padding: 11px 19px 11px 23px;
     gap: 17px;
-    border-radius: 13px;
+    border-radius: 22px;
     transform: translateY(0) scale(1);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -816,7 +881,7 @@ defineExpose({
   100% {
     padding: 12px 22px 12px 30px;
     gap: 20px;
-    border-radius: 12px;
+    border-radius: 22px;
     transform: translateY(0) scale(1);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -828,7 +893,7 @@ defineExpose({
   0% {
     padding: 14px 26px 14px 30px;
     gap: 22px;
-    border-radius: 15px;
+    border-radius: 22px;
     transform: translateY(0) scale(1);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.11),
@@ -838,7 +903,7 @@ defineExpose({
   100% {
     padding: 12px 22px 12px 30px;
     gap: 20px;
-    border-radius: 12px;
+    border-radius: 22px;
     transform: translateY(0) scale(1);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
@@ -846,6 +911,7 @@ defineExpose({
   }
 }
 
+/* Shared reveal keyframes end at the floated (compact) resting sizes. */
 @keyframes index-page-maps-cta-reveal-label-mobile {
   0% {
     font-size: clamp(0.71rem, 3.35vw, 0.89rem);
@@ -920,6 +986,94 @@ defineExpose({
   }
 }
 
+/*
+ * Not-floated (in-photo) reveal keyframes end at the larger in-photo resting sizes,
+ * so the entrance animation lands exactly on the static `--inview` values (no end jump).
+ */
+@keyframes index-page-maps-cta-reveal-label-not-floated-mobile {
+  0% {
+    font-size: clamp(0.71rem, 3.35vw, 0.89rem);
+  }
+
+  100% {
+    font-size: clamp(1.155rem, 3.025vw, 1.342rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-label-not-floated-desktop {
+  0% {
+    font-size: clamp(0.92rem, 1.65vw, 1.14rem);
+  }
+
+  100% {
+    font-size: clamp(1.155rem, 3.025vw, 1.342rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-sub-not-floated-mobile {
+  0% {
+    font-size: clamp(0.34rem, 1.85vw, 0.43rem);
+  }
+
+  100% {
+    font-size: clamp(0.572rem, 1.815vw, 0.682rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-sub-not-floated-desktop {
+  0% {
+    font-size: clamp(0.46rem, 0.95vw, 0.56rem);
+  }
+
+  100% {
+    font-size: clamp(0.572rem, 1.815vw, 0.682rem);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-textstack-not-floated-mobile {
+  0% {
+    gap: 3px;
+    transform: translateY(-1px);
+  }
+
+  100% {
+    gap: 3px;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-textstack-not-floated-desktop {
+  0% {
+    gap: 4px;
+    transform: translateY(-1px);
+  }
+
+  100% {
+    gap: 3px;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-pin-not-floated-mobile {
+  0% {
+    width: 26px;
+  }
+
+  100% {
+    width: 29px;
+  }
+}
+
+@keyframes index-page-maps-cta-reveal-pin-not-floated-desktop {
+  0% {
+    width: 30px;
+  }
+
+  100% {
+    width: 29px;
+  }
+}
+
 .index-page-shop-bottom-sections__hero-intro--inview
   .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
@@ -934,7 +1088,7 @@ defineExpose({
   )
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
   .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
-  animation: index-page-maps-cta-reveal-textstack-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: index-page-maps-cta-reveal-textstack-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .index-page-shop-bottom-sections__hero-intro--inview
@@ -943,7 +1097,7 @@ defineExpose({
   )
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
   .index-page-shop-bottom-sections__facebook-cta-btn-label {
-  animation: index-page-maps-cta-reveal-label-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: index-page-maps-cta-reveal-label-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .index-page-shop-bottom-sections__hero-intro--inview
@@ -952,7 +1106,16 @@ defineExpose({
   )
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
   .index-page-shop-bottom-sections__facebook-cta-btn-subline {
-  animation: index-page-maps-cta-reveal-sub-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: index-page-maps-cta-reveal-sub-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(
+    .index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
+  )
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+  animation: index-page-maps-cta-reveal-pin-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .index-page-shop-bottom-sections__hero-intro--inview
@@ -990,7 +1153,7 @@ defineExpose({
   animation: index-page-maps-cta-reveal-sub-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .index-page-shop-bottom-sections__hero-intro--inview
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(
       .index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
@@ -1005,7 +1168,7 @@ defineExpose({
     )
     .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
     .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
-    animation-name: index-page-maps-cta-reveal-textstack-desktop;
+    animation-name: index-page-maps-cta-reveal-textstack-not-floated-desktop;
   }
 
   .index-page-shop-bottom-sections__hero-intro--inview
@@ -1014,7 +1177,7 @@ defineExpose({
     )
     .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
     .index-page-shop-bottom-sections__facebook-cta-btn-label {
-    animation-name: index-page-maps-cta-reveal-label-desktop;
+    animation-name: index-page-maps-cta-reveal-label-not-floated-desktop;
   }
 
   .index-page-shop-bottom-sections__hero-intro--inview
@@ -1023,7 +1186,7 @@ defineExpose({
     )
     .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
     .index-page-shop-bottom-sections__facebook-cta-btn-subline {
-    animation-name: index-page-maps-cta-reveal-sub-desktop;
+    animation-name: index-page-maps-cta-reveal-sub-not-floated-desktop;
   }
 
   .index-page-shop-bottom-sections__hero-intro--inview
@@ -1032,7 +1195,7 @@ defineExpose({
     )
     .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
     .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
-    animation: index-page-maps-cta-reveal-pin-desktop 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation: index-page-maps-cta-reveal-pin-not-floated-desktop 0.45s cubic-bezier(0.16, 1, 0.3, 1) backwards;
   }
 
   .index-page-shop-bottom-sections__hero-intro--inview
@@ -1120,7 +1283,7 @@ defineExpose({
     line-height 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-shop-bottom-sections__hero-intro--inview
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated:not(
       .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
@@ -1136,7 +1299,7 @@ defineExpose({
   font-size: clamp(0.72rem, 5.25vw, 3.05rem);
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-shop-bottom-sections__hero-intro--inview
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated.index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-float-pop
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
@@ -1156,7 +1319,7 @@ defineExpose({
   font-size: clamp(calc(0.82rem + 2px), calc(2.35vw + 2px), calc(1.08rem + 2px));
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page-shop-bottom-sections__hero-intro--inview
     .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
     .index-page-shop-bottom-sections__hero-intro-address--facebook-shop-last.index-page-shop-bottom-sections__hero-intro-address--visible {
@@ -1171,9 +1334,37 @@ defineExpose({
 }
 
 .index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-label {
+  font-size: clamp(1.155rem, 3.025vw, 1.342rem);
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay
   .index-page-shop-bottom-sections__facebook-cta-btn-subline {
   font-size: clamp(0.52rem, 1.65vw, 0.62rem);
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+  font-size: clamp(0.572rem, 1.815vw, 0.682rem);
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+  width: 29px;
+}
+
+.index-page-shop-bottom-sections__hero-intro--inview
+  .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
+  .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible
+  .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
+  gap: 3px;
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
@@ -1193,13 +1384,18 @@ defineExpose({
   position: relative;
   z-index: 1650;
   width: 100%;
-  margin-top: -10px;
+  margin-top: 0;
   flex: 0 0 auto;
-  padding: clamp(20px, 4vw, 40px) 16px clamp(20px, 4vw, 28px);
+  padding: clamp(40px, 8vw, 80px) 16px clamp(40px, 8vw, 56px);
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 38%,
+      rgba(0, 0, 0, 0.06) 100%
+    ),
+    rgba(10, 10, 14, 0.9);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
@@ -1210,7 +1406,6 @@ defineExpose({
   align-items: center;
   text-align: center;
   gap: clamp(16px, 3vw, 28px);
-  padding-top: 11vh;
 }
 
 .index-page-shop-bottom-sections__facebook-shop-follow-text {
@@ -1235,6 +1430,7 @@ defineExpose({
 .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay {
   gap: 20px;
   padding: 12px 22px 12px 30px;
+  border-radius: 22px;
   align-items: center;
   transition:
     background 0.22s ease,
@@ -1246,7 +1442,7 @@ defineExpose({
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(0) scale(1.03);
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn.index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:active {
@@ -1325,6 +1521,30 @@ defineExpose({
     0 14px 38px rgba(0, 0, 0, 0.52);
 }
 
+.index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in {
+  animation: index-page-maps-cta-reveal-link-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) reverse backwards;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+  .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
+  animation: index-page-maps-cta-reveal-textstack-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) reverse backwards;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+  .index-page-shop-bottom-sections__facebook-cta-btn-label {
+  animation: index-page-maps-cta-reveal-label-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) reverse backwards;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+  .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+  animation: index-page-maps-cta-reveal-sub-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) reverse backwards;
+}
+
+.index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+  .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+  animation: index-page-maps-cta-reveal-pin-not-floated-mobile 0.45s cubic-bezier(0.16, 1, 0.3, 1) reverse backwards;
+}
+
 .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
   display: flex;
   flex-direction: column;
@@ -1350,7 +1570,7 @@ defineExpose({
   line-height: 1.05;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .index-page-shop-bottom-sections__small-fixed-maps-cta {
     width: min(92vw, 560px);
     gap: 10px;
@@ -1376,6 +1596,30 @@ defineExpose({
       0 18px 46px rgba(0, 0, 0, 0.52);
   }
 
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in {
+    animation-name: index-page-maps-cta-reveal-link-not-floated-desktop;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
+    animation-name: index-page-maps-cta-reveal-textstack-not-floated-desktop;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-label {
+    animation-name: index-page-maps-cta-reveal-label-not-floated-desktop;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-subline {
+    animation-name: index-page-maps-cta-reveal-sub-not-floated-desktop;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
+    animation-name: index-page-maps-cta-reveal-pin-not-floated-desktop;
+  }
+
   .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed .index-page-shop-bottom-sections__facebook-cta-btn-textstack {
     gap: 4px;
   }
@@ -1395,6 +1639,18 @@ defineExpose({
 
 @media (prefers-reduced-motion: reduce) {
   .index-page-shop-bottom-sections__small-fixed-maps-address-text {
+    animation: none !important;
+  }
+
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in,
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-textstack,
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-label,
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-subline,
+  .index-page-shop-bottom-sections__facebook-cta-btn--small-fixed-shrink-in
+    .index-page-shop-bottom-sections__facebook-cta-btn-maps-pin {
     animation: none !important;
   }
 }
@@ -1420,12 +1676,12 @@ defineExpose({
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop:not(.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated)
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
-  transform: translateY(0) scale(1.03);
+  transform: translateY(0) scale(1.2);
 }
 
 .index-page-shop-bottom-sections__hero-intro-sticky-cta--facebook-shop.index-page-shop-bottom-sections__hero-intro-sticky-cta--floated
   .index-page-shop-bottom-sections__facebook-cta-btn--hero-overlay.index-page-shop-bottom-sections__facebook-cta-btn--visible:hover {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(0) scale(1.03);
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn:focus-visible {
@@ -1443,13 +1699,12 @@ defineExpose({
   width: 100%;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
   box-sizing: border-box;
-  padding-bottom: 5vh;
 }
 
 .index-page-shop-bottom-sections__google-reviews {
   flex: 0 0 auto;
   width: 100%;
+  height: 5vh;
 }
 </style>

@@ -1,27 +1,27 @@
+:root {
+  --q-primary: #E61971;
+  --am-page-bg: #bababa;
+}
+
 html,
 body,
 #q-app {
   font-family: 'Poppins', sans-serif;
-  background: transparent;
+  background: var(--am-page-bg);
   color: rgba(255, 255, 255, 0.92);
   overflow-x: hidden;
 }
 
 #q-app .q-layout {
-  background: transparent;
+  background: var(--am-page-bg);
 }
 
 #q-app .q-page-container {
-  background: transparent;
+  background: var(--am-page-bg);
 }
 
 #q-app .q-page {
-  background: transparent;
-}
-
-
-:root {
-  --q-primary: #E61971;
+  background: var(--am-page-bg);
 }
 
 /* Global shared UI utilities (am- prefix to avoid collisions) */
@@ -146,7 +146,6 @@ body,
  */
 
 /* Full-bleed blocks (100dvw) */
-.index-page-product-categories,
 .index-page-quick-info__root {
   position: relative;
   left: 50%;
@@ -155,15 +154,10 @@ body,
   box-sizing: border-box;
 }
 
-/* Glass panel surface */
-.index-page-gallery-panel__panels--gallery,
-.index-page-shop-bottom-sections__facebook-shop-follow {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 34px rgba(0, 0, 0, 0.35);
+/* Gallery panel surface (no backdrop blur — glass effect lives on the reviews card) */
+.index-page-gallery-panel__panels--gallery {
+  background: transparent;
+  box-shadow: none;
 }
 
 .index-page-gallery-panel__panels--gallery {
@@ -171,32 +165,24 @@ body,
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.index-page-shop-bottom-sections__facebook-shop-follow {
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
 /* Glass card surface */
 .google-reviews-card__inner {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(3px) saturate(1.1);
+  -webkit-backdrop-filter: blur(5px) saturate(1.1);
 }
 
 .index-page-gallery-panel__thumb-wrap {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 12px 24px rgba(0, 0, 0, 0.55);
 }
 
 /* Base dark glass CTA button */
-.index-page-shop-bottom-sections__facebook-cta-btn,
-.index-page-product-categories__facebook-cta-btn {
+.index-page-shop-bottom-sections__facebook-cta-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -224,7 +210,7 @@ body,
 
 /* Facebook gradient CTA */
 .index-page-shop-bottom-sections__facebook-cta-btn--below,
-.index-page-product-categories__facebook-cta-btn--below,
+.index-page-shop-bottom-sections__facebook-cta-btn--quick-info-style,
 .index-page-quick-info__facebook-btn {
   color: #ffffff;
   background: linear-gradient(
@@ -243,7 +229,7 @@ body,
 }
 
 .index-page-shop-bottom-sections__facebook-cta-btn--below:hover,
-.index-page-product-categories__facebook-cta-btn--below:hover,
+.index-page-shop-bottom-sections__facebook-cta-btn--quick-info-style:hover,
 .index-page-quick-info__facebook-btn:hover {
   background: linear-gradient(
     145deg,
@@ -465,6 +451,14 @@ body,
   transform: translateY(0);
 }
 
+.index-page__hero-intro-address--atf {
+  font-size: clamp(1.35rem, 5.2vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  white-space: normal;
+}
+
 
 .index-page__hero-intro-cta-btn {
   pointer-events: auto;
@@ -505,17 +499,19 @@ body,
     box-shadow 0.22s ease;
 }
 
-button.index-page__hero-intro-cta-btn {
+button.index-page__hero-intro-cta-btn,
+a.index-page__hero-intro-cta-btn {
   appearance: none;
   -webkit-appearance: none;
+  text-decoration: none;
 }
 
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop) {
-    --hero-cta-stack-height: 90px;
-    --hero-cta-address-row-height: 34px;
-    --hero-cta-button-row-height: 56px;
+    --hero-cta-stack-height: 136px;
+    --hero-cta-address-row-height: 52px;
+    --hero-cta-button-row-height: 84px;
   }
 
   .index-page__hero-intro-cta-block:not(.index-page__hero-intro-cta-block--facebook-shop)
@@ -528,12 +524,17 @@ button.index-page__hero-intro-cta-btn {
     align-items: flex-start;
   }
 
-  .index-page__hero-intro-address:not(.index-page__hero-intro-address--facebook-shop-last) {
+  .index-page__hero-intro-address:not(.index-page__hero-intro-address--facebook-shop-last):not(.index-page__hero-intro-address--atf) {
     font-size: clamp(0.68rem, 3.45vw, 1.14rem);
     line-height: 1.18;
   }
 
-  .index-page__hero-intro-cta-btn {
+  .index-page__hero-intro-address--atf {
+    font-size: clamp(1.22rem, 4.9vw, 1.78rem);
+    line-height: 1.2;
+  }
+
+  .index-page__hero-intro-cta-btn:not(.index-page__hero-intro-cta-btn--solid) {
     min-width: 130px;
     padding: 12px 17px;
     font-size: 0.8rem;
@@ -587,7 +588,7 @@ button.index-page__hero-intro-cta-btn {
   }
 }
 
-@media (prefers-reduced-motion: reduce) and (max-width: 749.98px) {
+@media (prefers-reduced-motion: reduce) and (max-width: 999.98px) {
   .index-page__hero-intro-cta-btn--visible:hover {
     min-width: 118px;
     padding: 7px 13px;
@@ -599,7 +600,7 @@ button.index-page__hero-intro-cta-btn {
   }
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page__hero-intro {
     margin-top: 0;
   }
@@ -718,7 +719,9 @@ button.index-page__hero-intro-cta-btn {
 }
 
 .index-page__hero-intro-cta-btn--solid {
-  font-size: 1rem;
+  min-width: 172px;
+  padding: 10px 20px;
+  font-size: 1.6rem;
   font-weight: 500;
   letter-spacing: 0.03em;
   color: #141414;
@@ -740,43 +743,17 @@ button.index-page__hero-intro-cta-btn {
 }
 
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page__hero-intro-cta-btn--solid {
-    font-size: 0.84rem;
+    min-width: 162px;
+    padding: 9px 18px;
+    font-size: 1.38rem;
     font-weight: 500;
   }
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
   .index-page__hero-intro-sticky-cta--first:not(.index-page__hero-intro-sticky-cta--floated) {
     padding-bottom: calc(max(var(--hero-cta-img-gap, 20px), env(safe-area-inset-bottom, 0px)) + 14px);
   }
-}
-
-/* Index page hero: styles previously colocated with IndexPageHeroIntroThird.vue */
-
-.index-page__hero-intro--maps-underlay-cover {
-  z-index: 1650;
-}
-
-.index-page__hero-intro-quote {
-  text-shadow:
-    0 2px 5px rgb(0, 0, 0),
-    0 0 10px rgb(0, 0, 0);
-}
-
-.index-page__hero-intro-quote-text {
-  display: inline;
-}
-
-.index-page__hero-intro-quote-signature {
-  display: block;
-  width: 100%;
-  text-align: right;
-  margin-top: 2px;
-  line-height: 1.05;
-  font-size: 0.82em;
-  letter-spacing: 0.03em;
-  color: #ffffff;
-  opacity: 1;
 }

@@ -1,12 +1,23 @@
 <template>
   <q-layout view="lHh Lpr lFf" class="main-layout">
     <q-header
+      ref="headerEl"
       class="main-layout__header"
       unelevated
       :class="{
         'main-layout__header--scrolled': useSidesLayout
       }"
     >
+      <div v-if="isSmallScreen" class="main-layout__mobile-status-row">
+        <div class="main-layout__hours-toggle-wrap main-layout__mobile-status-wrap">
+          <OpenStatusButton
+            :expandable="false"
+            :is-open-today="isOpenToday"
+            :today-hours="todayHours"
+          />
+        </div>
+      </div>
+
       <div class="main-layout__header-inner" :class="{ 'main-layout__header-inner--scrolled': useSidesLayout }">
         <div class="main-layout__brand" :class="{ 'main-layout__brand--center': useSidesLayout }">
           <a
@@ -16,7 +27,7 @@
             @click.prevent="onLogoClick"
           >
             <img
-              src="../assets/logo.png"
+              src="../assets/logo.webp"
               alt="AM Moda Damska"
               class="main-layout__logo"
               :class="{ 'main-layout__logo--compact': useSidesLayout }"
@@ -181,8 +192,20 @@ const phoneFabExpanded = ref(false)
 const mobileHoursFabBtnRef = ref(null)
 const mobileHoursFabPanelRef = ref(null)
 const mobileHoursFabPanelFlipUp = ref(false)
+const headerEl = ref(null)
+
+let headerResizeObserver = null
 
 const useSidesLayout = computed(() => !isSmallScreen.value)
+
+function updateHeaderHeightCssVar() {
+  const headerComponent = headerEl.value
+  const el = headerComponent?.$el ?? headerComponent
+  if (!el || typeof el.getBoundingClientRect !== 'function') return
+
+  const height = Math.ceil(el.getBoundingClientRect().height)
+  document.documentElement.style.setProperty('--main-layout-header-height', `${height}px`)
+}
 
 function updateMobileHoursFabPanelPlacement() {
   if (!hoursExpanded.value) return
@@ -252,7 +275,8 @@ function onDocumentPointerDownOutsideHours(event) {
   if (hoursExpanded.value) {
     const inLegacyHours = target.closest('.main-layout__hours-toggle-wrap')
     const inMobileHours = target.closest('.main-layout__mobile-fab-hours')
-    if (!inLegacyHours && !inMobileHours) closeHoursDropdown()
+    const inMobileStatus = target.closest('.main-layout__mobile-status-row')
+    if (!inLegacyHours && !inMobileHours && !inMobileStatus) closeHoursDropdown()
   }
 
   if (phoneFabExpanded.value) {
@@ -286,28 +310,44 @@ function onLogoClick() {
 onMounted(() => {
   window.addEventListener('scroll', onWindowScroll, { passive: true })
   window.addEventListener('resize', onMobileHoursFabPlacementLayout, { passive: true })
+  window.addEventListener('resize', updateHeaderHeightCssVar, { passive: true })
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', onMobileHoursFabPlacementLayout)
     window.visualViewport.addEventListener('scroll', onMobileHoursFabPlacementLayout)
   }
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
+
+  nextTick(() => {
+    updateHeaderHeightCssVar()
+    const headerComponent = headerEl.value
+    const el = headerComponent?.$el ?? headerComponent
+    if (el && typeof ResizeObserver !== 'undefined') {
+      headerResizeObserver = new ResizeObserver(() => updateHeaderHeightCssVar())
+      headerResizeObserver.observe(el)
+    }
+  })
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onWindowScroll)
   window.removeEventListener('resize', onMobileHoursFabPlacementLayout)
+  window.removeEventListener('resize', updateHeaderHeightCssVar)
   if (window.visualViewport) {
     window.visualViewport.removeEventListener('resize', onMobileHoursFabPlacementLayout)
     window.visualViewport.removeEventListener('scroll', onMobileHoursFabPlacementLayout)
   }
   document.removeEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
+  if (headerResizeObserver) {
+    headerResizeObserver.disconnect()
+    headerResizeObserver = null
+  }
 })
 </script>
 
 <style scoped>
 .main-layout {
   min-height: 100vh;
-  background: transparent;
+  background: var(--am-page-bg, #bababa);
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -327,6 +367,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   padding: 13px;
+  background: transparent;
   transition: padding 0.3s ease;
   overflow: visible;
   min-height: 0;
@@ -362,7 +403,7 @@ onUnmounted(() => {
   min-height: unset;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
     gap: 9px;
     min-height: 90px;
@@ -638,7 +679,7 @@ onUnmounted(() => {
   transition-delay: 0.2s;
 }
 
-@media (min-width: 750px) {
+@media (min-width: 1000px) {
   .main-layout__phone-link,
   .main-layout__open-status {
     font-size: 1.05rem;
@@ -676,18 +717,92 @@ onUnmounted(() => {
   }
 }
 
-@media (max-width: 749.98px) {
+@media (max-width: 999.98px) {
+  .main-layout__header,
   .main-layout__header :deep(.q-header__content) {
-    padding: 8px 16px;
+    background: rgba(245, 246, 248, 0.7);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .main-layout__header :deep(.q-header__content) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .main-layout__header-inner {
+    padding: 0 16px;
+    box-sizing: border-box;
   }
 
   .main-layout__header-inner:not(.main-layout__header-inner--scrolled) {
-    min-height: 50px;
+    min-height: 0;
+    gap: 0;
+  }
+
+  .main-layout__mobile-status-row {
+    display: flex;
+    width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+
+  .main-layout__mobile-status-wrap {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: clamp(1.28rem, 5.4vw, 1.52rem);
+    font-weight: 600;
+    line-height: 1.1;
+    min-height: 0;
+    max-height: none;
+    padding: 5px 16px;
+    border-radius: 0;
     gap: 8px;
   }
 
+  .main-layout__mobile-status-wrap .main-layout__open-status span {
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__hours-value {
+    margin-left: clamp(6px, 2vw, 10px);
+    font-weight: 700;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__hours-chevron {
+    font-size: 1.2em !important;
+  }
+
+  .main-layout__mobile-status-dropdown.main-layout__hours-dropdown {
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    min-width: unset;
+    max-width: none;
+  }
+
   .main-layout__brand {
-    top: 5px;
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin: 0;
+    padding: 5px 0;
+    box-sizing: border-box;
   }
 
   .main-layout__contact--below {
@@ -965,6 +1080,11 @@ onUnmounted(() => {
   transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
+.main-layout__open-status--static {
+  cursor: default;
+  pointer-events: none;
+}
+
 .main-layout__header .main-layout__open-status,
 .main-layout__header button.main-layout__open-status {
   padding: 6px 13px;
@@ -996,6 +1116,41 @@ onUnmounted(() => {
 .main-layout__header .main-layout__open-status .main-layout__hours-chevron {
   color: #141414 !important;
   opacity: 1 !important;
+}
+
+.main-layout__header .main-layout__open-status--open-today,
+.main-layout__header .main-layout__open-status--open-today span {
+  color: #24a85a !important;
+  -webkit-text-fill-color: #24a85a !important;
+}
+
+.main-layout__header .main-layout__open-status--open-today .main-layout__hours-chevron {
+  color: #24a85a !important;
+}
+
+@media (max-width: 999.98px) {
+  .main-layout__mobile-status-wrap .main-layout__open-status,
+  .main-layout__mobile-status-wrap button.main-layout__open-status {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: transparent !important;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status--open-today,
+  .main-layout__mobile-status-wrap button.main-layout__open-status--open-today {
+    background: transparent !important;
+  }
+
+  .main-layout__mobile-status-wrap .main-layout__open-status:hover,
+  .main-layout__mobile-status-wrap button.main-layout__open-status:hover,
+  .main-layout__mobile-status-wrap .main-layout__open-status--open-today:hover,
+  .main-layout__mobile-status-wrap button.main-layout__open-status--open-today:hover {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
 }
 
 .main-layout__hours-chevron {
