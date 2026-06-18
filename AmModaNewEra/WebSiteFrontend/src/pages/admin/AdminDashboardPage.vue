@@ -52,6 +52,7 @@
                 @click="moveSelectedToBottom"
               />
               <q-btn
+                hidden
                 outline
                 color="primary"
                 no-caps
