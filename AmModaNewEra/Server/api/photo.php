@@ -133,47 +133,6 @@ if (isset($_GET['img']) && $_GET['img'] === '1' && !empty($_GET['id'])) {
     exit;
 }
 
-
-if (isset($_GET['img']) && $_GET['img'] === '1') {
-    $mainFiles = $photosDir ? glob($photosDir . '/main.*') : false;
-    $mainPath = $mainFiles && count($mainFiles) > 0 ? $mainFiles[0] : null;
-
-    if ($mainPath === null || !is_file($mainPath)) {
-        http_response_code(404);
-        header('Content-Type: application/json');
-        echo json_encode(['ok' => false, 'error' => 'Brak zdjęcia']);
-        exit;
-    }
-
-    $mimes = [
-        'jpg' => 'image/jpeg',
-        'jpeg' => 'image/jpeg',
-        'png' => 'image/png',
-        'gif' => 'image/gif',
-        'webp' => 'image/webp',
-    ];
-    $ext = strtolower(pathinfo($mainPath, PATHINFO_EXTENSION));
-    $mime = $mimes[$ext] ?? 'application/octet-stream';
-    [$etag, $mtime] = photo_cache_meta($mainPath);
-    if (photo_try_not_modified($etag, $mtime)) {
-        exit;
-    }
-    header('Content-Type: ' . $mime);
-    readfile($mainPath);
-    exit;
-}
-
-
+http_response_code(404);
 header('Content-Type: application/json; charset=utf-8');
-
-$mainFiles = $photosDir ? glob($photosDir . '/main.*') : false;
-$mainPath = $mainFiles && count($mainFiles) > 0 ? $mainFiles[0] : null;
-
-if ($mainPath === null || !is_file($mainPath)) {
-    echo json_encode(['ok' => true, 'hasPhoto' => false, 'url' => null]);
-    exit;
-}
-
-$mtime = (int) (@filemtime($mainPath) ?: 0);
-$url = 'api/photo.php?img=1&v=' . $mtime;
-echo json_encode(['ok' => true, 'hasPhoto' => true, 'url' => $url]);
+echo json_encode(['ok' => false, 'error' => 'Nieprawidłowe żądanie']);

@@ -100,6 +100,17 @@ public class BackendCodeTests
     }
 
     [Test]
+    public void LegacyMainPhotoEndpointWasRemovedFromBackend()
+    {
+        var photoPath = Path.Combine(ResolveServerPath(), "api", "photo.php");
+        Assert.That(File.Exists(photoPath), Is.True, $"Missing file: {photoPath}");
+
+        var content = File.ReadAllText(photoPath);
+        Assert.That(content, Does.Not.Contain("main.*"));
+        Assert.That(content, Does.Not.Contain("hasPhoto"));
+    }
+
+    [Test]
     public void CommittedEnvMustNotContainLocalhostApiBase()
     {
         var currentDirectory = Directory.GetCurrentDirectory();
