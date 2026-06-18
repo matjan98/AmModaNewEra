@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 use AmModa\Lib\Auth;
 use AmModa\Lib\Cors;
+use AmModa\Lib\LoginRateLimiter;
 
 require_once __DIR__ . '/../lib/Auth.php';
 require_once __DIR__ . '/../lib/Cors.php';
+require_once __DIR__ . '/../lib/LoginRateLimiter.php';
 
 Cors::apply(['GET', 'POST'], true);
 header('Content-Type: application/json; charset=utf-8');
@@ -50,10 +52,23 @@ if ($username === '' || $password === '') {
     exit;
 }
 
+if (LoginRateLimiter::isLimited()) {
+    http_response_code(429);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Zbyt wiele prób logowania. Spróbuj ponownie za chwilę.',
+    ]);
+    exit;
+}
+
+LoginRateLimiter::recordAttempt();
+
 if (!Auth::login($username, $password)) {
     http_response_code(401);
     echo json_encode(['ok' => false, 'error' => 'Nieprawidłowy login lub hasło.']);
     exit;
 }
+
+LoginRateLimiter::clearAttempts();
 
 echo json_encode(['ok' => true, 'authenticated' => true]);

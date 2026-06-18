@@ -26,6 +26,22 @@ public class BackendCodeTests
     }
 
     [Test]
+    public void LoginRateLimiterLimitsAdminAuthAttempts()
+    {
+        var limiterPath = Path.Combine(ResolveServerPath(), "lib", "LoginRateLimiter.php");
+        Assert.That(File.Exists(limiterPath), Is.True, $"Missing file: {limiterPath}");
+
+        var limiterContent = File.ReadAllText(limiterPath);
+        Assert.That(limiterContent, Does.Contain("MAX_ATTEMPTS = 3"));
+        Assert.That(limiterContent, Does.Contain("WINDOW_SECONDS = 20"));
+
+        var authPath = Path.Combine(ResolveServerPath(), "api", "auth.php");
+        var authContent = File.ReadAllText(authPath);
+        Assert.That(authContent, Does.Contain("LoginRateLimiter"));
+        Assert.That(authContent, Does.Contain("429"));
+    }
+
+    [Test]
     public void AdminApiEndpointsExist()
     {
         var serverPath = ResolveServerPath();
