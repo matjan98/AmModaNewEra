@@ -32,9 +32,6 @@ yarn-error.log*
 # local .env files
 .env.local*
 
-# Local gallery images (not committed)
-src/assets/gallery/
-
 # Ensure these source files are never ignored (e.g. by global ignore rules)
 !src/components/indexPage/IndexPageHeroIntroAtf.vue
 !src/pages/indexPage/useHeroCtas.js

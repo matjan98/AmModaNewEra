@@ -112,18 +112,21 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
-import { OPENING_HOURS, PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
+import { PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
+import { useSiteSettings } from '../composables/useSiteSettings.js'
 import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
 import HoursDropdown from '../components/layout/HoursDropdown.vue'
 import OpenStatusButton from '../components/layout/OpenStatusButton.vue'
 
 const { matches: isSmallScreen } = useIsSmallScreen()
-const { todayDayIndex, todayHours, isOpenToday } = useOpeningHours(OPENING_HOURS, {
+const { effectiveOpeningHours, effectiveTodayHours } = useSiteSettings()
+const { todayDayIndex, todayHours, isOpenToday } = useOpeningHours(effectiveOpeningHours, {
   liveClock: true,
+  todayHours: effectiveTodayHours,
 })
 
-const openingHours = OPENING_HOURS
+const openingHours = effectiveOpeningHours
 const hoursExpanded = ref(false)
 const headerEl = ref(null)
 

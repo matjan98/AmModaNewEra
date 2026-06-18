@@ -1,34 +1,29 @@
 <?php
 declare(strict_types=1);
 
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowedOrigins = [
-    'http://localhost:9000',
-    'http://127.0.0.1:9000',
-    'http://localhost:9001',
-    'http://127.0.0.1:9001',
-    'https://ammodadev.pl',
-    'http://ammodadev.pl',
-];
-if ($origin && in_array($origin, $allowedOrigins, true)) {
-    header('Access-Control-Allow-Origin: ' . $origin);
-    header('Vary: Origin');
-}
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json; charset=utf-8');
+use AmModa\Lib\Auth;
+use AmModa\Lib\Cors;
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+require_once __DIR__ . '/../lib/Auth.php';
+require_once __DIR__ . '/../lib/Cors.php';
+
+Cors::apply(['POST'], true);
+header('Content-Type: application/json; charset=utf-8');
+Cors::handlePreflight();
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     http_response_code(405);
     header('Allow: POST');
     echo json_encode(['ok' => false, 'error' => 'Method Not Allowed']);
     exit;
 }
+
+Auth::requireAuthenticated();
 
 $id = $_POST['id'] ?? '';
 if ($id === '' || !preg_match('/^photo_[a-f0-9.]+\.(jpe?g|png|gif|webp)$/i', $id)) {

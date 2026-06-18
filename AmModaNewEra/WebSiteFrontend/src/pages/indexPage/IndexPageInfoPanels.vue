@@ -14,7 +14,7 @@
         :phone-tel-href="PHONE_TEL_HREF"
         :phone-display="PHONE_DISPLAY"
         :facebook-url="FACEBOOK_URL"
-        :opening-hours="OPENING_HOURS"
+        :opening-hours="effectiveOpeningHours"
         :today-store-day-index="todayStoreDayIndex"
         :store-hours-heading-label="storeHoursHeadingLabel"
       />
@@ -44,15 +44,16 @@ import { useHeroImagePreload } from '../../composables/useHeroImagePreload.js'
 import { useIsSmallScreen } from '../../composables/useIsSmallScreen.js'
 import {
   FACEBOOK_URL,
-  OPENING_HOURS,
   PHONE_DISPLAY,
   PHONE_TEL_HREF,
 } from '../../constants/siteInfo.js'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
 import heroIntroDesktopImage from '../../assets/main-photos/hero-1.webp'
 import heroIntroMobileImage from '../../assets/main-photos/hero_mobile.webp'
 import shopPhotoSrc from '../../assets/main-photos/hero-shop.webp'
 
 const { matches: isSmallScreen } = useIsSmallScreen()
+const { effectiveOpeningHours } = useSiteSettings()
 
 const heroIntroImage = computed(() =>
   isSmallScreen.value ? heroIntroMobileImage : heroIntroDesktopImage,

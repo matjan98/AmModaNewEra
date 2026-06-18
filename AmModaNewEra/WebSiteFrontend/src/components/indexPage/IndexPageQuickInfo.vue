@@ -71,13 +71,12 @@
 </template>
 
 <script setup>
-import {
-  HOMEPAGE_NEWS_SECTION_ENABLED,
-  HOMEPAGE_NEWS_SECTION_TEXT,
-} from '../../constants/siteInfo.js'
+import { useSiteSettings } from '../../composables/useSiteSettings.js'
 
-const homepageNewsSectionEnabled = Boolean(HOMEPAGE_NEWS_SECTION_ENABLED)
-const homepageNewsSectionText = HOMEPAGE_NEWS_SECTION_TEXT
+const {
+  homepageNewsSectionEnabled,
+  homepageNewsSectionText,
+} = useSiteSettings()
 
 defineProps({
   phoneTelHref: {

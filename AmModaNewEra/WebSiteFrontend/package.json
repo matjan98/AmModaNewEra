@@ -12,7 +12,6 @@
     "ui:test": "playwright test",
     "ui:update": "playwright test --update-snapshots",
     "sync:favicon": "node ./scripts/sync-favicon.mjs",
-    "convert:product-photos": "node ./scripts/convert-product-photos.mjs",
     "dev": "npm run sync:favicon && quasar dev",
     "build": "npm run sync:favicon && quasar build",
     "postinstall": "quasar prepare"

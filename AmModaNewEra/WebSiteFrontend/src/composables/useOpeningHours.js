@@ -1,4 +1,4 @@
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, unref } from 'vue'
 
 const DEFAULT_CLOSED_LABEL = 'Zamknięte'
 const DEFAULT_OPEN_HEADING_LABEL = 'Dziś otwarte!'
@@ -19,7 +19,7 @@ function parseOpeningRangeMinutes(hoursStr) {
  * Shared store opening-hours logic.
  *
  * @param {Array<{dayIndex:number,label:string,hours:string}>} openingHours
- * @param {{ liveClock?: boolean, closedLabel?: string }} [options]
+ * @param {{ liveClock?: boolean, closedLabel?: string, todayHours?: import('vue').MaybeRef<string|null|undefined> }} [options]
  */
 export function useOpeningHours(openingHours, options = {}) {
   const closedLabel = options.closedLabel ?? DEFAULT_CLOSED_LABEL
@@ -29,8 +29,15 @@ export function useOpeningHours(openingHours, options = {}) {
   let tickTimer = null
 
   const todayDayIndex = computed(() => now.value.getDay())
-  const todayRow = computed(() => openingHours?.find((h) => h.dayIndex === todayDayIndex.value) ?? null)
-  const todayHours = computed(() => todayRow.value?.hours ?? closedLabel)
+  const resolvedOpeningHours = computed(() => unref(openingHours) ?? [])
+  const todayRow = computed(() => resolvedOpeningHours.value.find((h) => h.dayIndex === todayDayIndex.value) ?? null)
+  const todayHours = computed(() => {
+    const override = unref(options.todayHours)
+    if (typeof override === 'string' && override.length > 0) {
+      return override
+    }
+    return todayRow.value?.hours ?? closedLabel
+  })
   const isOpenToday = computed(() => todayHours.value !== closedLabel)
 
   const storeHoursHeadingLabel = computed(() =>

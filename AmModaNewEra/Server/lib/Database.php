@@ -40,5 +40,30 @@ final class Database
                 KEY ix_fetched_at (fetched_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
         );
+
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS site_settings (
+                id           TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+                news_text    TEXT NOT NULL,
+                news_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                updated_at   DATETIME NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+        );
+
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS opening_hours_weekly (
+                day_index TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+                label     VARCHAR(32) NOT NULL,
+                hours     VARCHAR(64) NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+        );
+
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS opening_hours_overrides (
+                override_date DATE NOT NULL PRIMARY KEY,
+                hours         VARCHAR(64) NOT NULL,
+                updated_at    DATETIME NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+        );
     }
 }

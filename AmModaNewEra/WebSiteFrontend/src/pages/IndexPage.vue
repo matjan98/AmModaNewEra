@@ -73,17 +73,17 @@ import IndexPageNavButtons from '../components/indexPage/IndexPageNavButtons.vue
 
 import IndexPageInfoPanels from './indexPage/IndexPageInfoPanels.vue'
 
-import { OPENING_HOURS } from '../constants/siteInfo.js'
-
 import { useRevealZoom } from './indexPage/useRevealZoom.js'
 
 import { useHeroCtas } from './indexPage/useHeroCtas.js'
 
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { prefetchGoogleReviews } from '../composables/useGoogleReviews.js'
+import { prefetchSiteSettings, useSiteSettings } from '../composables/useSiteSettings.js'
 import fixedBottomPhoto from '../assets/main-photos/background.webp'
 
 void prefetchGoogleReviews()
+void prefetchSiteSettings()
 
 
 
@@ -143,9 +143,13 @@ const { observeRevealZoomTargets, scheduleRevealZoomAfterLayout, setupRevealZoom
 
 
 
+const { effectiveOpeningHours, effectiveTodayHours } = useSiteSettings()
+
 const { todayDayIndex: todayStoreDayIndex, storeHoursHeadingLabel } =
 
-  useOpeningHours(OPENING_HOURS)
+  useOpeningHours(effectiveOpeningHours, {
+    todayHours: effectiveTodayHours,
+  })
 
 
 
