@@ -360,6 +360,23 @@ public class FrontendCodeTests
         var content = File.ReadAllText(adminPagePath);
         Assert.That(content, Does.Contain("vue-draggable-plus"));
         Assert.That(content, Does.Contain("reorder.php"));
+        Assert.That(content, Does.Contain("galleryReorder.js"));
+        Assert.That(content, Does.Contain("Przenieś na górę"));
+        Assert.That(content, Does.Contain("Przenieś na dół"));
+        Assert.That(content, Does.Contain("@start=\"onReorderStart\""));
+    }
+
+    [Test]
+    public void GalleryReorderUtilityExportsBulkMoveHelpers()
+    {
+        var rootPath = ResolveFrontendSrcPath();
+        var reorderUtilPath = Path.Combine(rootPath, "utils", "galleryReorder.js");
+        Assert.That(File.Exists(reorderUtilPath), Is.True, $"Missing file: {reorderUtilPath}");
+
+        var content = File.ReadAllText(reorderUtilPath);
+        Assert.That(content, Does.Contain("export function moveItemsToTop"));
+        Assert.That(content, Does.Contain("export function moveItemsToBottom"));
+        Assert.That(content, Does.Contain("export function reorderSelectedBlock"));
     }
 
     [Test]

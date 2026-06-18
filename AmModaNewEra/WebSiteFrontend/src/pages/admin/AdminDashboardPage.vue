@@ -30,8 +30,26 @@
                 unelevated
                 :label="`Usuń zaznaczone (${selectedCount})`"
                 :loading="deletingSelected"
-                :disable="uploading"
+                :disable="uploading || savingOrder"
                 @click="deleteSelectedPhotos"
+              />
+              <q-btn
+                v-if="hasSelection"
+                outline
+                color="primary"
+                no-caps
+                label="Przenieś na górę"
+                :disable="uploading || deletingSelected || savingOrder"
+                @click="moveSelectedToTop"
+              />
+              <q-btn
+                v-if="hasSelection"
+                outline
+                color="primary"
+                no-caps
+                label="Przenieś na dół"
+                :disable="uploading || deletingSelected || savingOrder"
+                @click="moveSelectedToBottom"
               />
               <q-btn
                 color="primary"
@@ -100,6 +118,7 @@
             ghost-class="admin-dashboard-page__thumb-wrap--ghost"
             chosen-class="admin-dashboard-page__thumb-wrap--chosen"
             drag-class="admin-dashboard-page__thumb-wrap--drag"
+            @start="onReorderStart"
             @end="onReorderEnd"
           >
             <div
@@ -331,6 +350,11 @@ import { VueDraggable } from 'vue-draggable-plus'
 import { apiGetJson, apiPostForm, apiPostJson, apiPutJson } from '../../utils/apiJson.js'
 import { getApiUrl } from '../../utils/apiUrl.js'
 import { uploadPhotosInBatches } from '../../utils/galleryBatchUpload.js'
+import {
+  moveItemsToBottom,
+  moveItemsToTop,
+  reorderSelectedBlock,
+} from '../../utils/galleryReorder.js'
 
 const activeTab = ref('gallery')
 const fileInputRef = ref(null)
@@ -344,6 +368,7 @@ const savingOrder = ref(false)
 const galleryMessage = ref('')
 const galleryMessageOk = ref(true)
 const selectedPhotoIds = ref(new Set())
+const dragSnapshot = ref(null)
 
 const selectedCount = computed(() => selectedPhotoIds.value.size)
 const hasSelection = computed(() => selectedCount.value > 0)
@@ -437,10 +462,63 @@ function setGalleryFeedback(message, ok = true) {
   galleryMessageOk.value = ok
 }
 
+function onReorderStart() {
+  dragSnapshot.value = photos.value.map((photo) => ({ ...photo }))
+}
+
 function onReorderEnd(event) {
-  if (event && event.oldIndex === event.newIndex) {
+  const oldIndex = event?.oldIndex
+  const newIndex = event?.newIndex
+  const snapshot = dragSnapshot.value
+  dragSnapshot.value = null
+
+  if (oldIndex == null || newIndex == null || !snapshot) {
     return
   }
+
+  if (oldIndex === newIndex && selectedPhotoIds.value.size <= 1) {
+    return
+  }
+
+  if (selectedPhotoIds.value.size > 1 && snapshot[oldIndex]) {
+    const draggedId = snapshot[oldIndex].id
+    const allSelected = snapshot.every((photo) => selectedPhotoIds.value.has(photo.id))
+    if (selectedPhotoIds.value.has(draggedId) && !allSelected) {
+      photos.value = reorderSelectedBlock(
+        snapshot,
+        selectedPhotoIds.value,
+        oldIndex,
+        newIndex,
+      )
+    }
+    if (oldIndex !== newIndex) {
+      persistPhotoOrder()
+    }
+    return
+  }
+
+  if (oldIndex === newIndex) {
+    return
+  }
+
+  persistPhotoOrder()
+}
+
+function moveSelectedToTop() {
+  if (!hasSelection.value) {
+    return
+  }
+
+  photos.value = moveItemsToTop(photos.value, selectedPhotoIds.value)
+  persistPhotoOrder()
+}
+
+function moveSelectedToBottom() {
+  if (!hasSelection.value) {
+    return
+  }
+
+  photos.value = moveItemsToBottom(photos.value, selectedPhotoIds.value)
   persistPhotoOrder()
 }
 
