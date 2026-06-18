@@ -557,6 +557,7 @@ onMounted(async () => {
 
 .admin-dashboard-page__dialog {
   width: min(100%, 420px);
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .admin-dashboard-page__dialog-title {
