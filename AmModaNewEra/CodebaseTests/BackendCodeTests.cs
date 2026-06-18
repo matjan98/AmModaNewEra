@@ -138,4 +138,26 @@ public class BackendCodeTests
         Assert.That(content, Does.Contain("return `/${DEFAULT_API_SUBPATH}/${normalizedPath}`"),
             "Default API URL must start with / so nested routes like /admin/login resolve correctly.");
     }
+
+    [Test]
+    public void NewsTextPreservesLineBreaksInQuickInfo()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var quickInfoPath = Path.GetFullPath(Path.Combine(
+            currentDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "WebSiteFrontend",
+            "src",
+            "components",
+            "indexPage",
+            "IndexPageQuickInfo.vue"));
+
+        var content = File.ReadAllText(quickInfoPath);
+        Assert.That(content, Does.Contain("index-page-quick-info__news-text"));
+        Assert.That(content, Does.Contain("white-space: pre-line"),
+            "News text must use pre-line so textarea line breaks render on the public site.");
+    }
 }

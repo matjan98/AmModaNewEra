@@ -265,6 +265,7 @@ defineProps({
   line-height: 1.45;
   color: #ffffff;
   text-align: center;
+  white-space: pre-line;
 }
 
 .index-page-quick-info__hours-block {
