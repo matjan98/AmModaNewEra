@@ -11,6 +11,7 @@
 
 <style scoped>
 .admin-guest-layout {
+  color: rgba(0, 0, 0, 0.87);
   background: #f3f4f7;
 }
 </style>

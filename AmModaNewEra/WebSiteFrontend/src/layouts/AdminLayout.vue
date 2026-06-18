@@ -34,6 +34,11 @@ async function onLogout() {
 </script>
 
 <style scoped>
+.admin-layout {
+  color: rgba(0, 0, 0, 0.87);
+  background: #f7f8fb;
+}
+
 .admin-layout__header {
   background: #111118;
   color: #fff;

@@ -140,6 +140,7 @@
           <q-date
             v-model="selectedDate"
             minimal
+            mask="YYYY-MM-DD"
             class="admin-dashboard-page__calendar"
             :events="overrideDates"
             event-color="primary"
