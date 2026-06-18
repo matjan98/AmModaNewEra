@@ -126,6 +126,7 @@
               :key="photo.id"
               class="admin-dashboard-page__thumb-wrap"
               :class="{ 'admin-dashboard-page__thumb-wrap--selected': isPhotoSelected(photo.id) }"
+              @contextmenu.prevent
             >
               <q-checkbox
                 :model-value="isPhotoSelected(photo.id)"
@@ -140,6 +141,8 @@
                 :alt="'Zdjęcie ' + photo.id"
                 class="admin-dashboard-page__thumb"
                 loading="lazy"
+                draggable="false"
+                @contextmenu.prevent
               >
               <q-btn
                 round
@@ -973,6 +976,10 @@ onMounted(async () => {
   display: block;
   aspect-ratio: 1 / 1;
   object-fit: cover;
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .admin-dashboard-page__delete-btn {
