@@ -719,7 +719,6 @@ function moveSelectedToBottom() {
 async function persistPhotoOrder() {
   const order = photos.value.map((photo) => photo.id)
   savingOrder.value = true
-  setGalleryFeedback('')
   try {
     const res = await apiPostJson('api/reorder.php', { order }, { credentials: 'include' })
     if (!res.ok || res.data?.ok !== true) {
