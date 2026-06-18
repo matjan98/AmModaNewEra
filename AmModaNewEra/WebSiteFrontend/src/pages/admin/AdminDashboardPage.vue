@@ -113,7 +113,7 @@
             :touch-start-threshold="5"
             :force-fallback="true"
             :disabled="uploading || deletingSelected || savingOrder"
-            filter=".admin-dashboard-page__select-checkbox, .admin-dashboard-page__delete-btn"
+            filter=".admin-dashboard-page__select-checkbox, .admin-dashboard-page__delete-btn, .admin-dashboard-page__preview-btn"
             :prevent-on-filter="false"
             ghost-class="admin-dashboard-page__thumb-wrap--ghost"
             chosen-class="admin-dashboard-page__thumb-wrap--chosen"
@@ -142,6 +142,7 @@
                 loading="lazy"
                 draggable="false"
                 @contextmenu.prevent
+                @load="onGalleryThumbLoad(photo.urlResolved, $event)"
               >
               <q-btn
                 round
@@ -152,6 +153,15 @@
                 aria-label="Usuń zdjęcie"
                 :disable="uploading"
                 @click="deletePhoto(photo.id)"
+              />
+              <q-btn
+                round
+                dense
+                color="primary"
+                icon="visibility"
+                class="admin-dashboard-page__preview-btn"
+                aria-label="Podgląd zdjęcia"
+                @click.stop="previewPhoto(photo, $event)"
               />
             </div>
           </VueDraggable>
@@ -347,7 +357,9 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import PhotoSwipeLightbox from 'photoswipe/lightbox'
+import 'photoswipe/style.css'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { apiGetJson, apiPostForm, apiPostJson, apiPutJson } from '../../utils/apiJson.js'
 import { getApiUrl } from '../../utils/apiUrl.js'
@@ -369,6 +381,20 @@ const savingOrder = ref(false)
 const galleryMessage = ref('')
 const galleryMessageOk = ref(true)
 const selectedPhotoIds = ref(new Set())
+const photoDims = ref(new Map())
+const pswpLightbox = ref(null)
+
+const slides = computed(() =>
+  photos.value.map((photo) => {
+    const dims = photoDims.value.get(photo.urlResolved)
+    return {
+      src: photo.urlResolved,
+      width: dims?.width ?? 1600,
+      height: dims?.height ?? 1600,
+      alt: `Zdjęcie ${photo.id}`,
+    }
+  }),
+)
 
 const selectedCount = computed(() => selectedPhotoIds.value.size)
 const hasSelection = computed(() => selectedCount.value > 0)
@@ -460,6 +486,41 @@ function toApiDate(qDateValue) {
 function setGalleryFeedback(message, ok = true) {
   galleryMessage.value = message
   galleryMessageOk.value = ok
+}
+
+function setPhotoDims(url, width, height) {
+  if (!url || !width || !height) return
+  if (!Number.isFinite(width) || !Number.isFinite(height)) return
+  if (width < 2 || height < 2) return
+  const current = photoDims.value.get(url)
+  if (current && current.width === width && current.height === height) return
+  photoDims.value.set(url, { width, height })
+}
+
+function setPhotoDimsFromImgEl(url, imgEl) {
+  if (!imgEl) return
+  const w = imgEl.naturalWidth
+  const h = imgEl.naturalHeight
+  if (w && h) setPhotoDims(url, w, h)
+}
+
+function onGalleryThumbLoad(url, ev) {
+  setPhotoDimsFromImgEl(url, ev?.target)
+}
+
+function previewPhoto(photo, ev) {
+  const list = photos.value.map((item) => item.urlResolved)
+  const idx = list.indexOf(photo.urlResolved)
+  const index = idx >= 0 ? idx : 0
+
+  const wrap = ev?.currentTarget?.closest?.('.admin-dashboard-page__thumb-wrap')
+  const imgEl = wrap?.querySelector?.('img') ?? null
+  setPhotoDimsFromImgEl(photo.urlResolved, imgEl)
+
+  const lb = pswpLightbox.value
+  if (!lb) return
+  lb.options.dataSource = slides.value
+  lb.loadAndOpen(index)
 }
 
 function onReorderEnd(event) {
@@ -810,7 +871,21 @@ watch(activeTab, (tab) => {
 })
 
 onMounted(async () => {
+  const lb = new PhotoSwipeLightbox({
+    dataSource: slides.value,
+    pswpModule: () => import('photoswipe'),
+    showHideAnimationType: 'zoom',
+    bgOpacity: 0.92,
+  })
+  lb.init()
+  pswpLightbox.value = lb
+
   await Promise.all([loadPhotos(), loadAdminSettings()])
+})
+
+onUnmounted(() => {
+  pswpLightbox.value?.destroy()
+  pswpLightbox.value = null
 })
 </script>
 
@@ -893,6 +968,12 @@ onMounted(async () => {
   gap: 12px;
 }
 
+@media (min-width: 768px) {
+  .admin-dashboard-page__gallery {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .admin-dashboard-page__thumb-wrap {
   position: relative;
   border-radius: 10px;
@@ -948,6 +1029,13 @@ onMounted(async () => {
   position: absolute;
   top: 8px;
   right: 8px;
+}
+
+.admin-dashboard-page__preview-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 1;
 }
 
 .admin-dashboard-page__empty {
