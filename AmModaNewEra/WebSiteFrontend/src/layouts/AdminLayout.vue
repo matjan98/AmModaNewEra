@@ -23,7 +23,10 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { useHead } from '@unhead/vue'
 import { logoutAdmin } from '../composables/useAdminAuth.js'
+
+useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 
 const router = useRouter()
 

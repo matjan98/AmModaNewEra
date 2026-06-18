@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 
+Disallow: /admin
+Disallow: /api/
+Disallow: /server/
+
 Sitemap: https://ammoda.pl/sitemap.xml

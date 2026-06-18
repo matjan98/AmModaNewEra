@@ -80,6 +80,10 @@ import { useHeroCtas } from './indexPage/useHeroCtas.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { prefetchGoogleReviews } from '../composables/useGoogleReviews.js'
 import { prefetchSiteSettings, useSiteSettings } from '../composables/useSiteSettings.js'
+import { useRoute, useRouter } from 'vue-router'
+import { useHead } from '@unhead/vue'
+import { absoluteUrl } from '../constants/siteOrigin.js'
+import { useBusinessJsonLd } from '../composables/useStructuredData.js'
 import fixedBottomPhoto from '../assets/main-photos/background.webp'
 
 void prefetchGoogleReviews()
@@ -95,8 +99,6 @@ const IndexPageGalleryPanel = defineAsyncComponent(() =>
 
 
 
-const TAB_STORAGE_KEY = 'index-page-active-tab'
-
 const HERO_CTA_IMAGE_BOTTOM_GAP_PX = 20
 
 const HERO_CTA_STACK_HEIGHT_PX = 114
@@ -107,25 +109,42 @@ const HERO_CTA_BUTTON_ROW_HEIGHT_PX = 52
 
 
 
-function getStoredTab() {
+const route = useRoute()
 
-  try {
+const router = useRouter()
 
-    const stored = localStorage.getItem(TAB_STORAGE_KEY)
+// Active tab is derived from the route so each panel has its own URL
+// ('/' = info, '/galeria' = gallery) - better for SEO, sharing and prerender.
+const activeTab = computed(() => (route.name === 'gallery' ? 'gallery' : 'info'))
 
-    return stored === 'gallery' || stored === 'info' ? stored : 'info'
+const isGalleryRoute = computed(() => activeTab.value === 'gallery')
 
-  } catch {
+const pageTitle = computed(() =>
+  isGalleryRoute.value
+    ? 'Galeria zdjęć - A&M Moda Damska Kozy'
+    : 'A&M Moda Damska Kozy | Sukienki, komplety, moda damska',
+)
 
-    return 'info'
+const pageDescription = computed(() =>
+  isGalleryRoute.value
+    ? 'Galeria zdjęć z butiku A&M Moda Damska w Kozach - sukienki, komplety, bluzki, kurtki i dodatki. Zobacz nasze nowości i aranżacje.'
+    : 'A&M Moda Damska - butik z modą damską w Kozach (ul. Bielska 166). Sukienki, komplety, bluzki, kurtki i dodatki. Sprawdź nowości i godziny otwarcia.',
+)
 
-  }
+const canonicalUrl = computed(() => absoluteUrl(isGalleryRoute.value ? '/galeria' : '/'))
 
-}
+useHead({
+  title: pageTitle,
+  meta: [
+    { name: 'description', content: pageDescription },
+    { property: 'og:title', content: pageTitle },
+    { property: 'og:description', content: pageDescription },
+    { property: 'og:url', content: canonicalUrl },
+  ],
+  link: [{ rel: 'canonical', href: canonicalUrl }],
+})
 
-
-
-const activeTab = ref(getStoredTab())
+useBusinessJsonLd()
 
 const panelSlideDirection = ref('left')
 
@@ -212,16 +231,6 @@ const panelBindings = computed(() => {
 
 
 watch(activeTab, (value) => {
-
-  try {
-
-    localStorage.setItem(TAB_STORAGE_KEY, value)
-
-  } catch {
-
-    void 0
-
-  }
 
   setupRevealZoomObserver(false)
 
@@ -335,7 +344,7 @@ function goToGallery() {
 
   panelSlideDirection.value = 'left'
 
-  activeTab.value = 'gallery'
+  router.push({ name: 'gallery' })
 
 }
 
@@ -345,7 +354,7 @@ function goToInfo() {
 
   panelSlideDirection.value = 'right'
 
-  activeTab.value = 'info'
+  router.push({ name: 'home' })
 
 }
 

@@ -7,6 +7,9 @@
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue'
+
+useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 </script>
 
 <style scoped>

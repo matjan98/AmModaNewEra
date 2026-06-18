@@ -1,9 +1,15 @@
+// Same component reference for both public routes so Vue Router reuses the
+// IndexPage instance when switching between Info ('/') and Gallery ('/galeria'),
+// keeping the slide transition and keep-alive intact.
+const IndexPage = () => import('pages/IndexPage.vue')
+
 const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') },
+      { path: '', name: 'home', component: IndexPage },
+      { path: 'galeria', name: 'gallery', component: IndexPage },
     ]
   },
 

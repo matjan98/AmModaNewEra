@@ -2,11 +2,15 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers'
+import prerender from '@prerenderer/rollup-plugin'
 
 /** Public site origin for absolute URLs in index.html (Open Graph, canonical). No trailing slash. */
 const siteOrigin = (process.env.SITE_ORIGIN ?? 'https://ammoda.pl').replace(/\/$/, '')
 
-export default defineConfig((/* ctx */) => {
+/** Public routes prerendered to static HTML for crawlers (see build.extendViteConf). */
+const prerenderRoutes = ['/', '/galeria']
+
+export default defineConfig((ctx) => {
   return {
     htmlVariables: {
       siteOrigin
@@ -18,6 +22,7 @@ export default defineConfig((/* ctx */) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      'unhead'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -39,6 +44,12 @@ export default defineConfig((/* ctx */) => {
         node: 'node20'
       },
 
+      // Exposed to app code as process.env.SITE_ORIGIN (used by @unhead/vue to
+      // build absolute canonical / Open Graph URLs at runtime and in prerender).
+      env: {
+        SITE_ORIGIN: siteOrigin
+      },
+
       vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
@@ -55,7 +66,27 @@ export default defineConfig((/* ctx */) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      // Prerender public routes to static HTML in production so crawlers and
+      // social bots see fully rendered content + meta/JSON-LD without running JS.
+      // Output paths (dist/spa/*) stay unchanged; each route becomes its own
+      // index.html (e.g. dist/spa/galeria/index.html).
+      extendViteConf (viteConf) {
+        if (!ctx.prod) return
+        viteConf.plugins.push(prerender({
+          routes: prerenderRoutes,
+          renderer: '@prerenderer/renderer-puppeteer',
+          rendererOptions: {
+            renderAfterDocumentEvent: 'app-prerender-ready',
+            maxConcurrentRoutes: 1,
+            timeout: 60000,
+            headless: true,
+            inject: true,
+            injectProperty: '__PRERENDER__',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          }
+        }))
+      },
+
       // viteVuePluginOptions: {},
       
       vitePlugins: [

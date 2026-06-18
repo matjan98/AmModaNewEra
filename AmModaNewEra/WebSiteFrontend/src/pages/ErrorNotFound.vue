@@ -25,7 +25,13 @@
 </template>
 
 <script setup>
+import { useHead } from '@unhead/vue'
 import logoSrc from '../assets/logo.webp'
+
+useHead({
+  title: 'Nie znaleziono strony - A&M Moda Damska',
+  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+})
 </script>
 
 <style scoped>

@@ -5,7 +5,7 @@
   >
     <div class="index-page-gallery-panel__panels-inner">
       <section class="index-page-gallery-panel__section index-page-gallery-panel__section--gallery">
-        <h2 class="index-page-gallery-panel__gallery-heading">Galeria</h2>
+        <h1 class="index-page-gallery-panel__gallery-heading">Galeria</h1>
         <div class="index-page-gallery-panel__gallery">
           <template v-if="photoListWithUrls.length">
             <div
@@ -46,7 +46,7 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import 'photoswipe/style.css'
 import { computed, nextTick, onActivated, onMounted, onUnmounted, ref } from 'vue'
 import { getApiUrl } from '../utils/apiUrl.js'
-import { apiGetJson } from '../utils/apiJson.js'
+import { useGalleryPhotos } from '../composables/useGalleryPhotos.js'
 import GoogleReviewsCard from './GoogleReviewsCard.vue'
 
 defineOptions({ name: 'IndexPageGalleryPanel' })
@@ -58,7 +58,7 @@ const props = defineProps({
   },
 })
 
-const photoList = ref([])
+const { photos: photoList, prefetchGalleryPhotos } = useGalleryPhotos()
 
 const photoDims = ref(new Map())
 const pswpLightbox = ref(null)
@@ -107,19 +107,6 @@ function onGalleryThumbLoad(url, ev) {
   setDimsFromImgEl(url, imgEl)
 }
 
-async function loadPhotos() {
-  const res = await apiGetJson('api/photo.php?list=1')
-  if (!res.ok && res.error) console.error(res.error)
-  const data = res.ok ? res.data : null
-  if (data?.ok && Array.isArray(data.photos)) {
-    photoList.value = data.photos
-  } else {
-    photoList.value = []
-  }
-  await nextTick()
-  props.observeRevealZoomTargets?.()
-}
-
 function onThumbClick(url, ev) {
   const list = photoListWithUrls.value.map((photo) => photo.urlResolved)
   const idx = list.indexOf(url)
@@ -136,7 +123,10 @@ function onThumbClick(url, ev) {
 }
 
 onMounted(() => {
-  loadPhotos()
+  prefetchGalleryPhotos().then(async () => {
+    await nextTick()
+    props.observeRevealZoomTargets?.()
+  })
 
   const lb = new PhotoSwipeLightbox({
     dataSource: slides.value,

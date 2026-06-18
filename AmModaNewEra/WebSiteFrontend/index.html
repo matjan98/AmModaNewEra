@@ -4,22 +4,21 @@
     <title><%= productName %></title>
 
     <meta charset="utf-8">
-    <meta name="description" content="<%= productDescription %>">
     <meta name="theme-color" content="#E61971">
+
+    <!-- Per-route title, description, canonical, og:url, og:title and
+         og:description are managed at runtime by @unhead/vue (see
+         src/pages/IndexPage.vue). The tags below are global defaults shared by
+         every route. Twitter cards fall back to the og:* values. -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="<%= productName %>">
-    <meta property="og:description" content="<%= productDescription %>">
     <meta property="og:locale" content="pl_PL">
+    <meta property="og:site_name" content="A&M Moda Damska">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<%= productName %>">
-    <meta name="twitter:description" content="<%= productDescription %>">
     <meta name="twitter:image" content="<%= siteOrigin %>/icons/open-graph-1200x630.jpg">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="width=device-width, initial-scale=1<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>">
 
-    <link rel="canonical" href="<%= siteOrigin %>/">
-    <meta property="og:url" content="<%= siteOrigin %>/">
     <meta property="og:image" content="<%= siteOrigin %>/icons/open-graph-1200x630.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -36,48 +35,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
     <link rel="manifest" href="site.webmanifest">
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "ClothingStore",
-      "name": "A&M Moda Damska",
-      "description": "Butik z modą damską w Kozach. Sukienki, komplety, bluzki, kurtki, dodatki.",
-      "url": "https://ammoda.pl/",
-      "image": "https://ammoda.pl/icons/open-graph-1200x630.jpg",
-      "telephone": "+48503115446",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "ul. Bielska 166",
-        "addressLocality": "Kozy",
-        "postalCode": "43-340",
-        "addressCountry": "PL"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": 49.8512,
-        "longitude": 19.1543
-      },
-      "hasMap": "https://www.google.com/maps/dir/?api=1&destination=Kozy%2C%20Bielska%20166",
-      "openingHoursSpecification": [
-        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Monday",    "opens": "09:00", "closes": "18:00" },
-        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Tuesday",   "opens": "09:00", "closes": "18:00" },
-        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "09:00", "closes": "18:00" },
-        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday",  "opens": "09:00", "closes": "18:00" },
-        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Friday",    "opens": "09:00", "closes": "18:00" },
-        { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday",  "opens": "09:00", "closes": "14:00" }
-      ],
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.7",
-        "reviewCount": "171",
-        "bestRating": "5",
-        "worstRating": "1"
-      },
-      "sameAs": [
-        "https://www.facebook.com/AMModaDamska/"
-      ]
-    }
-    </script>
+    <!-- ClothingStore JSON-LD is injected at runtime by @unhead/vue with the
+         live Google rating - see src/composables/useStructuredData.js. -->
   </head>
   <body>
     <!-- quasar:entry-point -->

@@ -1,7 +1,23 @@
 export const PHONE_DISPLAY = '503 115 446'
 export const PHONE_TEL_HREF = 'tel:+48503115446'
+export const PHONE_E164 = '+48503115446'
 
 export const ADDRESS_LINE = 'Kozy, ul. Bielska 166'
+
+// Structured (schema.org) business data - single source of truth for JSON-LD.
+export const BUSINESS_NAME = 'A&M Moda Damska'
+export const BUSINESS_DESCRIPTION =
+  'Butik z modą damską w Kozach. Sukienki, komplety, bluzki, kurtki, dodatki.'
+export const BUSINESS_ADDRESS = {
+  streetAddress: 'ul. Bielska 166',
+  addressLocality: 'Kozy',
+  postalCode: '43-340',
+  addressCountry: 'PL',
+}
+export const BUSINESS_GEO = {
+  latitude: 49.8512,
+  longitude: 19.1543,
+}
 
 export const FACEBOOK_URL = 'https://www.facebook.com/AMModaDamska/'
 export const MAPS_URL = 'https://www.google.com/maps/dir/?api=1&destination=Kozy%2C%20Bielska%20166'
