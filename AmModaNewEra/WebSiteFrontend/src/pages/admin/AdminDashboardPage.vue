@@ -1271,6 +1271,7 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.88);
   border-radius: 4px;
   padding: 2px 4px;
+  transition: opacity 0.15s ease;
 }
 
 .admin-dashboard-page__thumb {
@@ -1288,6 +1289,7 @@ onUnmounted(() => {
   position: absolute;
   top: 8px;
   right: 8px;
+  transition: opacity 0.15s ease;
 }
 
 .admin-dashboard-page__preview-btn {
@@ -1295,6 +1297,36 @@ onUnmounted(() => {
   bottom: 8px;
   right: 8px;
   z-index: 1;
+  transition: opacity 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-dashboard-page__select-checkbox,
+  .admin-dashboard-page__delete-btn,
+  .admin-dashboard-page__preview-btn {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .admin-dashboard-page__thumb-wrap:hover .admin-dashboard-page__select-checkbox,
+  .admin-dashboard-page__thumb-wrap:hover .admin-dashboard-page__delete-btn,
+  .admin-dashboard-page__thumb-wrap:hover .admin-dashboard-page__preview-btn,
+  .admin-dashboard-page__thumb-wrap:focus-within .admin-dashboard-page__select-checkbox,
+  .admin-dashboard-page__thumb-wrap:focus-within .admin-dashboard-page__delete-btn,
+  .admin-dashboard-page__thumb-wrap:focus-within .admin-dashboard-page__preview-btn,
+  .admin-dashboard-page__thumb-wrap--selected .admin-dashboard-page__select-checkbox {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (hover: none), (any-pointer: coarse) {
+  .admin-dashboard-page__select-checkbox,
+  .admin-dashboard-page__delete-btn,
+  .admin-dashboard-page__preview-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .admin-dashboard-page__empty {
