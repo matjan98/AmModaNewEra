@@ -39,7 +39,7 @@
                 color="primary"
                 no-caps
                 label="Przenieś na górę"
-                :disable="uploading || deletingSelected || savingOrder"
+                :disable="uploading || deletingSelected || savingOrder || reorderAnimating"
                 @click="moveSelectedToTop"
               />
               <q-btn
@@ -48,7 +48,7 @@
                 color="primary"
                 no-caps
                 label="Przenieś na dół"
-                :disable="uploading || deletingSelected || savingOrder"
+                :disable="uploading || deletingSelected || savingOrder || reorderAnimating"
                 @click="moveSelectedToBottom"
               />
               <q-btn
@@ -103,69 +103,72 @@
             {{ galleryMessage }}
           </q-banner>
 
-          <VueDraggable
-            v-if="photos.length"
-            v-model="photos"
-            class="admin-dashboard-page__gallery"
-            :animation="180"
-            :delay="180"
-            :delay-on-touch-only="true"
-            :touch-start-threshold="5"
-            :force-fallback="true"
-            :disabled="uploading || deletingSelected || savingOrder"
-            filter=".admin-dashboard-page__select-checkbox, .admin-dashboard-page__delete-btn, .admin-dashboard-page__preview-btn"
-            :prevent-on-filter="false"
-            ghost-class="admin-dashboard-page__thumb-wrap--ghost"
-            chosen-class="admin-dashboard-page__thumb-wrap--chosen"
-            drag-class="admin-dashboard-page__thumb-wrap--drag"
-            @end="onReorderEnd"
-          >
-            <div
-              v-for="photo in photos"
-              :key="photo.id"
-              class="admin-dashboard-page__thumb-wrap"
-              :class="{ 'admin-dashboard-page__thumb-wrap--selected': isPhotoSelected(photo.id) }"
-              @contextmenu.prevent
+          <div ref="galleryRef">
+            <VueDraggable
+              v-if="photos.length"
+              v-model="photos"
+              class="admin-dashboard-page__gallery"
+              :animation="180"
+              :delay="180"
+              :delay-on-touch-only="true"
+              :touch-start-threshold="5"
+              :force-fallback="true"
+              :disabled="uploading || deletingSelected || savingOrder || reorderAnimating"
+              filter=".admin-dashboard-page__select-checkbox, .admin-dashboard-page__delete-btn, .admin-dashboard-page__preview-btn"
+              :prevent-on-filter="false"
+              ghost-class="admin-dashboard-page__thumb-wrap--ghost"
+              chosen-class="admin-dashboard-page__thumb-wrap--chosen"
+              drag-class="admin-dashboard-page__thumb-wrap--drag"
+              @end="onReorderEnd"
             >
-              <q-checkbox
-                :model-value="isPhotoSelected(photo.id)"
-                dense
-                class="admin-dashboard-page__select-checkbox"
-                :aria-label="'Zaznacz zdjęcie ' + photo.id"
-                @update:model-value="(checked) => togglePhotoSelection(photo.id, checked)"
-                @click.stop
-              />
-              <img
-                :src="photo.urlResolved"
-                :alt="'Zdjęcie ' + photo.id"
-                class="admin-dashboard-page__thumb"
-                loading="lazy"
-                draggable="false"
+              <div
+                v-for="photo in photos"
+                :key="photo.id"
+                class="admin-dashboard-page__thumb-wrap"
+                :class="{ 'admin-dashboard-page__thumb-wrap--selected': isPhotoSelected(photo.id) }"
+                :data-photo-id="photo.id"
                 @contextmenu.prevent
-                @load="onGalleryThumbLoad(photo.urlResolved, $event)"
               >
-              <q-btn
-                round
-                dense
-                color="negative"
-                icon="delete"
-                class="admin-dashboard-page__delete-btn"
-                aria-label="Usuń zdjęcie"
-                :disable="uploading"
-                @click="deletePhoto(photo.id)"
-              />
-              <q-btn
-                round
-                dense
-                color="primary"
-                icon="visibility"
-                class="admin-dashboard-page__preview-btn"
-                aria-label="Podgląd zdjęcia"
-                @click.stop="previewPhoto(photo, $event)"
-              />
-            </div>
-          </VueDraggable>
-          <p v-else class="admin-dashboard-page__empty">Brak zdjęć w galerii.</p>
+                <q-checkbox
+                  :model-value="isPhotoSelected(photo.id)"
+                  dense
+                  class="admin-dashboard-page__select-checkbox"
+                  :aria-label="'Zaznacz zdjęcie ' + photo.id"
+                  @update:model-value="(checked) => togglePhotoSelection(photo.id, checked)"
+                  @click.stop
+                />
+                <img
+                  :src="photo.urlResolved"
+                  :alt="'Zdjęcie ' + photo.id"
+                  class="admin-dashboard-page__thumb"
+                  loading="lazy"
+                  draggable="false"
+                  @contextmenu.prevent
+                  @load="onGalleryThumbLoad(photo.urlResolved, $event)"
+                >
+                <q-btn
+                  round
+                  dense
+                  color="negative"
+                  icon="delete"
+                  class="admin-dashboard-page__delete-btn"
+                  aria-label="Usuń zdjęcie"
+                  :disable="uploading"
+                  @click="deletePhoto(photo.id)"
+                />
+                <q-btn
+                  round
+                  dense
+                  color="primary"
+                  icon="visibility"
+                  class="admin-dashboard-page__preview-btn"
+                  aria-label="Podgląd zdjęcia"
+                  @click.stop="previewPhoto(photo, $event)"
+                />
+              </div>
+            </VueDraggable>
+            <p v-else class="admin-dashboard-page__empty">Brak zdjęć w galerii.</p>
+          </div>
         </q-tab-panel>
 
         <q-tab-panel name="news" class="admin-dashboard-page__panel">
@@ -359,7 +362,7 @@
 <script setup>
 import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import 'photoswipe/style.css'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { apiGetJson, apiPostForm, apiPostJson, apiPutJson } from '../../utils/apiJson.js'
 import { getApiUrl } from '../../utils/apiUrl.js'
@@ -371,6 +374,8 @@ import {
 
 const activeTab = ref('gallery')
 const fileInputRef = ref(null)
+const galleryRef = ref(null)
+const reorderAnimating = ref(false)
 
 const photos = ref([])
 const uploading = ref(false)
@@ -530,22 +535,110 @@ function onReorderEnd(event) {
   persistPhotoOrder()
 }
 
-function moveSelectedToTop() {
-  if (!hasSelection.value) {
+const FLIP_DURATION = 260
+
+function prefersReducedMotion() {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
+}
+
+/**
+ * Records the current on-screen position of every gallery thumbnail,
+ * keyed by photo id. This is the "First" step of a FLIP animation.
+ */
+function captureThumbRects() {
+  const rects = new Map()
+  const root = galleryRef.value
+  if (!root) {
+    return rects
+  }
+  root.querySelectorAll('[data-photo-id]').forEach((el) => {
+    rects.set(el.getAttribute('data-photo-id'), el.getBoundingClientRect())
+  })
+  return rects
+}
+
+/**
+ * Slides every thumbnail from its previous position (firstRects) to its
+ * current one using a transform transition (the "Invert" and "Play" steps
+ * of FLIP). Inline styles are cleared once the transition finishes so they
+ * do not interfere with subsequent drag operations.
+ */
+function playThumbFlip(firstRects) {
+  const root = galleryRef.value
+  if (!root) {
     return
   }
 
-  photos.value = moveItemsToTop(photos.value, selectedPhotoIds.value)
+  const elements = [...root.querySelectorAll('[data-photo-id]')]
+
+  elements.forEach((el) => {
+    const first = firstRects.get(el.getAttribute('data-photo-id'))
+    if (!first) {
+      return
+    }
+    const last = el.getBoundingClientRect()
+    const dx = first.left - last.left
+    const dy = first.top - last.top
+    if (dx === 0 && dy === 0) {
+      return
+    }
+    el.style.transition = 'none'
+    el.style.transform = `translate(${dx}px, ${dy}px)`
+  })
+
+  void root.offsetHeight
+
+  requestAnimationFrame(() => {
+    elements.forEach((el) => {
+      if (!el.style.transform) {
+        return
+      }
+      el.style.transition = `transform ${FLIP_DURATION}ms ease`
+      el.style.transform = ''
+      const clearFlipStyles = (event) => {
+        if (event.target !== el || event.propertyName !== 'transform') {
+          return
+        }
+        el.style.transition = ''
+        el.removeEventListener('transitionend', clearFlipStyles)
+      }
+      el.addEventListener('transitionend', clearFlipStyles)
+    })
+  })
+}
+
+async function animateReorder(reorder) {
+  if (!hasSelection.value || reorderAnimating.value) {
+    return
+  }
+
+  if (prefersReducedMotion()) {
+    reorder()
+    persistPhotoOrder()
+    return
+  }
+
+  reorderAnimating.value = true
+  const firstRects = captureThumbRects()
+  reorder()
+  await nextTick()
+  playThumbFlip(firstRects)
+  setTimeout(() => {
+    reorderAnimating.value = false
+  }, FLIP_DURATION + 50)
   persistPhotoOrder()
 }
 
-function moveSelectedToBottom() {
-  if (!hasSelection.value) {
-    return
-  }
+function moveSelectedToTop() {
+  animateReorder(() => {
+    photos.value = moveItemsToTop(photos.value, selectedPhotoIds.value)
+  })
+}
 
-  photos.value = moveItemsToBottom(photos.value, selectedPhotoIds.value)
-  persistPhotoOrder()
+function moveSelectedToBottom() {
+  animateReorder(() => {
+    photos.value = moveItemsToBottom(photos.value, selectedPhotoIds.value)
+  })
 }
 
 async function persistPhotoOrder() {
