@@ -52,7 +52,7 @@
                 @click="moveSelectedToBottom"
               />
               <q-btn
-                hidden
+                class="admin-dashboard-page__repair-permissions-btn"
                 outline
                 color="primary"
                 no-caps
@@ -1118,6 +1118,10 @@ onUnmounted(() => {
 
 .admin-dashboard-page__file-input {
   display: none;
+}
+
+.admin-dashboard-page__repair-permissions-btn {
+  display: none !important;
 }
 
 .admin-dashboard-page__gallery {
