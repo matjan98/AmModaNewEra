@@ -239,6 +239,8 @@ public class BackendCodeTests
         Assert.That(content, Does.Contain("GALLERY_UPLOAD_BATCH_SIZE = 10"));
         Assert.That(content, Does.Contain("uploadPhotosInBatches"));
         Assert.That(content, Does.Contain("rollbackSessionUploads"));
+        Assert.That(content, Does.Contain("sortFilesByNumericName"));
+        Assert.That(content, Does.Contain("uploadedIds"));
     }
 
     [Test]

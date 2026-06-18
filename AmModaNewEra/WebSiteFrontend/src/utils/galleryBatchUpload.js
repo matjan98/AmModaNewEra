@@ -2,6 +2,18 @@ export const GALLERY_UPLOAD_BATCH_SIZE = 10
 export const GALLERY_UPLOAD_BATCH_TIMEOUT_MS = 300_000
 
 /**
+ * Sorts files by filename using natural numeric order (e.g. 1, 2, 10 instead of 1, 10, 2).
+ *
+ * @param {FileList | File[]} files
+ * @returns {File[]}
+ */
+export function sortFilesByNumericName(files) {
+  return [...files].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }),
+  )
+}
+
+/**
  * @param {FileList | File[]} files
  * @param {number} [batchSize]
  * @returns {File[][]}
@@ -76,7 +88,7 @@ function buildFailureResult({ reason, rollbackFailedIds }) {
  *   uploadTimeoutMs?: number,
  *   batchSize?: number,
  * }} params
- * @returns {Promise<{ ok: true, uploadedCount: number } | { ok: false, error: string, rollbackFailedIds?: string[] }>}
+ * @returns {Promise<{ ok: true, uploadedCount: number, uploadedIds: string[] } | { ok: false, error: string, rollbackFailedIds?: string[] }>}
  */
 export async function uploadPhotosInBatches({
   files,
@@ -86,7 +98,8 @@ export async function uploadPhotosInBatches({
   uploadTimeoutMs = GALLERY_UPLOAD_BATCH_TIMEOUT_MS,
   batchSize = GALLERY_UPLOAD_BATCH_SIZE,
 }) {
-  const batches = chunkFiles(files, batchSize)
+  const sortedFiles = sortFilesByNumericName(files)
+  const batches = chunkFiles(sortedFiles, batchSize)
   const totalCount = batches.reduce((sum, batch) => sum + batch.length, 0)
   const batchCount = batches.length
   const sessionUploadedIds = []
@@ -133,5 +146,5 @@ export async function uploadPhotosInBatches({
     })
   }
 
-  return { ok: true, uploadedCount }
+  return { ok: true, uploadedCount, uploadedIds: sessionUploadedIds }
 }

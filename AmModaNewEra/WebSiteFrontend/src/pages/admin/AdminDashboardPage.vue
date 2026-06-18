@@ -820,6 +820,30 @@ async function onFilesSelected(event) {
       return
     }
 
+    if (result.uploadedIds.length > 0) {
+      await loadPhotos()
+
+      const uploadedSet = new Set(result.uploadedIds)
+      const order = [
+        ...result.uploadedIds,
+        ...photos.value.map((photo) => photo.id).filter((id) => !uploadedSet.has(id)),
+      ]
+
+      savingOrder.value = true
+      try {
+        const res = await apiPostJson('api/reorder.php', { order }, { credentials: 'include' })
+        if (!res.ok || res.data?.ok !== true) {
+          setGalleryFeedback(
+            res.data?.error ?? 'Zdjęcia wgrane, ale nie udało się zapisać kolejności.',
+            false,
+          )
+          return
+        }
+      } finally {
+        savingOrder.value = false
+      }
+    }
+
     setGalleryFeedback(formatUploadedCountMessage(result.uploadedCount))
     await loadPhotos()
   } finally {
