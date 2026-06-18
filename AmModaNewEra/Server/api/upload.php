@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 use AmModa\Lib\Auth;
 use AmModa\Lib\Cors;
+use AmModa\Lib\ImageProcessor;
 
 require_once __DIR__ . '/../lib/Auth.php';
 require_once __DIR__ . '/../lib/Cors.php';
+require_once __DIR__ . '/../lib/ImageProcessor.php';
 
 Cors::apply(['POST'], true);
 header('Content-Type: application/json; charset=utf-8');
@@ -25,13 +27,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 
 Auth::requireAuthenticated();
 
+if (!ImageProcessor::isSupported()) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Serwer nie obsługuje przetwarzania obrazów (brak GD/Imagick z WebP).']);
+    exit;
+}
+
 $allowedTypes = [
     'image/jpeg' => 'jpg',
     'image/png' => 'png',
     'image/gif' => 'gif',
     'image/webp' => 'webp',
+    'image/bmp' => 'bmp',
+    'image/x-ms-bmp' => 'bmp',
 ];
-$maxSize = 5 * 1024 * 1024;
+$maxSize = 25 * 1024 * 1024;
 $maxFiles = 50;
 
 $files = [];
@@ -87,26 +97,30 @@ foreach ($files as $file) {
     $size = $file['size'];
 
     if ($size > $maxSize) {
-        $errors[] = 'Plik zbyt duży (max 5 MB).';
+        $errors[] = 'Plik zbyt duży (max 25 MB).';
         continue;
     }
 
     $mime = finfo_file($finfo, $tmp);
     if (!isset($allowedTypes[$mime])) {
-        $errors[] = 'Dozwolone formaty: JPG, PNG, GIF, WEBP.';
+        $errors[] = 'Dozwolone formaty: JPG, PNG, GIF, WEBP, BMP.';
         continue;
     }
 
-    $ext = $allowedTypes[$mime];
     $baseName = 'photo_' . uniqid('', true);
-    $targetPath = $photosDir . '/' . $baseName . '.' . $ext;
+    $targetPath = $photosDir . '/' . $baseName . '.webp';
 
-    if (!move_uploaded_file($tmp, $targetPath)) {
-        $errors[] = 'Zapis pliku nie powiódł się.';
+    try {
+        (new ImageProcessor())->process($tmp, $targetPath);
+    } catch (\Throwable $e) {
+        if (is_file($targetPath)) {
+            @unlink($targetPath);
+        }
+        $errors[] = 'Nie udało się przetworzyć zdjęcia.';
         continue;
     }
 
-    $uploaded[] = $baseName . '.' . $ext;
+    $uploaded[] = $baseName . '.webp';
 }
 finfo_close($finfo);
 

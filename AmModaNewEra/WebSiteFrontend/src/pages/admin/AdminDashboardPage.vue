@@ -44,7 +44,7 @@
               <input
                 ref="fileInputRef"
                 type="file"
-                accept="image/jpeg,image/png,image/gif,image/webp"
+                accept="image/jpeg,image/png,image/gif,image/webp,image/bmp"
                 multiple
                 class="admin-dashboard-page__file-input"
                 @change="onFilesSelected"

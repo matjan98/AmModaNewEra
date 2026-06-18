@@ -224,4 +224,57 @@ public class BackendCodeTests
         var photoContent = File.ReadAllText(Path.Combine(serverPath, "api", "photo.php"));
         Assert.That(photoContent, Does.Contain("GalleryOrder"));
     }
+
+    [Test]
+    public void ImageProcessorLibraryExists()
+    {
+        var processorPath = Path.Combine(ResolveServerPath(), "lib", "ImageProcessor.php");
+        Assert.That(File.Exists(processorPath), Is.True, $"Missing file: {processorPath}");
+
+        var content = File.ReadAllText(processorPath);
+        Assert.That(content, Does.Contain("class ImageProcessor"));
+        Assert.That(content, Does.Contain("webp"));
+        Assert.That(content, Does.Contain("MAX_LONG_EDGE"));
+        Assert.That(content, Does.Contain("MAX_SHORT_EDGE"));
+    }
+
+    [Test]
+    public void UploadConvertsImagesToWebp()
+    {
+        var uploadPath = Path.Combine(ResolveServerPath(), "api", "upload.php");
+        var content = File.ReadAllText(uploadPath);
+
+        Assert.That(content, Does.Contain("ImageProcessor"));
+        Assert.That(content, Does.Contain(".webp"));
+        Assert.That(content, Does.Not.Contain("move_uploaded_file"),
+            "Upload must process images via ImageProcessor instead of moving the raw file.");
+    }
+
+    [Test]
+    public void UploadAcceptsBmpInput()
+    {
+        var uploadPath = Path.Combine(ResolveServerPath(), "api", "upload.php");
+        var content = File.ReadAllText(uploadPath);
+        Assert.That(content, Does.Contain("image/bmp"));
+    }
+
+    [Test]
+    public void AdminGalleryAcceptsBmpUploads()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var pagePath = Path.GetFullPath(Path.Combine(
+            currentDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "WebSiteFrontend",
+            "src",
+            "pages",
+            "admin",
+            "AdminDashboardPage.vue"));
+
+        var content = File.ReadAllText(pagePath);
+        Assert.That(content, Does.Contain("image/bmp"));
+    }
 }
