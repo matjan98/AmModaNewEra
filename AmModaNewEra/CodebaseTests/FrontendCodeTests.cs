@@ -363,11 +363,10 @@ public class FrontendCodeTests
         Assert.That(content, Does.Contain("galleryReorder.js"));
         Assert.That(content, Does.Contain("Przenieś na górę"));
         Assert.That(content, Does.Contain("Przenieś na dół"));
-        Assert.That(content, Does.Contain("@start=\"onReorderStart\""));
     }
 
     [Test]
-    public void GalleryReorderUtilityExportsBulkMoveHelpers()
+    public void GalleryReorderUtilityExportsMoveToTopAndBottom()
     {
         var rootPath = ResolveFrontendSrcPath();
         var reorderUtilPath = Path.Combine(rootPath, "utils", "galleryReorder.js");
@@ -376,7 +375,7 @@ public class FrontendCodeTests
         var content = File.ReadAllText(reorderUtilPath);
         Assert.That(content, Does.Contain("export function moveItemsToTop"));
         Assert.That(content, Does.Contain("export function moveItemsToBottom"));
-        Assert.That(content, Does.Contain("export function reorderSelectedBlock"));
+        Assert.That(content, Does.Not.Contain("export function reorderSelectedBlock"));
     }
 
     [Test]
