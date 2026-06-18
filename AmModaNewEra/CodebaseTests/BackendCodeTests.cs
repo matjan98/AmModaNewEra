@@ -122,6 +122,29 @@ public class BackendCodeTests
     }
 
     [Test]
+    public void GalleryBatchUploadUtilExists()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var utilPath = Path.GetFullPath(Path.Combine(
+            currentDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "WebSiteFrontend",
+            "src",
+            "utils",
+            "galleryBatchUpload.js"));
+
+        Assert.That(File.Exists(utilPath), Is.True, $"Missing file: {utilPath}");
+
+        var content = File.ReadAllText(utilPath);
+        Assert.That(content, Does.Contain("GALLERY_UPLOAD_BATCH_SIZE = 10"));
+        Assert.That(content, Does.Contain("uploadPhotosInBatches"));
+        Assert.That(content, Does.Contain("rollbackSessionUploads"));
+    }
+
+    [Test]
     public void CommittedEnvMustNotContainLocalhostApiBase()
     {
         var currentDirectory = Directory.GetCurrentDirectory();

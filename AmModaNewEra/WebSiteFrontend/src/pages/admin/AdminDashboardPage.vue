@@ -29,6 +29,7 @@
                 unelevated
                 :label="`Usuń zaznaczone (${selectedCount})`"
                 :loading="deletingSelected"
+                :disable="uploading"
                 @click="deleteSelectedPhotos"
               />
               <q-btn
@@ -37,6 +38,7 @@
                 unelevated
                 label="Dodaj zdjęcia"
                 :loading="uploading"
+                :disable="uploading"
                 @click="fileInputRef?.click()"
               />
               <input
@@ -56,6 +58,21 @@
             label="Zaznacz wszystkie"
             class="admin-dashboard-page__select-all"
           />
+
+          <q-linear-progress
+            v-if="uploading"
+            :value="uploadProgress"
+            color="primary"
+            stripe
+            animated
+            class="admin-dashboard-page__upload-progress"
+          />
+          <p
+            v-if="uploading && uploadProgressLabel"
+            class="admin-dashboard-page__upload-progress-label"
+          >
+            {{ uploadProgressLabel }}
+          </p>
 
           <q-banner
             v-if="galleryMessage"
@@ -95,6 +112,7 @@
                 icon="delete"
                 class="admin-dashboard-page__delete-btn"
                 aria-label="Usuń zdjęcie"
+                :disable="uploading"
                 @click="deletePhoto(photo.id)"
               />
             </div>
@@ -238,12 +256,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { apiGetJson, apiPostForm, apiPutJson } from '../../utils/apiJson.js'
 import { getApiUrl } from '../../utils/apiUrl.js'
+import { uploadPhotosInBatches } from '../../utils/galleryBatchUpload.js'
 
 const activeTab = ref('gallery')
 const fileInputRef = ref(null)
 
 const photos = ref([])
 const uploading = ref(false)
+const uploadProgress = ref(0)
+const uploadProgressLabel = ref('')
 const deletingSelected = ref(false)
 const galleryMessage = ref('')
 const galleryMessageOk = ref(true)
@@ -326,6 +347,23 @@ function clearPhotoSelection() {
   selectedPhotoIds.value = new Set()
 }
 
+function resetUploadProgress() {
+  uploadProgress.value = 0
+  uploadProgressLabel.value = ''
+}
+
+function handleUploadProgress({ uploadedCount, totalCount, batchIndex, batchCount }) {
+  uploadProgress.value = totalCount > 0 ? uploadedCount / totalCount : 0
+  uploadProgressLabel.value = totalCount > 0
+    ? `Wgrywanie zdjęć: ${uploadedCount}/${totalCount} (paczka ${batchIndex}/${batchCount})`
+    : ''
+}
+
+function formatUploadedCountMessage(count) {
+  if (count === 1) return 'Zapisano 1 zdjęcie.'
+  return `Zapisano ${count} zdjęć.`
+}
+
 async function loadPhotos() {
   const res = await apiGetJson('api/photo.php?list=1')
   if (!res.ok || res.data?.ok !== true || !Array.isArray(res.data.photos)) {
@@ -360,23 +398,30 @@ async function onFilesSelected(event) {
   const fileList = input?.files
   if (!fileList || fileList.length === 0) return
 
-  const formData = new FormData()
-  Array.from(fileList).forEach((file) => formData.append('photos[]', file))
-
+  const files = Array.from(fileList)
   uploading.value = true
   setGalleryFeedback('')
+  resetUploadProgress()
 
   try {
-    const res = await apiPostForm('api/upload.php', formData)
-    if (!res.ok || res.data?.ok !== true) {
-      setGalleryFeedback(res.data?.error ?? 'Upload nie powiódł się.', false)
+    const result = await uploadPhotosInBatches({
+      files,
+      postForm: (path, formData, options) => apiPostForm(path, formData, options),
+      deleteForm: (path, formData) => apiPostForm(path, formData),
+      onProgress: handleUploadProgress,
+    })
+
+    if (!result.ok) {
+      setGalleryFeedback(result.error, false)
+      await loadPhotos()
       return
     }
 
-    setGalleryFeedback(res.data.message ?? 'Zapisano zdjęcia.')
+    setGalleryFeedback(formatUploadedCountMessage(result.uploadedCount))
     await loadPhotos()
   } finally {
     uploading.value = false
+    resetUploadProgress()
     if (input) input.value = ''
   }
 }
@@ -566,6 +611,16 @@ onMounted(async () => {
 
 .admin-dashboard-page__select-all {
   margin-bottom: 12px;
+}
+
+.admin-dashboard-page__upload-progress {
+  margin-bottom: 8px;
+}
+
+.admin-dashboard-page__upload-progress-label {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.62);
 }
 
 .admin-dashboard-page__section-title {

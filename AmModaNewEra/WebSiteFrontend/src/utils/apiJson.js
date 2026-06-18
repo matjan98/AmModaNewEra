@@ -105,11 +105,13 @@ export async function apiPutJson(path, body, options = {}) {
 /**
  * @param {string} path
  * @param {FormData} formData
+ * @param {{ credentials?: RequestCredentials, timeoutMs?: number }} [options]
  */
-export async function apiPostForm(path, formData) {
+export async function apiPostForm(path, formData, options = {}) {
   return apiRequestJson(path, {
     method: 'POST',
     body: formData,
-    credentials: 'include',
+    credentials: options.credentials ?? 'include',
+    timeoutMs: options.timeoutMs,
   })
 }
