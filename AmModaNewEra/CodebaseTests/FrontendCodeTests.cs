@@ -349,4 +349,16 @@ public class FrontendCodeTests
 
         Assert.Pass("All imports are used correctly.");
     }
+
+    [Test]
+    public void GalleryReorderUsesDraggable()
+    {
+        var rootPath = ResolveFrontendSrcPath();
+        var adminPagePath = Path.Combine(rootPath, "pages", "admin", "AdminDashboardPage.vue");
+        Assert.That(File.Exists(adminPagePath), Is.True, $"Missing file: {adminPagePath}");
+
+        var content = File.ReadAllText(adminPagePath);
+        Assert.That(content, Does.Contain("vue-draggable-plus"));
+        Assert.That(content, Does.Contain("reorder.php"));
+    }
 }

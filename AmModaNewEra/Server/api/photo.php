@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+use AmModa\Lib\GalleryOrder;
+
+require_once __DIR__ . '/../lib/GalleryOrder.php';
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
@@ -94,10 +97,22 @@ if (isset($_GET['list']) && $_GET['list'] === '1') {
         }
     }
 
-    usort($photos, function ($a, $b) use ($photosDir) {
-        $tA = filemtime($photosDir . '/' . $a['id']) ?: 0;
-        $tB = filemtime($photosDir . '/' . $b['id']) ?: 0;
-        return $tB <=> $tA;
+    $pos = array_flip(GalleryOrder::read());
+    usort($photos, function ($a, $b) use ($pos, $photosDir) {
+        $ia = $pos[$a['id']] ?? null;
+        $ib = $pos[$b['id']] ?? null;
+        if ($ia === null && $ib === null) {
+            $tA = filemtime($photosDir . '/' . $a['id']) ?: 0;
+            $tB = filemtime($photosDir . '/' . $b['id']) ?: 0;
+            return $tB <=> $tA;
+        }
+        if ($ia === null) {
+            return -1;
+        }
+        if ($ib === null) {
+            return 1;
+        }
+        return $ia <=> $ib;
     });
     echo json_encode(['ok' => true, 'photos' => $photos]);
     exit;

@@ -205,4 +205,23 @@ public class BackendCodeTests
         Assert.That(content, Does.Contain("white-space: pre-line"),
             "News text must use pre-line so textarea line breaks render on the public site.");
     }
+
+    [Test]
+    public void PhotoReorderEndpointExists()
+    {
+        var serverPath = ResolveServerPath();
+
+        var reorderPath = Path.Combine(serverPath, "api", "reorder.php");
+        Assert.That(File.Exists(reorderPath), Is.True, $"Missing file: {reorderPath}");
+
+        var reorderContent = File.ReadAllText(reorderPath);
+        Assert.That(reorderContent, Does.Contain("GalleryOrder"));
+        Assert.That(reorderContent, Does.Contain("requireAuthenticated"));
+
+        var libPath = Path.Combine(serverPath, "lib", "GalleryOrder.php");
+        Assert.That(File.Exists(libPath), Is.True, $"Missing file: {libPath}");
+
+        var photoContent = File.ReadAllText(Path.Combine(serverPath, "api", "photo.php"));
+        Assert.That(photoContent, Does.Contain("GalleryOrder"));
+    }
 }

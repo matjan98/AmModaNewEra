@@ -84,7 +84,23 @@
             {{ galleryMessage }}
           </q-banner>
 
-          <div v-if="photos.length" class="admin-dashboard-page__gallery">
+          <VueDraggable
+            v-if="photos.length"
+            v-model="photos"
+            class="admin-dashboard-page__gallery"
+            :animation="180"
+            :delay="180"
+            :delay-on-touch-only="true"
+            :touch-start-threshold="5"
+            :force-fallback="true"
+            :disabled="uploading || deletingSelected || savingOrder"
+            filter=".admin-dashboard-page__select-checkbox, .admin-dashboard-page__delete-btn"
+            :prevent-on-filter="false"
+            ghost-class="admin-dashboard-page__thumb-wrap--ghost"
+            chosen-class="admin-dashboard-page__thumb-wrap--chosen"
+            drag-class="admin-dashboard-page__thumb-wrap--drag"
+            @end="onReorderEnd"
+          >
             <div
               v-for="photo in photos"
               :key="photo.id"
@@ -116,7 +132,7 @@
                 @click="deletePhoto(photo.id)"
               />
             </div>
-          </div>
+          </VueDraggable>
           <p v-else class="admin-dashboard-page__empty">Brak zdjęć w galerii.</p>
         </q-tab-panel>
 
@@ -254,7 +270,8 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { apiGetJson, apiPostForm, apiPutJson } from '../../utils/apiJson.js'
+import { VueDraggable } from 'vue-draggable-plus'
+import { apiGetJson, apiPostForm, apiPostJson, apiPutJson } from '../../utils/apiJson.js'
 import { getApiUrl } from '../../utils/apiUrl.js'
 import { uploadPhotosInBatches } from '../../utils/galleryBatchUpload.js'
 
@@ -266,6 +283,7 @@ const uploading = ref(false)
 const uploadProgress = ref(0)
 const uploadProgressLabel = ref('')
 const deletingSelected = ref(false)
+const savingOrder = ref(false)
 const galleryMessage = ref('')
 const galleryMessageOk = ref(true)
 const selectedPhotoIds = ref(new Set())
@@ -327,6 +345,30 @@ function toApiDate(qDateValue) {
 function setGalleryFeedback(message, ok = true) {
   galleryMessage.value = message
   galleryMessageOk.value = ok
+}
+
+function onReorderEnd(event) {
+  if (event && event.oldIndex === event.newIndex) {
+    return
+  }
+  persistPhotoOrder()
+}
+
+async function persistPhotoOrder() {
+  const order = photos.value.map((photo) => photo.id)
+  savingOrder.value = true
+  setGalleryFeedback('')
+  try {
+    const res = await apiPostJson('api/reorder.php', { order }, { credentials: 'include' })
+    if (!res.ok || res.data?.ok !== true) {
+      setGalleryFeedback(res.data?.error ?? 'Nie udało się zapisać kolejności.', false)
+      await loadPhotos()
+      return
+    }
+    setGalleryFeedback('Kolejność zapisana.')
+  } finally {
+    savingOrder.value = false
+  }
 }
 
 function isPhotoSelected(id) {
@@ -655,11 +697,29 @@ onMounted(async () => {
   border-radius: 10px;
   overflow: hidden;
   background: #ddd;
+  cursor: grab;
+}
+
+.admin-dashboard-page__thumb-wrap:active {
+  cursor: grabbing;
 }
 
 .admin-dashboard-page__thumb-wrap--selected {
   outline: 2px solid var(--q-primary);
   outline-offset: -2px;
+}
+
+.admin-dashboard-page__thumb-wrap--ghost {
+  opacity: 0.5;
+}
+
+.admin-dashboard-page__thumb-wrap--chosen {
+  outline: 2px solid var(--q-primary);
+  outline-offset: -2px;
+}
+
+.admin-dashboard-page__thumb-wrap--drag {
+  opacity: 0.9;
 }
 
 .admin-dashboard-page__select-checkbox {

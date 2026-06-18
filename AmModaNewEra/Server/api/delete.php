@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 use AmModa\Lib\Auth;
 use AmModa\Lib\Cors;
+use AmModa\Lib\GalleryOrder;
 
 require_once __DIR__ . '/../lib/Auth.php';
 require_once __DIR__ . '/../lib/Cors.php';
+require_once __DIR__ . '/../lib/GalleryOrder.php';
 
 Cors::apply(['POST'], true);
 header('Content-Type: application/json; charset=utf-8');
@@ -42,6 +44,7 @@ if ($ids === []) {
 
 $photosDir = __DIR__ . '/../photos';
 $deleted = 0;
+$deletedIds = [];
 $failed = [];
 
 foreach ($ids as $id) {
@@ -58,9 +61,14 @@ foreach ($ids as $id) {
 
     if (unlink($filePath)) {
         $deleted++;
+        $deletedIds[] = $id;
     } else {
         $failed[] = $id;
     }
+}
+
+if ($deletedIds !== []) {
+    GalleryOrder::removeMany($deletedIds);
 }
 
 if ($deleted === 0) {
