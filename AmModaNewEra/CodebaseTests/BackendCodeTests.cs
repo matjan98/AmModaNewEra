@@ -118,4 +118,24 @@ public class BackendCodeTests
         Assert.That(content, Does.Not.Contain("localhost"),
             "Committed .env must not set VITE_API_BASE to localhost — use .env.development for local dev.");
     }
+
+    [Test]
+    public void ApiUrlUsesRootRelativePathInProduction()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var apiUrlPath = Path.GetFullPath(Path.Combine(
+            currentDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "WebSiteFrontend",
+            "src",
+            "utils",
+            "apiUrl.js"));
+
+        var content = File.ReadAllText(apiUrlPath);
+        Assert.That(content, Does.Contain("return `/${DEFAULT_API_SUBPATH}/${normalizedPath}`"),
+            "Default API URL must start with / so nested routes like /admin/login resolve correctly.");
+    }
 }
