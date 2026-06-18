@@ -111,6 +111,17 @@ public class BackendCodeTests
     }
 
     [Test]
+    public void PhotoDeleteEndpointSupportsBulkIds()
+    {
+        var deletePath = Path.Combine(ResolveServerPath(), "api", "delete.php");
+        Assert.That(File.Exists(deletePath), Is.True, $"Missing file: {deletePath}");
+
+        var content = File.ReadAllText(deletePath);
+        Assert.That(content, Does.Contain("ids"));
+        Assert.That(content, Does.Contain("'deleted'"));
+    }
+
+    [Test]
     public void CommittedEnvMustNotContainLocalhostApiBase()
     {
         var currentDirectory = Directory.GetCurrentDirectory();

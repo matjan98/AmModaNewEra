@@ -21,23 +21,41 @@
         <q-tab-panel name="gallery" class="admin-dashboard-page__panel">
           <div class="admin-dashboard-page__section-header">
             <h2 class="admin-dashboard-page__section-title">Galeria zdjęć</h2>
-            <q-btn
-              color="primary"
-              no-caps
-              unelevated
-              label="Dodaj zdjęcia"
-              :loading="uploading"
-              @click="fileInputRef?.click()"
-            />
-            <input
-              ref="fileInputRef"
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              multiple
-              class="admin-dashboard-page__file-input"
-              @change="onFilesSelected"
-            >
+            <div class="admin-dashboard-page__section-actions">
+              <q-btn
+                v-if="hasSelection"
+                color="negative"
+                no-caps
+                unelevated
+                :label="`Usuń zaznaczone (${selectedCount})`"
+                :loading="deletingSelected"
+                @click="deleteSelectedPhotos"
+              />
+              <q-btn
+                color="primary"
+                no-caps
+                unelevated
+                label="Dodaj zdjęcia"
+                :loading="uploading"
+                @click="fileInputRef?.click()"
+              />
+              <input
+                ref="fileInputRef"
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                multiple
+                class="admin-dashboard-page__file-input"
+                @change="onFilesSelected"
+              >
+            </div>
           </div>
+
+          <q-checkbox
+            v-if="photos.length"
+            v-model="allSelected"
+            label="Zaznacz wszystkie"
+            class="admin-dashboard-page__select-all"
+          />
 
           <q-banner
             v-if="galleryMessage"
@@ -54,7 +72,16 @@
               v-for="photo in photos"
               :key="photo.id"
               class="admin-dashboard-page__thumb-wrap"
+              :class="{ 'admin-dashboard-page__thumb-wrap--selected': isPhotoSelected(photo.id) }"
             >
+              <q-checkbox
+                :model-value="isPhotoSelected(photo.id)"
+                dense
+                class="admin-dashboard-page__select-checkbox"
+                :aria-label="'Zaznacz zdjęcie ' + photo.id"
+                @update:model-value="(checked) => togglePhotoSelection(photo.id, checked)"
+                @click.stop
+              />
               <img
                 :src="photo.urlResolved"
                 :alt="'Zdjęcie ' + photo.id"
@@ -217,8 +244,25 @@ const fileInputRef = ref(null)
 
 const photos = ref([])
 const uploading = ref(false)
+const deletingSelected = ref(false)
 const galleryMessage = ref('')
 const galleryMessageOk = ref(true)
+const selectedPhotoIds = ref(new Set())
+
+const selectedCount = computed(() => selectedPhotoIds.value.size)
+const hasSelection = computed(() => selectedCount.value > 0)
+
+const allSelected = computed({
+  get() {
+    return photos.value.length > 0
+      && photos.value.every((photo) => selectedPhotoIds.value.has(photo.id))
+  },
+  set(checked) {
+    selectedPhotoIds.value = checked
+      ? new Set(photos.value.map((photo) => photo.id))
+      : new Set()
+  },
+})
 
 const newsText = ref('')
 const newsEnabled = ref(false)
@@ -264,10 +308,29 @@ function setGalleryFeedback(message, ok = true) {
   galleryMessageOk.value = ok
 }
 
+function isPhotoSelected(id) {
+  return selectedPhotoIds.value.has(id)
+}
+
+function togglePhotoSelection(id, checked) {
+  const next = new Set(selectedPhotoIds.value)
+  if (checked) {
+    next.add(id)
+  } else {
+    next.delete(id)
+  }
+  selectedPhotoIds.value = next
+}
+
+function clearPhotoSelection() {
+  selectedPhotoIds.value = new Set()
+}
+
 async function loadPhotos() {
   const res = await apiGetJson('api/photo.php?list=1')
   if (!res.ok || res.data?.ok !== true || !Array.isArray(res.data.photos)) {
     photos.value = []
+    clearPhotoSelection()
     return
   }
 
@@ -275,6 +338,11 @@ async function loadPhotos() {
     ...photo,
     urlResolved: getApiUrl(typeof photo.url === 'string' ? photo.url : ''),
   }))
+
+  const validIds = new Set(photos.value.map((photo) => photo.id))
+  selectedPhotoIds.value = new Set(
+    [...selectedPhotoIds.value].filter((id) => validIds.has(id)),
+  )
 }
 
 async function loadAdminSettings() {
@@ -326,7 +394,37 @@ async function deletePhoto(id) {
   }
 
   setGalleryFeedback('Zdjęcie usunięte.')
+  togglePhotoSelection(id, false)
   await loadPhotos()
+}
+
+async function deleteSelectedPhotos() {
+  const ids = [...selectedPhotoIds.value]
+  if (ids.length === 0) return
+  if (!window.confirm(`Usunąć ${ids.length} zaznaczonych zdjęć?`)) return
+
+  const formData = new FormData()
+  ids.forEach((id) => formData.append('ids[]', id))
+
+  deletingSelected.value = true
+  setGalleryFeedback('')
+
+  try {
+    const res = await apiPostForm('api/delete.php', formData)
+    if (!res.ok || res.data?.ok !== true) {
+      setGalleryFeedback(res.data?.error ?? 'Usuwanie nie powiodło się.', false)
+      return
+    }
+
+    const deleted = res.data.deleted ?? ids.length
+    setGalleryFeedback(
+      deleted === 1 ? 'Zdjęcie usunięte.' : `Usunięto ${deleted} zdjęć.`,
+    )
+    clearPhotoSelection()
+    await loadPhotos()
+  } finally {
+    deletingSelected.value = false
+  }
 }
 
 async function saveNews() {
@@ -455,6 +553,21 @@ onMounted(async () => {
   margin-bottom: 16px;
 }
 
+.admin-dashboard-page__section-header .admin-dashboard-page__section-title {
+  margin: 0;
+}
+
+.admin-dashboard-page__section-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-dashboard-page__select-all {
+  margin-bottom: 12px;
+}
+
 .admin-dashboard-page__section-title {
   margin: 0 0 16px;
   font-size: 1.25rem;
@@ -487,6 +600,21 @@ onMounted(async () => {
   border-radius: 10px;
   overflow: hidden;
   background: #ddd;
+}
+
+.admin-dashboard-page__thumb-wrap--selected {
+  outline: 2px solid var(--q-primary);
+  outline-offset: -2px;
+}
+
+.admin-dashboard-page__select-checkbox {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 4px;
+  padding: 2px 4px;
 }
 
 .admin-dashboard-page__thumb {

@@ -25,26 +25,63 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 
 Auth::requireAuthenticated();
 
-$id = $_POST['id'] ?? '';
-if ($id === '' || !preg_match('/^photo_[a-f0-9.]+\.(jpe?g|png|gif|webp)$/i', $id)) {
+$photoIdPattern = '/^photo_[a-f0-9.]+\.(jpe?g|png|gif|webp)$/i';
+
+$ids = [];
+if (isset($_POST['ids']) && is_array($_POST['ids'])) {
+    $ids = $_POST['ids'];
+} elseif (isset($_POST['id']) && is_string($_POST['id']) && $_POST['id'] !== '') {
+    $ids = [$_POST['id']];
+}
+
+if ($ids === []) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'error' => 'Nieprawidłowe zdjęcie.']);
     exit;
 }
 
 $photosDir = __DIR__ . '/../photos';
-$filePath = $photosDir . '/' . $id;
+$deleted = 0;
+$failed = [];
 
-if (!is_file($filePath)) {
-    http_response_code(404);
-    echo json_encode(['ok' => false, 'error' => 'Zdjęcie nie istnieje.']);
+foreach ($ids as $id) {
+    if (!is_string($id) || !preg_match($photoIdPattern, $id)) {
+        $failed[] = is_string($id) ? $id : '';
+        continue;
+    }
+
+    $filePath = $photosDir . '/' . $id;
+    if (!is_file($filePath)) {
+        $failed[] = $id;
+        continue;
+    }
+
+    if (unlink($filePath)) {
+        $deleted++;
+    } else {
+        $failed[] = $id;
+    }
+}
+
+if ($deleted === 0) {
+    http_response_code(400);
+    echo json_encode([
+        'ok' => false,
+        'error' => 'Nie usunięto żadnego zdjęcia.',
+        'failed' => $failed,
+    ]);
     exit;
 }
 
-if (!unlink($filePath)) {
-    http_response_code(500);
-    echo json_encode(['ok' => false, 'error' => 'Nie udało się usunąć.']);
-    exit;
+$message = $deleted === 1 ? 'Usunięto 1 zdjęcie.' : "Usunięto {$deleted} zdjęć.";
+$response = [
+    'ok' => true,
+    'deleted' => $deleted,
+    'message' => $message,
+];
+
+if ($failed !== []) {
+    $response['failed'] = $failed;
 }
 
-echo json_encode(['ok' => true, 'message' => 'Usunięto.']);
+echo json_encode($response);
