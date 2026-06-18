@@ -34,8 +34,10 @@ public class BackendCodeTests
             "api/auth.php",
             "api/settings.php",
             "api/admin/settings.php",
+            "api/admin/reviews.php",
             "lib/SiteSettingsRepository.php",
             "lib/OpeningHoursRepository.php",
+            "lib/ReviewsSync.php",
             "lib/Cors.php",
         };
 
@@ -276,5 +278,43 @@ public class BackendCodeTests
 
         var content = File.ReadAllText(pagePath);
         Assert.That(content, Does.Contain("image/bmp"));
+    }
+
+    [Test]
+    public void GoogleReviewsAutoSyncFlagIsWired()
+    {
+        var serverPath = ResolveServerPath();
+
+        var databaseContent = File.ReadAllText(Path.Combine(serverPath, "lib", "Database.php"));
+        Assert.That(databaseContent, Does.Contain("google_reviews_auto_sync"),
+            "site_settings must define the google_reviews_auto_sync column.");
+
+        var settingsRepoContent = File.ReadAllText(Path.Combine(serverPath, "lib", "SiteSettingsRepository.php"));
+        Assert.That(settingsRepoContent, Does.Contain("google_reviews_auto_sync"));
+        Assert.That(settingsRepoContent, Does.Contain("saveGoogleReviewsAutoSync"));
+
+        var syncPath = Path.Combine(serverPath, "lib", "ReviewsSync.php");
+        Assert.That(File.Exists(syncPath), Is.True, $"Missing file: {syncPath}");
+
+        var syncContent = File.ReadAllText(syncPath);
+        Assert.That(syncContent, Does.Contain("class ReviewsSync"));
+        Assert.That(syncContent, Does.Contain("refreshIfNeeded"));
+    }
+
+    [Test]
+    public void ReviewsEndpointsRespectAutoSyncFlag()
+    {
+        var serverPath = ResolveServerPath();
+
+        var publicReviews = File.ReadAllText(Path.Combine(serverPath, "api", "reviews.php"));
+        Assert.That(publicReviews, Does.Contain("ReviewsSync"));
+        Assert.That(publicReviews, Does.Contain("google_reviews_auto_sync"),
+            "Public reviews endpoint must honor the auto-sync flag before calling Google.");
+
+        var adminReviews = File.ReadAllText(Path.Combine(serverPath, "api", "admin", "reviews.php"));
+        Assert.That(adminReviews, Does.Contain("requireAuthenticated"));
+        Assert.That(adminReviews, Does.Contain("autoSyncEnabled"));
+        Assert.That(adminReviews, Does.Contain("saveGoogleReviewsAutoSync"));
+        Assert.That(adminReviews, Does.Contain("refreshIfNeeded"));
     }
 }

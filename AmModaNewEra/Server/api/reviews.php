@@ -4,10 +4,14 @@ declare(strict_types=1);
 use AmModa\Lib\Database;
 use AmModa\Lib\GooglePlacesClient;
 use AmModa\Lib\ReviewsRepository;
+use AmModa\Lib\ReviewsSync;
+use AmModa\Lib\SiteSettingsRepository;
 
 require_once __DIR__ . '/../lib/Database.php';
 require_once __DIR__ . '/../lib/GooglePlacesClient.php';
 require_once __DIR__ . '/../lib/ReviewsRepository.php';
+require_once __DIR__ . '/../lib/ReviewsSync.php';
+require_once __DIR__ . '/../lib/SiteSettingsRepository.php';
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
@@ -51,23 +55,16 @@ try {
     exit;
 }
 
-$repo   = new ReviewsRepository($pdo);
-$client = new GooglePlacesClient($placesConfig);
+$repo         = new ReviewsRepository($pdo);
+$client       = new GooglePlacesClient($placesConfig);
+$settingsRepo = new SiteSettingsRepository($pdo);
 
-$row    = $repo->getLatest();
-$ttl    = (int) ($placesConfig['refresh_interval_seconds'] ?? 86400);
-$stale  = false;
+$autoSyncEnabled = (bool) $settingsRepo->get()['google_reviews_auto_sync'];
+$ttl             = ReviewsSync::ttl($placesConfig);
 
-if ($repo->isStale($row, $ttl)) {
-    try {
-        $data = $client->fetchPlaceDetails();
-        $repo->insertSnapshot($data['rating'], $data['userRatingCount']);
-        $row = $repo->getLatest();
-    } catch (Throwable $e) {
-        error_log('[reviews.php] Google Places fetch failed: ' . $e->getMessage());
-        $stale = true;
-    }
-}
+$result = ReviewsSync::refreshIfNeeded($repo, $client, $ttl, $autoSyncEnabled, false);
+$row    = $result['row'];
+$stale  = $result['stale'];
 
 if ($row === null) {
     http_response_code(503);

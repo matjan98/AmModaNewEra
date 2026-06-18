@@ -13,6 +13,7 @@
         <q-tab name="gallery" label="Galeria" />
         <q-tab name="news" label="Aktualności" />
         <q-tab name="hours" label="Godziny otwarcia" />
+        <q-tab name="reviews" label="Opinie Google" />
       </q-tabs>
 
       <q-separator />
@@ -225,6 +226,62 @@
             </div>
           </div>
         </q-tab-panel>
+
+        <q-tab-panel name="reviews" class="admin-dashboard-page__panel">
+          <h2 class="admin-dashboard-page__section-title">Opinie Google</h2>
+
+          <q-toggle
+            v-model="reviewsAutoSync"
+            label="Automatyczna synchronizacja z Google"
+            :disable="savingReviewsAutoSync || syncingReviews"
+            class="admin-dashboard-page__checkbox"
+            @update:model-value="saveReviewsAutoSync"
+          />
+
+          <p class="admin-dashboard-page__hint">
+            Gdy włączone, oceny odświeżają się automatycznie (najwyżej raz na dobę) przy ruchu na stronie.
+          </p>
+
+          <div class="admin-dashboard-page__reviews-summary">
+            <div class="admin-dashboard-page__reviews-row">
+              <span class="admin-dashboard-page__reviews-label">Ocena</span>
+              <span class="admin-dashboard-page__reviews-value">{{ reviewsRatingDisplay }}</span>
+            </div>
+            <div class="admin-dashboard-page__reviews-row">
+              <span class="admin-dashboard-page__reviews-label">Liczba opinii</span>
+              <span class="admin-dashboard-page__reviews-value">
+                {{ reviewsRatingCount === null ? '—' : reviewsRatingCount }} {{ reviewsOpinionsLabel }}
+              </span>
+            </div>
+            <div class="admin-dashboard-page__reviews-row">
+              <span class="admin-dashboard-page__reviews-label">Ostatnia synchronizacja</span>
+              <span class="admin-dashboard-page__reviews-value">
+                {{ reviewsUpdatedAtDisplay }}<span v-if="reviewsStale"> (nieaktualne)</span>
+              </span>
+            </div>
+          </div>
+
+          <q-btn
+            color="primary"
+            no-caps
+            unelevated
+            label="Synchronizuj teraz"
+            class="admin-dashboard-page__save-weekly-btn"
+            :loading="syncingReviews"
+            :disable="savingReviewsAutoSync"
+            @click="syncReviewsNow"
+          />
+
+          <q-banner
+            v-if="reviewsMessage"
+            dense
+            rounded
+            class="admin-dashboard-page__message admin-dashboard-page__reviews-message"
+            :class="reviewsMessageOk ? 'bg-positive text-white' : 'bg-negative text-white'"
+          >
+            {{ reviewsMessage }}
+          </q-banner>
+        </q-tab-panel>
       </q-tab-panels>
     </div>
 
@@ -269,7 +326,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { apiGetJson, apiPostForm, apiPostJson, apiPutJson } from '../../utils/apiJson.js'
 import { getApiUrl } from '../../utils/apiUrl.js'
@@ -321,6 +378,39 @@ const overrideModeOptions = [
   { label: 'Otwarte - inne godziny', value: false },
   { label: 'Zamknięte', value: true },
 ]
+
+const reviewsAutoSync = ref(false)
+const reviewsRating = ref(null)
+const reviewsRatingCount = ref(null)
+const reviewsUpdatedAt = ref(null)
+const reviewsStale = ref(false)
+const savingReviewsAutoSync = ref(false)
+const syncingReviews = ref(false)
+const reviewsMessage = ref('')
+const reviewsMessageOk = ref(true)
+const reviewsLoaded = ref(false)
+
+const reviewsRatingDisplay = computed(() =>
+  reviewsRating.value === null ? '—' : reviewsRating.value.toFixed(1).replace('.', ','),
+)
+
+const reviewsOpinionsLabel = computed(() => {
+  const n = reviewsRatingCount.value
+  if (n === null) return ''
+  const abs = Math.abs(n)
+  const lastTwo = abs % 100
+  const last = abs % 10
+  if (abs === 1) return 'opinia'
+  if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return 'opinie'
+  return 'opinii'
+})
+
+const reviewsUpdatedAtDisplay = computed(() => {
+  if (!reviewsUpdatedAt.value) return '—'
+  const parsed = new Date(reviewsUpdatedAt.value.replace(' ', 'T'))
+  if (Number.isNaN(parsed.getTime())) return reviewsUpdatedAt.value
+  return parsed.toLocaleString('pl-PL', { dateStyle: 'medium', timeStyle: 'short' })
+})
 
 const overrideDates = computed(() => overrides.value.map((item) => item.override_date))
 
@@ -608,6 +698,74 @@ async function removeOverride(date) {
   overrides.value = res.data.overrides ?? []
 }
 
+function setReviewsFeedback(message, ok = true) {
+  reviewsMessage.value = message
+  reviewsMessageOk.value = ok
+}
+
+function applyReviewsStatus(data) {
+  if (!data) return
+  if (typeof data.autoSyncEnabled === 'boolean') reviewsAutoSync.value = data.autoSyncEnabled
+  const fetchedRating = Number(data.rating)
+  const fetchedCount = Number(data.ratingCount)
+  reviewsRating.value = Number.isFinite(fetchedRating) ? fetchedRating : null
+  reviewsRatingCount.value = Number.isFinite(fetchedCount) ? fetchedCount : null
+  reviewsUpdatedAt.value = typeof data.updatedAt === 'string' ? data.updatedAt : null
+  reviewsStale.value = Boolean(data.stale)
+}
+
+async function loadReviewsAdmin() {
+  const res = await apiGetJson('api/admin/reviews.php', { credentials: 'include' })
+  if (res.data) applyReviewsStatus(res.data)
+  if (!res.ok || res.data?.ok !== true) {
+    setReviewsFeedback(res.data?.error ?? 'Nie udało się pobrać danych opinii.', false)
+    return
+  }
+  reviewsLoaded.value = true
+  setReviewsFeedback('')
+}
+
+async function saveReviewsAutoSync(enabled) {
+  savingReviewsAutoSync.value = true
+  setReviewsFeedback('')
+  try {
+    const res = await apiPutJson('api/admin/reviews.php', { autoSyncEnabled: enabled })
+    if (!res.ok || res.data?.ok !== true) {
+      reviewsAutoSync.value = !enabled
+      setReviewsFeedback(res.data?.error ?? 'Nie udało się zapisać ustawienia.', false)
+      return
+    }
+    applyReviewsStatus(res.data)
+    setReviewsFeedback(enabled
+      ? 'Automatyczna synchronizacja włączona.'
+      : 'Automatyczna synchronizacja wyłączona.')
+  } finally {
+    savingReviewsAutoSync.value = false
+  }
+}
+
+async function syncReviewsNow() {
+  syncingReviews.value = true
+  setReviewsFeedback('')
+  try {
+    const res = await apiPostJson('api/admin/reviews.php', {}, { credentials: 'include' })
+    if (res.data) applyReviewsStatus(res.data)
+    if (!res.ok || res.data?.ok !== true) {
+      setReviewsFeedback(res.data?.error ?? 'Synchronizacja nie powiodła się.', false)
+      return
+    }
+    setReviewsFeedback('Zsynchronizowano z Google.')
+  } finally {
+    syncingReviews.value = false
+  }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'reviews' && !reviewsLoaded.value) {
+    loadReviewsAdmin()
+  }
+})
+
 onMounted(async () => {
   await Promise.all([loadPhotos(), loadAdminSettings()])
 })
@@ -810,5 +968,34 @@ onMounted(async () => {
 
 .admin-dashboard-page__override-hours-input {
   margin-top: 12px;
+}
+
+.admin-dashboard-page__reviews-summary {
+  margin: 16px 0;
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.admin-dashboard-page__reviews-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-dashboard-page__reviews-label {
+  color: rgba(0, 0, 0, 0.62);
+}
+
+.admin-dashboard-page__reviews-value {
+  font-weight: 600;
+}
+
+.admin-dashboard-page__reviews-message {
+  margin-top: 16px;
 }
 </style>

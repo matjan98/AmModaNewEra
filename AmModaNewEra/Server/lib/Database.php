@@ -46,9 +46,12 @@ final class Database
                 id           TINYINT UNSIGNED NOT NULL PRIMARY KEY,
                 news_text    TEXT NOT NULL,
                 news_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                google_reviews_auto_sync TINYINT(1) NOT NULL DEFAULT 1,
                 updated_at   DATETIME NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
         );
+
+        self::ensureSiteSettingsColumns($pdo);
 
         $pdo->exec(
             'CREATE TABLE IF NOT EXISTS opening_hours_weekly (
@@ -65,5 +68,28 @@ final class Database
                 updated_at    DATETIME NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
         );
+    }
+
+    /**
+     * Idempotent migration for older installs that miss newer site_settings columns.
+     * Defaults to enabled so existing behavior (lazy auto-sync) is preserved.
+     */
+    private static function ensureSiteSettingsColumns(PDO $pdo): void
+    {
+        $stmt = $pdo->query(
+            "SELECT COUNT(*)
+               FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'site_settings'
+                AND COLUMN_NAME = 'google_reviews_auto_sync'"
+        );
+        $hasColumn = $stmt ? (int) $stmt->fetchColumn() > 0 : true;
+
+        if (!$hasColumn) {
+            $pdo->exec(
+                'ALTER TABLE site_settings
+                    ADD COLUMN google_reviews_auto_sync TINYINT(1) NOT NULL DEFAULT 1'
+            );
+        }
     }
 }
