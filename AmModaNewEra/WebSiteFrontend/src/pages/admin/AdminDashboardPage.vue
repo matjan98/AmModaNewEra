@@ -360,17 +360,26 @@
         </q-card-section>
 
         <q-card-section>
-          <q-option-group
-            v-model="overrideClosed"
-            :options="overrideModeOptions"
-            type="radio"
-          />
+          <div class="admin-dashboard-page__override-presets">
+            <q-btn
+              flat
+              no-caps
+              label="Ustaw zamknięte"
+              @click="applyOverrideClosedPreset"
+            />
+            <q-btn
+              flat
+              no-caps
+              label="Ustaw otwarte"
+              @click="applyOverrideOpenPreset"
+            />
+          </div>
           <q-input
-            v-if="!overrideClosed"
             v-model="overrideHours"
             dense
             outlined
-            label="Godziny (np. 9:00 - 18:00)"
+            label="Tekst wyświetlany na stronie"
+            hint="np. 9:00 - 18:00 lub Zamknięte"
             class="admin-dashboard-page__override-hours-input"
           />
         </q-card-section>
@@ -460,14 +469,10 @@ const savingWeekly = ref(false)
 
 const selectedDate = ref('')
 const overrideDialogOpen = ref(false)
-const overrideClosed = ref(false)
 const overrideHours = ref('9:00 - 18:00')
 const savingOverride = ref(false)
 
-const overrideModeOptions = [
-  { label: 'Otwarte - inne godziny', value: false },
-  { label: 'Zamknięte', value: true },
-]
+const DEFAULT_OVERRIDE_OPEN_HOURS = '9:00 - 18:00'
 
 const reviewsAutoSync = ref(false)
 const reviewsRating = ref(null)
@@ -986,6 +991,14 @@ async function saveWeeklyHours() {
   }
 }
 
+function applyOverrideClosedPreset() {
+  overrideHours.value = 'Zamknięte'
+}
+
+function applyOverrideOpenPreset() {
+  overrideHours.value = DEFAULT_OVERRIDE_OPEN_HOURS
+}
+
 function openOverrideDialog(dateValue) {
   if (!isDateOnOrAfterToday(dateValue)) return
 
@@ -993,13 +1006,9 @@ function openOverrideDialog(dateValue) {
   const apiDate = toApiDate(dateValue)
   const existing = overrides.value.find((item) => item.override_date === apiDate)
 
-  if (existing) {
-    overrideClosed.value = existing.hours === 'Zamknięte'
-    overrideHours.value = existing.hours === 'Zamknięte' ? '9:00 - 18:00' : existing.hours
-  } else {
-    overrideClosed.value = false
-    overrideHours.value = '9:00 - 18:00'
-  }
+  overrideHours.value = existing
+    ? existing.hours
+    : DEFAULT_OVERRIDE_OPEN_HOURS
 
   overrideDialogOpen.value = true
 }
@@ -1008,12 +1017,18 @@ async function saveOverride() {
   const apiDate = toApiDate(selectedDate.value)
   if (!apiDate || !isDateOnOrAfterToday(selectedDate.value)) return
 
+  const hours = overrideHours.value.trim()
+  if (!hours) {
+    window.alert('Wpisz tekst godzin lub zamknięcia.')
+    return
+  }
+
   savingOverride.value = true
   try {
     const res = await apiPutJson('api/admin/settings.php', {
       overrides: [{
         override_date: apiDate,
-        hours: overrideClosed.value ? 'Zamknięte' : overrideHours.value.trim(),
+        hours,
       }],
     })
 
@@ -1392,6 +1407,12 @@ onUnmounted(() => {
 .admin-dashboard-page__dialog-title {
   font-size: 1.05rem;
   font-weight: 600;
+}
+
+.admin-dashboard-page__override-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .admin-dashboard-page__override-hours-input {
