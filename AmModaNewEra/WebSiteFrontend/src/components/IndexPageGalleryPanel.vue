@@ -58,10 +58,11 @@ const props = defineProps({
   },
 })
 
-const { photos: photoList, prefetchGalleryPhotos } = useGalleryPhotos()
+const { photos: photoList, prefetchGalleryPhotos, reloadGalleryPhotos } = useGalleryPhotos()
 
 const photoDims = ref(new Map())
 const pswpLightbox = ref(null)
+const isFirstGalleryActivation = ref(true)
 
 const photoListWithUrls = computed(() =>
   photoList.value.map((p) => {
@@ -140,7 +141,15 @@ onMounted(() => {
 })
 
 onActivated(() => {
-  nextTick(() => props.observeRevealZoomTargets?.())
+  if (isFirstGalleryActivation.value) {
+    isFirstGalleryActivation.value = false
+    nextTick(() => props.observeRevealZoomTargets?.())
+    return
+  }
+
+  reloadGalleryPhotos().then(() => {
+    nextTick(() => props.observeRevealZoomTargets?.())
+  })
 })
 
 onUnmounted(() => {

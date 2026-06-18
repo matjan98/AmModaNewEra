@@ -82,6 +82,8 @@ function photo_try_not_modified(string $etag, int $mtime): bool
 
 if (isset($_GET['list']) && $_GET['list'] === '1') {
     header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate');
+    header('Pragma: no-cache');
     $photos = [];
     if (is_dir($photosDir)) {
         foreach (glob($photosDir . '/photo_*.*') ?: [] as $path) {

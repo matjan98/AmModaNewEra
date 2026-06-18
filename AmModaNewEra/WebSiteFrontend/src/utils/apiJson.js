@@ -47,6 +47,7 @@ export async function apiRequestJson(path, options = {}) {
       credentials,
       headers: requestHeaders,
       signal: controller.signal,
+      cache: 'no-store',
     })
 
     let data = null

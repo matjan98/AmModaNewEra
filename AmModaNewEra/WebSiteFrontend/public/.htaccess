@@ -60,6 +60,9 @@ RewriteRule ^(.*)$ https://ammoda.pl/$1 [L,R=301]
   ExpiresByType text/xml                "access plus 1 hour"
   ExpiresByType application/xml         "access plus 1 hour"
 
+  # API JSON responses must not inherit the long default cache
+  ExpiresByType application/json        "access plus 0 seconds"
+
   ExpiresDefault                        "access plus 1 month"
 </IfModule>
 

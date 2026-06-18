@@ -1,0 +1,4 @@
+# Prevent mod_expires defaults from overriding per-endpoint Cache-Control in PHP.
+<IfModule mod_expires.c>
+  ExpiresActive Off
+</IfModule>

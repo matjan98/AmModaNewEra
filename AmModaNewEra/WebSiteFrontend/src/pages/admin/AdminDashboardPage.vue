@@ -507,9 +507,14 @@ function formatDeleteErrorMessage(res, requestedCount) {
   const base = res.data?.error ?? res.error ?? 'Usuwanie nie powiodło się.'
   const failed = Array.isArray(res.data?.failed) ? res.data.failed : []
   const unlinkFailed = failed.filter((entry) => entry?.reason === 'unlink_failed').length
+  const notFound = failed.filter((entry) => entry?.reason === 'not_found').length
 
   if (unlinkFailed > 0 && requestedCount > 0) {
     return `${base} (${unlinkFailed}/${requestedCount} — brak uprawnień do plików na serwerze).`
+  }
+
+  if (notFound > 0 && requestedCount > 0) {
+    return `Zdjęcie już nie istnieje na serwerze (lista mogła być nieaktualna). Odśwież stronę. (${notFound}/${requestedCount})`
   }
 
   if (failed.length > 0 && requestedCount > 0) {
@@ -763,7 +768,7 @@ function formatUploadedCountMessage(count) {
 }
 
 async function loadPhotos() {
-  const res = await apiGetJson('api/photo.php?list=1')
+  const res = await apiGetJson(`api/photo.php?list=1&_=${Date.now()}`)
   if (!res.ok || res.data?.ok !== true || !Array.isArray(res.data.photos)) {
     photos.value = []
     clearPhotoSelection()

@@ -113,6 +113,70 @@ public class BackendCodeTests
     }
 
     [Test]
+    public void PhotoListEndpointDisablesHttpCache()
+    {
+        var photoPath = Path.Combine(ResolveServerPath(), "api", "photo.php");
+        Assert.That(File.Exists(photoPath), Is.True, $"Missing file: {photoPath}");
+
+        var content = File.ReadAllText(photoPath);
+        Assert.That(content, Does.Contain("no-store"));
+        Assert.That(content, Does.Contain("no-cache"));
+    }
+
+    [Test]
+    public void ServerApiHtaccessDisablesExpiresDefault()
+    {
+        var path = Path.Combine(ResolveServerPath(), "api", ".htaccess");
+        Assert.That(File.Exists(path), Is.True, $"Missing file: {path}");
+
+        var content = File.ReadAllText(path);
+        Assert.That(content, Does.Contain("ExpiresActive Off"));
+    }
+
+    [Test]
+    public void ApiJsonClientUsesNoStoreFetchCache()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var utilPath = Path.GetFullPath(Path.Combine(
+            currentDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "WebSiteFrontend",
+            "src",
+            "utils",
+            "apiJson.js"));
+
+        Assert.That(File.Exists(utilPath), Is.True, $"Missing file: {utilPath}");
+
+        var content = File.ReadAllText(utilPath);
+        Assert.That(content, Does.Contain("cache: 'no-store'"));
+    }
+
+    [Test]
+    public void GalleryPhotosComposableSupportsReload()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var path = Path.GetFullPath(Path.Combine(
+            currentDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "WebSiteFrontend",
+            "src",
+            "composables",
+            "useGalleryPhotos.js"));
+
+        Assert.That(File.Exists(path), Is.True, $"Missing file: {path}");
+
+        var content = File.ReadAllText(path);
+        Assert.That(content, Does.Contain("reloadGalleryPhotos"));
+        Assert.That(content, Does.Contain("Date.now()"));
+    }
+
+    [Test]
     public void PhotoDeleteEndpointSupportsBulkIds()
     {
         var deletePath = Path.Combine(ResolveServerPath(), "api", "delete.php");

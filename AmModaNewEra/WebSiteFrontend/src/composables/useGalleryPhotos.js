@@ -6,6 +6,14 @@ const photos = ref([])
 /** @type {Promise<void> | null} */
 let loadPromise = null
 
+/** Ignores stale responses when multiple gallery fetches overlap. */
+let loadGeneration = 0
+
+function galleryListPath(cacheBust = false) {
+  const suffix = cacheBust ? `&_=${Date.now()}` : ''
+  return `api/photo.php?list=1${suffix}`
+}
+
 function applyPhotosPayload(data) {
   if (data?.ok === true && Array.isArray(data.photos)) {
     photos.value = data.photos
@@ -14,16 +22,24 @@ function applyPhotosPayload(data) {
   }
 }
 
+function loadGalleryPhotos(cacheBust = false) {
+  const generation = ++loadGeneration
+  return apiGetJson(galleryListPath(cacheBust)).then((res) => {
+    if (generation !== loadGeneration) {
+      return
+    }
+    if (res.ok) {
+      applyPhotosPayload(res.data)
+    } else {
+      if (res.error) console.error(res.error)
+      photos.value = []
+    }
+  })
+}
+
 function ensureGalleryPhotosLoaded() {
   if (!loadPromise) {
-    loadPromise = apiGetJson('api/photo.php?list=1').then((res) => {
-      if (res.ok) {
-        applyPhotosPayload(res.data)
-      } else {
-        if (res.error) console.error(res.error)
-        photos.value = []
-      }
-    })
+    loadPromise = loadGalleryPhotos()
   }
   return loadPromise
 }
@@ -34,6 +50,15 @@ export function prefetchGalleryPhotos() {
 }
 
 /**
+ * Fetches the gallery list again (bypasses the in-session singleton cache).
+ * Use after admin changes or when re-activating the public gallery panel.
+ */
+export function reloadGalleryPhotos() {
+  loadPromise = loadGalleryPhotos(true)
+  return loadPromise
+}
+
+/**
  * Shared gallery photos state - one API request per page session, reused by the
  * gallery panel and awaited during prerender so the snapshot can include them.
  */
@@ -41,5 +66,6 @@ export function useGalleryPhotos() {
   return {
     photos,
     prefetchGalleryPhotos,
+    reloadGalleryPhotos,
   }
 }
