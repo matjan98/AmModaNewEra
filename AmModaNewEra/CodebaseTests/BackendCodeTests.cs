@@ -98,4 +98,24 @@ public class BackendCodeTests
         Assert.That(content, Does.Not.Contain("assets/gallery"));
         Assert.That(content, Does.Not.Contain("__gallery--products"));
     }
+
+    [Test]
+    public void CommittedEnvMustNotContainLocalhostApiBase()
+    {
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var envPath = Path.GetFullPath(Path.Combine(
+            currentDirectory,
+            "..",
+            "..",
+            "..",
+            "..",
+            "WebSiteFrontend",
+            ".env"));
+
+        Assert.That(File.Exists(envPath), Is.True, $"Missing file: {envPath}");
+
+        var content = File.ReadAllText(envPath);
+        Assert.That(content, Does.Not.Contain("localhost"),
+            "Committed .env must not set VITE_API_BASE to localhost — use .env.development for local dev.");
+    }
 }

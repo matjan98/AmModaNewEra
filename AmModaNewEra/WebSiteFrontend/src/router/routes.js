@@ -9,8 +9,11 @@ const routes = [
 
   {
     path: '/admin/login',
-    component: () => import('pages/admin/AdminLoginPage.vue'),
+    component: () => import('layouts/AdminGuestLayout.vue'),
     meta: { guestOnly: true },
+    children: [
+      { path: '', component: () => import('pages/admin/AdminLoginPage.vue') },
+    ],
   },
   {
     path: '/admin',
