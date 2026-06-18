@@ -243,15 +243,37 @@
             Kliknij datę, aby ustawić wyjątkowe godziny lub zamknięcie. Kalendarz ma pierwszeństwo przed stałym harmonogramem.
           </p>
 
-          <q-date
-            v-model="selectedDate"
-            minimal
-            mask="YYYY-MM-DD"
-            class="admin-dashboard-page__calendar"
-            :events="overrideDates"
-            event-color="primary"
-            @update:model-value="openOverrideDialog"
-          />
+          <div class="admin-dashboard-page__calendar-row">
+            <q-date
+              v-model="selectedDate"
+              minimal
+              mask="YYYY-MM-DD"
+              class="admin-dashboard-page__calendar"
+              :events="overrideDates"
+              event-color="primary"
+              :options="isSelectableOverrideDate"
+              @update:model-value="openOverrideDialog"
+            />
+
+            <div class="admin-dashboard-page__holidays-panel">
+              <h4 class="admin-dashboard-page__holidays-title">Najbliższe święta</h4>
+              <p class="admin-dashboard-page__holidays-hint">
+                Dni ustawowo wolne od pracy (ustawa z 1951 r.)
+              </p>
+              <ul class="admin-dashboard-page__holidays-list">
+                <li
+                  v-for="holiday in upcomingPublicHolidays"
+                  :key="holiday.date"
+                  class="admin-dashboard-page__holiday-item"
+                >
+                  <span class="admin-dashboard-page__holiday-date">
+                    {{ formatOverrideDate(holiday.date) }}
+                  </span>
+                  <span class="admin-dashboard-page__holiday-name">{{ holiday.name }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
 
           <div v-if="overrides.length" class="admin-dashboard-page__override-list">
             <div
@@ -381,6 +403,7 @@ import {
   moveItemsToBottom,
   moveItemsToTop,
 } from '../../utils/galleryReorder.js'
+import { getNextPolishPublicHolidays } from '../../constants/polishPublicHolidays.js'
 
 const activeTab = ref('gallery')
 const fileInputRef = ref(null)
@@ -480,6 +503,39 @@ const reviewsUpdatedAtDisplay = computed(() => {
 })
 
 const overrideDates = computed(() => overrides.value.map((item) => item.override_date))
+
+const upcomingPublicHolidays = computed(() => {
+  void activeTab.value
+  return getNextPolishPublicHolidays(new Date(), 3)
+})
+
+function getTodayStart() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
+
+function parseQDateValue(dateValue) {
+  if (!dateValue) return null
+  if (dateValue.includes('-')) {
+    const [year, month, day] = dateValue.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+  const [year, month, day] = dateValue.split('/').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function isDateOnOrAfterToday(dateValue) {
+  const parsed = parseQDateValue(dateValue)
+  if (!parsed) return false
+  return parsed >= getTodayStart()
+}
+
+function isSelectableOverrideDate(date) {
+  const [year, month, day] = date.split('/').map(Number)
+  const cell = new Date(year, month - 1, day)
+  return cell >= getTodayStart()
+}
 
 function formatOverrideDate(dateStr) {
   if (!dateStr) return ''
@@ -931,6 +987,8 @@ async function saveWeeklyHours() {
 }
 
 function openOverrideDialog(dateValue) {
+  if (!isDateOnOrAfterToday(dateValue)) return
+
   selectedDate.value = dateValue
   const apiDate = toApiDate(dateValue)
   const existing = overrides.value.find((item) => item.override_date === apiDate)
@@ -948,7 +1006,7 @@ function openOverrideDialog(dateValue) {
 
 async function saveOverride() {
   const apiDate = toApiDate(selectedDate.value)
-  if (!apiDate) return
+  if (!apiDate || !isDateOnOrAfterToday(selectedDate.value)) return
 
   savingOverride.value = true
   try {
@@ -1257,8 +1315,57 @@ onUnmounted(() => {
   margin-top: 16px;
 }
 
+.admin-dashboard-page__calendar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+}
+
 .admin-dashboard-page__calendar {
   max-width: 320px;
+}
+
+.admin-dashboard-page__holidays-panel {
+  flex: 1 1 240px;
+  max-width: 360px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.admin-dashboard-page__holidays-title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.admin-dashboard-page__holidays-hint {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.admin-dashboard-page__holidays-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-dashboard-page__holiday-item {
+  display: grid;
+  gap: 2px;
+}
+
+.admin-dashboard-page__holiday-date {
+  font-weight: 600;
+}
+
+.admin-dashboard-page__holiday-name {
+  font-size: 0.92rem;
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .admin-dashboard-page__override-list {

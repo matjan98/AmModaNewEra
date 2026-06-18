@@ -44,6 +44,7 @@ $siteRepo = new SiteSettingsRepository($pdo);
 $hoursRepo = new OpeningHoursRepository($pdo);
 
 if ($method === 'GET') {
+    $hoursRepo->deletePastOverrides();
     $site = $siteRepo->get();
 
     echo json_encode([
@@ -112,6 +113,15 @@ if (isset($body['overrides']) && is_array($body['overrides'])) {
             continue;
         }
 
+        if (!OpeningHoursRepository::isOverrideDateAllowed($date)) {
+            http_response_code(400);
+            echo json_encode([
+                'ok'    => false,
+                'error' => 'Nie można ustawić wyjątku dla daty z przeszłości.',
+            ]);
+            exit;
+        }
+
         $hours = trim((string) ($override['hours'] ?? ''));
         if ($hours === '') {
             continue;
@@ -121,6 +131,7 @@ if (isset($body['overrides']) && is_array($body['overrides'])) {
     }
 }
 
+$hoursRepo->deletePastOverrides();
 $site = $siteRepo->get();
 
 echo json_encode([

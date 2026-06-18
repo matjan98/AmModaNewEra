@@ -137,6 +137,24 @@ final class OpeningHoursRepository
         $stmt->execute([':override_date' => $date]);
     }
 
+    public function deletePastOverrides(?DateTimeImmutable $before = null): int
+    {
+        $before ??= new DateTimeImmutable('today');
+        $stmt = $this->pdo->prepare(
+            'DELETE FROM opening_hours_overrides WHERE override_date < :before_date'
+        );
+        $stmt->execute([':before_date' => $before->format('Y-m-d')]);
+
+        return $stmt->rowCount();
+    }
+
+    public static function isOverrideDateAllowed(string $date, ?DateTimeImmutable $today = null): bool
+    {
+        $today ??= new DateTimeImmutable('today');
+
+        return $date >= $today->format('Y-m-d');
+    }
+
     /**
      * @param list<array{day_index:int,label:string,hours:string}> $defaultWeekly
      */

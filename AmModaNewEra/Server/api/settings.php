@@ -37,6 +37,8 @@ try {
 $siteRepo = new SiteSettingsRepository($pdo);
 $hoursRepo = new OpeningHoursRepository($pdo);
 
+$hoursRepo->deletePastOverrides();
+
 $site = $siteRepo->get();
 $openingHours = $hoursRepo->getEffectiveWeeklyHours();
 $todayHours = $hoursRepo->getTodayHours();

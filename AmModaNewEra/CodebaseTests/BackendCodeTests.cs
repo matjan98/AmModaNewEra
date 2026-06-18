@@ -76,6 +76,29 @@ public class BackendCodeTests
     }
 
     [Test]
+    public void OpeningHoursRepositoryPurgesPastOverrides()
+    {
+        var repoPath = Path.Combine(ResolveServerPath(), "lib", "OpeningHoursRepository.php");
+        var content = File.ReadAllText(repoPath);
+
+        Assert.That(content, Does.Contain("deletePastOverrides"));
+        Assert.That(content, Does.Contain("DELETE FROM opening_hours_overrides WHERE override_date <"));
+        Assert.That(content, Does.Contain("isOverrideDateAllowed"));
+    }
+
+    [Test]
+    public void SettingsEndpointsCleanupPastOverrides()
+    {
+        var serverPath = ResolveServerPath();
+        var adminSettings = File.ReadAllText(Path.Combine(serverPath, "api", "admin", "settings.php"));
+        var publicSettings = File.ReadAllText(Path.Combine(serverPath, "api", "settings.php"));
+
+        Assert.That(adminSettings, Does.Contain("deletePastOverrides"));
+        Assert.That(publicSettings, Does.Contain("deletePastOverrides"));
+        Assert.That(adminSettings, Does.Contain("isOverrideDateAllowed"));
+    }
+
+    [Test]
     public void SpaFallbackHtaccessExists()
     {
         var currentDirectory = Directory.GetCurrentDirectory();

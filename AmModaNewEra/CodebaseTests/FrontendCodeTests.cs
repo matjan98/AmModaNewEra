@@ -390,4 +390,34 @@ public class FrontendCodeTests
         Assert.That(content, Does.Contain("api/admin/reviews.php"));
         Assert.That(content, Does.Contain("autoSyncEnabled"));
     }
+
+    [Test]
+    public void PolishPublicHolidaysModuleDefinesStatutoryDaysOff()
+    {
+        var rootPath = ResolveFrontendSrcPath();
+        var holidaysPath = Path.Combine(rootPath, "constants", "polishPublicHolidays.js");
+        Assert.That(File.Exists(holidaysPath), Is.True, $"Missing file: {holidaysPath}");
+
+        var content = File.ReadAllText(holidaysPath);
+        Assert.That(content, Does.Contain("POLISH_STATUTORY_HOLIDAYS"));
+        Assert.That(content, Does.Contain("calculateEasterSunday"));
+        Assert.That(content, Does.Contain("getNextPolishPublicHolidays"));
+        Assert.That(content, Does.Contain("Nowy Rok"));
+        Assert.That(content, Does.Contain("Święto Trzech Króli"));
+        Assert.That(content, Does.Contain("Wigilia Bożego Narodzenia"));
+        Assert.That(content, Does.Contain("Narodowe Święto Niepodległości"));
+    }
+
+    [Test]
+    public void AdminDashboardShowsUpcomingPublicHolidays()
+    {
+        var rootPath = ResolveFrontendSrcPath();
+        var adminPagePath = Path.Combine(rootPath, "pages", "admin", "AdminDashboardPage.vue");
+        var content = File.ReadAllText(adminPagePath);
+
+        Assert.That(content, Does.Contain("polishPublicHolidays.js"));
+        Assert.That(content, Does.Contain("Najbliższe święta"));
+        Assert.That(content, Does.Contain("isSelectableOverrideDate"));
+        Assert.That(content, Does.Contain("upcomingPublicHolidays"));
+    }
 }
