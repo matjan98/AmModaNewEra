@@ -121,6 +121,8 @@ foreach ($files as $file) {
         continue;
     }
 
+    @chmod($targetPath, 0664);
+
     $uploaded[] = $baseName . '.webp';
 }
 finfo_close($finfo);

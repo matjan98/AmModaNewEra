@@ -7,7 +7,8 @@ Struktura wzorowana na projekcie UrmateAi: endpointy w `api/`, konfiguracja w `c
 - **POST api/upload.php** – wgrywanie zdjęć (pole formularza: `photo` lub `photos[]`). Każde zdjęcie jest konwertowane do WebP i zapisywane w katalogu `photos/` jako `photo_{uniqid}.webp`.
 - **GET api/photo.php?list=1** – JSON: `{ ok, photos: [{ id, v, url }] }` — lista zdjęć galerii.
 - **GET api/photo.php?img=1&id=photo_xxx.webp** – serwowanie pojedynczego pliku z galerii.
-- **POST api/delete.php** – usuwanie zdjęć po `id` lub wielu `ids[]` (wymaga autoryzacji admina).
+- **POST api/delete.php** – usuwanie zdjęć po `id`, wielu `ids[]` (FormData) lub JSON `{ "ids": [...] }` (wymaga autoryzacji admina).
+- **POST api/admin/gallery-permissions.php** – naprawa uprawnień plików w `photos/` (chmod 0664) gdy usuwanie nie działa z powodu hostingu.
 
 ### Optymalizacja przy wgrywaniu
 

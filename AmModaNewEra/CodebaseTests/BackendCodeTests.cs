@@ -121,6 +121,21 @@ public class BackendCodeTests
         var content = File.ReadAllText(deletePath);
         Assert.That(content, Does.Contain("ids"));
         Assert.That(content, Does.Contain("'deleted'"));
+        Assert.That(content, Does.Contain("php://input"));
+        Assert.That(content, Does.Contain("'reason'"));
+        Assert.That(content, Does.Contain("is_writable"));
+    }
+
+    [Test]
+    public void GalleryPermissionsRepairEndpointExists()
+    {
+        var path = Path.Combine(ResolveServerPath(), "api", "admin", "gallery-permissions.php");
+        Assert.That(File.Exists(path), Is.True, $"Missing file: {path}");
+
+        var content = File.ReadAllText(path);
+        Assert.That(content, Does.Contain("requireAuthenticated"));
+        Assert.That(content, Does.Contain("still_unwritable"));
+        Assert.That(content, Does.Contain("chmod"));
     }
 
     [Test]

@@ -52,6 +52,15 @@
                 @click="moveSelectedToBottom"
               />
               <q-btn
+                outline
+                color="primary"
+                no-caps
+                label="Napraw uprawnienia zdjęć"
+                :loading="fixingPermissions"
+                :disable="uploading || deletingSelected || savingOrder || reorderAnimating"
+                @click="repairGalleryPermissions"
+              />
+              <q-btn
                 color="primary"
                 no-caps
                 unelevated
@@ -382,6 +391,7 @@ const uploading = ref(false)
 const uploadProgress = ref(0)
 const uploadProgressLabel = ref('')
 const deletingSelected = ref(false)
+const fixingPermissions = ref(false)
 const savingOrder = ref(false)
 const galleryMessage = ref('')
 const galleryMessageOk = ref(true)
@@ -491,6 +501,65 @@ function toApiDate(qDateValue) {
 function setGalleryFeedback(message, ok = true) {
   galleryMessage.value = message
   galleryMessageOk.value = ok
+}
+
+function formatDeleteErrorMessage(res, requestedCount) {
+  const base = res.data?.error ?? res.error ?? 'Usuwanie nie powiodło się.'
+  const failed = Array.isArray(res.data?.failed) ? res.data.failed : []
+  const unlinkFailed = failed.filter((entry) => entry?.reason === 'unlink_failed').length
+
+  if (unlinkFailed > 0 && requestedCount > 0) {
+    return `${base} (${unlinkFailed}/${requestedCount} — brak uprawnień do plików na serwerze).`
+  }
+
+  if (failed.length > 0 && requestedCount > 0) {
+    return `${base} (${failed.length}/${requestedCount} nieusuniętych).`
+  }
+
+  return base
+}
+
+function formatDeleteSuccessMessage(data, requestedCount) {
+  if (typeof data?.message === 'string' && data.message.trim() !== '') {
+    return data.message
+  }
+
+  const deleted = Number(data?.deleted)
+  if (Number.isFinite(deleted) && deleted > 0) {
+    return deleted === 1 ? 'Zdjęcie usunięte.' : `Usunięto ${deleted} zdjęć.`
+  }
+
+  return requestedCount === 1 ? 'Zdjęcie usunięte.' : `Usunięto ${requestedCount} zdjęć.`
+}
+
+async function deletePhotosByIds(ids) {
+  return apiPostJson('api/delete.php', { ids }, { credentials: 'include' })
+}
+
+async function repairGalleryPermissions() {
+  fixingPermissions.value = true
+  setGalleryFeedback('')
+
+  try {
+    const res = await apiPostJson('api/admin/gallery-permissions.php', {}, { credentials: 'include' })
+    if (!res.ok || res.data?.ok !== true) {
+      setGalleryFeedback(res.data?.error ?? 'Naprawa uprawnień nie powiodła się.', false)
+      return
+    }
+
+    const stillUnwritable = Array.isArray(res.data.still_unwritable) ? res.data.still_unwritable.length : 0
+    if (stillUnwritable > 0) {
+      setGalleryFeedback(
+        `${res.data.message ?? 'Naprawiono część uprawnień.'} Nadal ${stillUnwritable} plików jest nieusuwalnych — skontaktuj się z hostingiem.`,
+        false,
+      )
+      return
+    }
+
+    setGalleryFeedback(res.data.message ?? 'Uprawnienia zdjęć naprawione.')
+  } finally {
+    fixingPermissions.value = false
+  }
 }
 
 function setPhotoDims(url, width, height) {
@@ -758,16 +827,13 @@ async function onFilesSelected(event) {
 async function deletePhoto(id) {
   if (!window.confirm('Usunąć to zdjęcie?')) return
 
-  const formData = new FormData()
-  formData.append('id', id)
-
-  const res = await apiPostForm('api/delete.php', formData)
+  const res = await deletePhotosByIds([id])
   if (!res.ok || res.data?.ok !== true) {
-    setGalleryFeedback(res.data?.error ?? 'Usuwanie nie powiodło się.', false)
+    setGalleryFeedback(formatDeleteErrorMessage(res, 1), false)
     return
   }
 
-  setGalleryFeedback('Zdjęcie usunięte.')
+  setGalleryFeedback(formatDeleteSuccessMessage(res.data, 1))
   togglePhotoSelection(id, false)
   await loadPhotos()
 }
@@ -777,23 +843,17 @@ async function deleteSelectedPhotos() {
   if (ids.length === 0) return
   if (!window.confirm(`Usunąć ${ids.length} zaznaczonych zdjęć?`)) return
 
-  const formData = new FormData()
-  ids.forEach((id) => formData.append('ids[]', id))
-
   deletingSelected.value = true
   setGalleryFeedback('')
 
   try {
-    const res = await apiPostForm('api/delete.php', formData)
+    const res = await deletePhotosByIds(ids)
     if (!res.ok || res.data?.ok !== true) {
-      setGalleryFeedback(res.data?.error ?? 'Usuwanie nie powiodło się.', false)
+      setGalleryFeedback(formatDeleteErrorMessage(res, ids.length), false)
       return
     }
 
-    const deleted = res.data.deleted ?? ids.length
-    setGalleryFeedback(
-      deleted === 1 ? 'Zdjęcie usunięte.' : `Usunięto ${deleted} zdjęć.`,
-    )
+    setGalleryFeedback(formatDeleteSuccessMessage(res.data, ids.length))
     clearPhotoSelection()
     await loadPhotos()
   } finally {

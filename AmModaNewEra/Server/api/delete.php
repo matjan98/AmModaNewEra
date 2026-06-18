@@ -28,13 +28,52 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 Auth::requireAuthenticated();
 
 $photoIdPattern = '/^photo_[a-f0-9.]+\.(jpe?g|png|gif|webp)$/i';
+$photoFileMode = 0664;
 
-$ids = [];
-if (isset($_POST['ids']) && is_array($_POST['ids'])) {
-    $ids = $_POST['ids'];
-} elseif (isset($_POST['id']) && is_string($_POST['id']) && $_POST['id'] !== '') {
-    $ids = [$_POST['id']];
+/**
+ * @return list<string>
+ */
+function delete_parse_ids_from_request(): array
+{
+    $contentType = strtolower((string) ($_SERVER['CONTENT_TYPE'] ?? ''));
+    if (str_contains($contentType, 'application/json')) {
+        $body = json_decode(file_get_contents('php://input') ?: '', true);
+        if (is_array($body) && isset($body['ids']) && is_array($body['ids'])) {
+            return $body['ids'];
+        }
+    }
+
+    if (isset($_POST['ids']) && is_array($_POST['ids'])) {
+        return $_POST['ids'];
+    }
+
+    if (isset($_POST['id']) && is_string($_POST['id']) && $_POST['id'] !== '') {
+        return [$_POST['id']];
+    }
+
+    return [];
 }
+
+/**
+ * @return array{id: string, reason: string}
+ */
+function delete_failed_entry(string $id, string $reason): array
+{
+    return ['id' => $id, 'reason' => $reason];
+}
+
+function delete_try_unlink(string $filePath, int $fileMode): bool
+{
+    if (unlink($filePath)) {
+        return true;
+    }
+
+    @chmod($filePath, $fileMode);
+
+    return unlink($filePath);
+}
+
+$ids = delete_parse_ids_from_request();
 
 if ($ids === []) {
     http_response_code(400);
@@ -43,27 +82,45 @@ if ($ids === []) {
 }
 
 $photosDir = __DIR__ . '/../photos';
+
+if (!is_dir($photosDir)) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Katalog photos nie istnieje.']);
+    exit;
+}
+
+if (!is_writable($photosDir)) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Katalog photos nie jest zapisywalny.']);
+    exit;
+}
+
 $deleted = 0;
 $deletedIds = [];
+/** @var list<array{id: string, reason: string}> $failed */
 $failed = [];
 
 foreach ($ids as $id) {
     if (!is_string($id) || !preg_match($photoIdPattern, $id)) {
-        $failed[] = is_string($id) ? $id : '';
+        $failed[] = delete_failed_entry(is_string($id) ? $id : '', 'invalid_id');
         continue;
     }
 
     $filePath = $photosDir . '/' . $id;
     if (!is_file($filePath)) {
-        $failed[] = $id;
+        $failed[] = delete_failed_entry($id, 'not_found');
         continue;
     }
 
-    if (unlink($filePath)) {
+    if (!is_writable($filePath)) {
+        @chmod($filePath, $photoFileMode);
+    }
+
+    if (delete_try_unlink($filePath, $photoFileMode)) {
         $deleted++;
         $deletedIds[] = $id;
     } else {
-        $failed[] = $id;
+        $failed[] = delete_failed_entry($id, 'unlink_failed');
     }
 }
 
@@ -72,10 +129,17 @@ if ($deletedIds !== []) {
 }
 
 if ($deleted === 0) {
+    $allUnlinkFailed = $failed !== []
+        && count(array_filter($failed, static fn (array $entry): bool => $entry['reason'] === 'unlink_failed')) === count($failed);
+
+    $error = $allUnlinkFailed
+        ? 'Serwer nie może usunąć plików (uprawnienia). Skontaktuj się z administratorem hostingu lub użyj narzędzia naprawy uprawnień.'
+        : 'Nie usunięto żadnego zdjęcia.';
+
     http_response_code(400);
     echo json_encode([
         'ok' => false,
-        'error' => 'Nie usunięto żadnego zdjęcia.',
+        'error' => $error,
         'failed' => $failed,
     ]);
     exit;
