@@ -1,5 +1,5 @@
 export const GALLERY_UPLOAD_BATCH_SIZE = 10
-export const GALLERY_UPLOAD_BATCH_TIMEOUT_MS = 120_000
+export const GALLERY_UPLOAD_BATCH_TIMEOUT_MS = 300_000
 
 /**
  * @param {FileList | File[]} files

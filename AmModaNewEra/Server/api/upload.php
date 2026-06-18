@@ -41,7 +41,8 @@ $allowedTypes = [
     'image/bmp' => 'bmp',
     'image/x-ms-bmp' => 'bmp',
 ];
-$maxSize = 25 * 1024 * 1024;
+$maxSizeMb = 70;
+$maxSize = $maxSizeMb * 1024 * 1024;
 $maxFiles = 50;
 
 $files = [];
@@ -97,7 +98,7 @@ foreach ($files as $file) {
     $size = $file['size'];
 
     if ($size > $maxSize) {
-        $errors[] = 'Plik zbyt duży (max 25 MB).';
+        $errors[] = 'Plik zbyt duży (max ' . $maxSizeMb . ' MB).';
         continue;
     }
 

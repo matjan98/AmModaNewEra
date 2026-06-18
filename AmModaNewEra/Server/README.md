@@ -19,7 +19,7 @@ Struktura wzorowana na projekcie UrmateAi: endpointy w `api/`, konfiguracja w `c
 
 Silnik: preferowany Imagick, w razie braku — GD (wymagana obsługa WebP). Wynik jest zawsze zapisywany jako WebP.
 
-Dozwolone formaty wejściowe: JPG, PNG, GIF, WEBP, BMP (max 25 MB na plik).
+Dozwolone formaty wejściowe: JPG, PNG, GIF, WEBP, BMP (max 70 MB na plik).
 
 ## Uruchomienie (dev)
 
