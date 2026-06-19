@@ -9,9 +9,6 @@
         class="index-page-quick-info__news-block"
         aria-label="Aktualności sklepu"
       >
-        <h3 class="index-page-quick-info__hours-heading index-page-quick-info__news-heading">
-          Aktualności:
-        </h3>
         <p class="index-page-quick-info__news-text">
           {{ homepageNewsSectionText }}
         </p>
@@ -250,10 +247,6 @@ defineProps({
 
 .index-page-quick-info__news-block {
   text-align: center;
-}
-
-.index-page-quick-info__news-heading {
-  margin-bottom: clamp(8px, 1.65vw, 12px);
 }
 
 .index-page-quick-info__news-text {
