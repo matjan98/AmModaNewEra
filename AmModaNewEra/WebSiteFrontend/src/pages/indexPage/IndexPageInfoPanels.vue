@@ -14,7 +14,7 @@
         :phone-tel-href="PHONE_TEL_HREF"
         :phone-display="PHONE_DISPLAY"
         :facebook-url="FACEBOOK_URL"
-        :opening-hours="effectiveOpeningHours"
+        :opening-hours="weeklyOpeningHours"
         :today-store-day-index="todayStoreDayIndex"
         :store-hours-heading-label="storeHoursHeadingLabel"
       />
@@ -57,7 +57,7 @@ import heroIntroMobileImage from '../../assets/main-photos/hero_mobile.webp'
 import shopPhotoSrc from '../../assets/main-photos/hero-shop.webp'
 
 const { matches: isSmallScreen } = useIsSmallScreen()
-const { effectiveOpeningHours } = useSiteSettings()
+const { weeklyOpeningHours } = useSiteSettings()
 
 const heroIntroImage = computed(() =>
   isSmallScreen.value ? heroIntroMobileImage : heroIntroDesktopImage,

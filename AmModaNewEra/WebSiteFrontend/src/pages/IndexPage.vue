@@ -162,13 +162,10 @@ const { observeRevealZoomTargets, scheduleRevealZoomAfterLayout, setupRevealZoom
 
 
 
-const { effectiveOpeningHours, effectiveTodayHours } = useSiteSettings()
+const { weeklyOpeningHours } = useSiteSettings()
 
 const { todayDayIndex: todayStoreDayIndex, storeHoursHeadingLabel } =
-
-  useOpeningHours(effectiveOpeningHours, {
-    todayHours: effectiveTodayHours,
-  })
+  useOpeningHours(weeklyOpeningHours)
 
 
 

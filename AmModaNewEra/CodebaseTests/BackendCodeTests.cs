@@ -103,6 +103,15 @@ public class BackendCodeTests
     }
 
     [Test]
+    public void PublicSettingsReturnsWeeklyOpeningHoursWithoutOverrides()
+    {
+        var publicSettings = File.ReadAllText(Path.Combine(ResolveServerPath(), "api", "settings.php"));
+
+        Assert.That(publicSettings, Does.Contain("getWeeklyRows()"));
+        Assert.That(publicSettings, Does.Not.Contain("getEffectiveWeeklyHours()"));
+    }
+
+    [Test]
     public void SpaFallbackHtaccessExists()
     {
         var currentDirectory = Directory.GetCurrentDirectory();

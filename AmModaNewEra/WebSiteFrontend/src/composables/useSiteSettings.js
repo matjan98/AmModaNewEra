@@ -8,8 +8,8 @@ import { apiGetJson } from '../utils/apiJson.js'
 
 const newsText = ref(HOMEPAGE_NEWS_SECTION_TEXT)
 const newsEnabled = ref(Boolean(HOMEPAGE_NEWS_SECTION_ENABLED))
-const openingHours = ref([...OPENING_HOURS])
-const todayHours = ref(OPENING_HOURS.find((row) => row.dayIndex === new Date().getDay())?.hours ?? 'Zamknięte')
+const weeklyOpeningHours = ref([...OPENING_HOURS])
+const headerTodayHours = ref(OPENING_HOURS.find((row) => row.dayIndex === new Date().getDay())?.hours ?? 'Zamknięte')
 
 const now = ref(new Date())
 /** @type {ReturnType<typeof setInterval> | null} */
@@ -17,15 +17,6 @@ let dayWatchTimer = null
 
 /** @type {Promise<void> | null} */
 let loadPromise = null
-
-function findNextDateForDayIndex(dayIndex, fromDate) {
-  const currentDayIndex = fromDate.getDay()
-  const daysAhead = (dayIndex - currentDayIndex + 7) % 7
-  const nextDate = new Date(fromDate)
-  nextDate.setHours(0, 0, 0, 0)
-  nextDate.setDate(nextDate.getDate() + daysAhead)
-  return nextDate
-}
 
 function formatDateKey(date) {
   const year = date.getFullYear()
@@ -44,20 +35,12 @@ function buildOverridesMap(overrides) {
   return map
 }
 
-function computeEffectiveOpeningHours(weeklyRows, overrides, fromDate) {
-  const overrideMap = buildOverridesMap(overrides)
-  return weeklyRows.map((row) => {
-    const dayIndex = Number(row.day_index ?? row.dayIndex)
-    const nextDate = findNextDateForDayIndex(dayIndex, fromDate)
-    const dateKey = formatDateKey(nextDate)
-    const hours = overrideMap.get(dateKey) ?? String(row.hours ?? '')
-
-    return {
-      dayIndex,
-      label: String(row.label ?? ''),
-      hours,
-    }
-  })
+function mapWeeklyRows(weeklyRows) {
+  return weeklyRows.map((row) => ({
+    dayIndex: Number(row.day_index ?? row.dayIndex),
+    label: String(row.label ?? ''),
+    hours: String(row.hours ?? ''),
+  }))
 }
 
 function computeTodayHours(weeklyRows, overrides, fromDate) {
@@ -81,8 +64,8 @@ let overridesCache = []
 
 function applyComputedHours() {
   const currentDate = now.value
-  openingHours.value = computeEffectiveOpeningHours(weeklyRowsCache, overridesCache, currentDate)
-  todayHours.value = computeTodayHours(weeklyRowsCache, overridesCache, currentDate)
+  weeklyOpeningHours.value = mapWeeklyRows(weeklyRowsCache)
+  headerTodayHours.value = computeTodayHours(weeklyRowsCache, overridesCache, currentDate)
 }
 
 function applySettingsPayload(data) {
@@ -142,14 +125,12 @@ export function prefetchSiteSettings() {
 export function useSiteSettings() {
   const homepageNewsSectionText = computed(() => newsText.value)
   const homepageNewsSectionEnabled = computed(() => newsEnabled.value)
-  const effectiveOpeningHours = computed(() => openingHours.value)
-  const effectiveTodayHours = computed(() => todayHours.value)
 
   return {
     homepageNewsSectionText,
     homepageNewsSectionEnabled,
-    effectiveOpeningHours,
-    effectiveTodayHours,
+    weeklyOpeningHours: computed(() => weeklyOpeningHours.value),
+    headerTodayHours: computed(() => headerTodayHours.value),
     prefetchSiteSettings,
   }
 }

@@ -241,7 +241,7 @@
 
           <h3 class="admin-dashboard-page__subsection-title">Wyjątki w kalendarzu</h3>
           <p class="admin-dashboard-page__hint">
-            Kliknij datę, aby ustawić wyjątkowe godziny lub zamknięcie. Kalendarz ma pierwszeństwo przed stałym harmonogramem.
+            Kliknij datę, aby ustawić wyjątkowe godziny lub zamknięcie. Wyjątki wpływają tylko na komunikat w nagłówku strony (np. święto, zamknięcie). Stały harmonogram tygodniowy na stronie głównej pozostaje bez zmian.
           </p>
 
           <div class="admin-dashboard-page__calendar-row">

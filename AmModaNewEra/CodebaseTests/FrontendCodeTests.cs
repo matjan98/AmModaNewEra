@@ -418,6 +418,20 @@ public class FrontendCodeTests
     }
 
     [Test]
+    public void SiteSettingsSeparatesWeeklyScheduleFromHeaderTodayHours()
+    {
+        var rootPath = ResolveFrontendSrcPath();
+        var settingsPath = Path.Combine(rootPath, "composables", "useSiteSettings.js");
+        Assert.That(File.Exists(settingsPath), Is.True, $"Missing file: {settingsPath}");
+
+        var content = File.ReadAllText(settingsPath);
+        Assert.That(content, Does.Contain("weeklyOpeningHours"));
+        Assert.That(content, Does.Contain("headerTodayHours"));
+        Assert.That(content, Does.Not.Contain("computeEffectiveOpeningHours"));
+        Assert.That(content, Does.Not.Contain("effectiveOpeningHours"));
+    }
+
+    [Test]
     public void PolishPublicHolidaysModuleDefinesStatutoryDaysOff()
     {
         var rootPath = ResolveFrontendSrcPath();

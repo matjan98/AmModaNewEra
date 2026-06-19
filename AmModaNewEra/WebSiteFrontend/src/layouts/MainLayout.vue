@@ -86,10 +86,10 @@ import { prefetchPageViewIncrement } from '../composables/usePageViews.js'
 import OpenStatusButton from '../components/layout/OpenStatusButton.vue'
 
 const { matches: isSmallScreen } = useIsSmallScreen()
-const { effectiveOpeningHours, effectiveTodayHours } = useSiteSettings()
-const { todayHours, isOpenToday } = useOpeningHours(effectiveOpeningHours, {
+const { weeklyOpeningHours, headerTodayHours } = useSiteSettings()
+const { todayHours, isOpenToday } = useOpeningHours(weeklyOpeningHours, {
   liveClock: true,
-  todayHours: effectiveTodayHours,
+  todayHours: headerTodayHours,
 })
 
 const headerEl = ref(null)

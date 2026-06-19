@@ -40,7 +40,15 @@ $hoursRepo = new OpeningHoursRepository($pdo);
 $hoursRepo->deletePastOverrides();
 
 $site = $siteRepo->get();
-$openingHours = $hoursRepo->getEffectiveWeeklyHours();
+$weeklyRows = $hoursRepo->getWeeklyRows();
+$openingHours = array_map(
+    static fn (array $row): array => [
+        'dayIndex' => (int) $row['day_index'],
+        'label'    => (string) $row['label'],
+        'hours'    => (string) $row['hours'],
+    ],
+    $weeklyRows
+);
 $todayHours = $hoursRepo->getTodayHours();
 
 echo json_encode([
