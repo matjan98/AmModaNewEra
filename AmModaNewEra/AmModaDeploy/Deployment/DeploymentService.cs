@@ -223,11 +223,11 @@ public class DeploymentService
 
     private async Task BuildFrontendAsync(string frontendPath, CancellationToken cancellationToken)
     {
-        ConsoleColors.WriteLine(ConsoleColors.Yellow, "Building frontend (npx quasar build)...");
+        ConsoleColors.WriteLine(ConsoleColors.Yellow, "Building frontend (npm run build)...");
 
         await _processRunner.RunAsync(
-            "npx",
-            "quasar build",
+            "npm",
+            "run build",
             frontendPath,
             cancellationToken,
             additionalEnvironment: new Dictionary<string, string> { ["FORCE_COLOR"] = "1" }).ConfigureAwait(false);
