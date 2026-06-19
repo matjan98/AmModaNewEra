@@ -14,6 +14,7 @@
         <q-tab name="news" label="Aktualności" />
         <q-tab name="hours" label="Godziny otwarcia" />
         <q-tab name="reviews" label="Opinie Google" />
+        <q-tab name="page-views" label="Wyświetlenia" />
       </q-tabs>
 
       <q-separator />
@@ -348,6 +349,31 @@
             {{ reviewsMessage }}
           </q-banner>
         </q-tab-panel>
+
+        <q-tab-panel name="page-views" class="admin-dashboard-page__panel">
+          <h2 class="admin-dashboard-page__section-title">Wyświetlenia</h2>
+
+          <div class="admin-dashboard-page__reviews-summary">
+            <div class="admin-dashboard-page__reviews-row">
+              <span class="admin-dashboard-page__reviews-label">Wyświetlenia starej strony</span>
+              <span class="admin-dashboard-page__reviews-value">{{ oldSiteViewsDisplay }}</span>
+            </div>
+            <div class="admin-dashboard-page__reviews-row">
+              <span class="admin-dashboard-page__reviews-label">Wyświetlenia obecnej strony</span>
+              <span class="admin-dashboard-page__reviews-value">{{ currentSiteViewsDisplay }}</span>
+            </div>
+          </div>
+
+          <q-banner
+            v-if="pageViewsMessage"
+            dense
+            rounded
+            class="admin-dashboard-page__message admin-dashboard-page__reviews-message"
+            :class="pageViewsMessageOk ? 'bg-positive text-white' : 'bg-negative text-white'"
+          >
+            {{ pageViewsMessage }}
+          </q-banner>
+        </q-tab-panel>
       </q-tab-panels>
     </div>
 
@@ -484,6 +510,18 @@ const syncingReviews = ref(false)
 const reviewsMessage = ref('')
 const reviewsMessageOk = ref(true)
 const reviewsLoaded = ref(false)
+
+const oldSiteViews = ref(null)
+const currentSiteViews = ref(null)
+const pageViewsMessage = ref('')
+const pageViewsMessageOk = ref(true)
+const pageViewsLoaded = ref(false)
+
+const formatPageViewsCount = (value) =>
+  value === null ? '—' : value.toLocaleString('pl-PL')
+
+const oldSiteViewsDisplay = computed(() => formatPageViewsCount(oldSiteViews.value))
+const currentSiteViewsDisplay = computed(() => formatPageViewsCount(currentSiteViews.value))
 
 const reviewsRatingDisplay = computed(() =>
   reviewsRating.value === null ? '—' : reviewsRating.value.toFixed(1).replace('.', ','),
@@ -1119,9 +1157,36 @@ async function syncReviewsNow() {
   }
 }
 
+function setPageViewsFeedback(message, ok = true) {
+  pageViewsMessage.value = message
+  pageViewsMessageOk.value = ok
+}
+
+function applyPageViewsStatus(data) {
+  if (!data) return
+  const fetchedOld = Number(data.oldSiteViews)
+  const fetchedCurrent = Number(data.currentSiteViews)
+  oldSiteViews.value = Number.isFinite(fetchedOld) ? fetchedOld : null
+  currentSiteViews.value = Number.isFinite(fetchedCurrent) ? fetchedCurrent : null
+}
+
+async function loadPageViewsAdmin() {
+  const res = await apiGetJson('api/admin/page-views.php', { credentials: 'include' })
+  if (res.data) applyPageViewsStatus(res.data)
+  if (!res.ok || res.data?.ok !== true) {
+    setPageViewsFeedback(res.data?.error ?? 'Nie udało się pobrać danych wyświetleń.', false)
+    return
+  }
+  pageViewsLoaded.value = true
+  setPageViewsFeedback('')
+}
+
 watch(activeTab, (tab) => {
   if (tab === 'reviews' && !reviewsLoaded.value) {
     loadReviewsAdmin()
+  }
+  if (tab === 'page-views' && !pageViewsLoaded.value) {
+    loadPageViewsAdmin()
   }
 })
 

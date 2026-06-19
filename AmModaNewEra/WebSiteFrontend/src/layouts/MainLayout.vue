@@ -116,6 +116,7 @@ import { PHONE_DISPLAY, PHONE_TEL_HREF } from '../constants/siteInfo.js'
 import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { useSiteSettings } from '../composables/useSiteSettings.js'
 import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
+import { prefetchPageViewIncrement } from '../composables/usePageViews.js'
 import HoursDropdown from '../components/layout/HoursDropdown.vue'
 import OpenStatusButton from '../components/layout/OpenStatusButton.vue'
 
@@ -176,6 +177,8 @@ function onLogoClick() {
 }
 
 onMounted(() => {
+  void prefetchPageViewIncrement()
+
   window.addEventListener('scroll', onWindowScroll, { passive: true })
   window.addEventListener('resize', updateHeaderHeightCssVar, { passive: true })
   document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)

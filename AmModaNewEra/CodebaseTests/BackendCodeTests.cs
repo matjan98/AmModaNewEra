@@ -51,8 +51,11 @@ public class BackendCodeTests
             "api/settings.php",
             "api/admin/settings.php",
             "api/admin/reviews.php",
+            "api/admin/page-views.php",
+            "api/page-views.php",
             "lib/SiteSettingsRepository.php",
             "lib/OpeningHoursRepository.php",
+            "lib/PageViewsRepository.php",
             "lib/ReviewsSync.php",
             "lib/Cors.php",
         };
@@ -73,6 +76,7 @@ public class BackendCodeTests
         Assert.That(content, Does.Contain("site_settings"));
         Assert.That(content, Does.Contain("opening_hours_weekly"));
         Assert.That(content, Does.Contain("opening_hours_overrides"));
+        Assert.That(content, Does.Contain("page_views"));
     }
 
     [Test]
@@ -436,5 +440,20 @@ public class BackendCodeTests
         Assert.That(adminReviews, Does.Contain("autoSyncEnabled"));
         Assert.That(adminReviews, Does.Contain("saveGoogleReviewsAutoSync"));
         Assert.That(adminReviews, Does.Contain("refreshIfNeeded"));
+    }
+
+    [Test]
+    public void PageViewsEndpointsExposeOldAndCurrentCounters()
+    {
+        var serverPath = ResolveServerPath();
+
+        var publicPageViews = File.ReadAllText(Path.Combine(serverPath, "api", "page-views.php"));
+        Assert.That(publicPageViews, Does.Contain("PageViewsRepository"));
+        Assert.That(publicPageViews, Does.Contain("increment"));
+
+        var adminPageViews = File.ReadAllText(Path.Combine(serverPath, "api", "admin", "page-views.php"));
+        Assert.That(adminPageViews, Does.Contain("requireAuthenticated"));
+        Assert.That(adminPageViews, Does.Contain("OLD_SITE_PAGE_VIEWS = 260104"));
+        Assert.That(adminPageViews, Does.Contain("currentSiteViews"));
     }
 }

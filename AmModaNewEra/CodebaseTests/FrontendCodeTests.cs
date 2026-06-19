@@ -392,6 +392,32 @@ public class FrontendCodeTests
     }
 
     [Test]
+    public void AdminDashboardHasPageViewsTab()
+    {
+        var rootPath = ResolveFrontendSrcPath();
+        var adminPagePath = Path.Combine(rootPath, "pages", "admin", "AdminDashboardPage.vue");
+        Assert.That(File.Exists(adminPagePath), Is.True, $"Missing file: {adminPagePath}");
+
+        var content = File.ReadAllText(adminPagePath);
+        Assert.That(content, Does.Contain("name=\"page-views\""), "Admin dashboard must expose a 'page-views' tab.");
+        Assert.That(content, Does.Contain("Wyświetlenia starej strony"));
+        Assert.That(content, Does.Contain("Wyświetlenia obecnej strony"));
+        Assert.That(content, Does.Contain("api/admin/page-views.php"));
+    }
+
+    [Test]
+    public void MainLayoutRegistersPageViewIncrement()
+    {
+        var rootPath = ResolveFrontendSrcPath();
+        var layoutPath = Path.Combine(rootPath, "layouts", "MainLayout.vue");
+        Assert.That(File.Exists(layoutPath), Is.True, $"Missing file: {layoutPath}");
+
+        var content = File.ReadAllText(layoutPath);
+        Assert.That(content, Does.Contain("prefetchPageViewIncrement"));
+        Assert.That(content, Does.Contain("usePageViews.js"));
+    }
+
+    [Test]
     public void PolishPublicHolidaysModuleDefinesStatutoryDaysOff()
     {
         var rootPath = ResolveFrontendSrcPath();

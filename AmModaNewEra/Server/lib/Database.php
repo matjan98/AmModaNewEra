@@ -68,6 +68,17 @@ final class Database
                 updated_at    DATETIME NOT NULL
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
         );
+
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS page_views (
+                id         TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+                view_count INT UNSIGNED NOT NULL DEFAULT 0
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+        );
+
+        $pdo->exec(
+            'INSERT IGNORE INTO page_views (id, view_count) VALUES (1, 0)'
+        );
     }
 
     /**
