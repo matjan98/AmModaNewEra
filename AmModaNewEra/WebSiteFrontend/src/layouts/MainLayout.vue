@@ -40,48 +40,14 @@
             <q-icon name="phone" size="18px" class="main-layout__phone-icon" />
             {{ PHONE_DISPLAY }}
           </a>
-          <div class="main-layout__hours-toggle-wrap">
-            <OpenStatusButton
-              v-model:expanded="hoursExpanded"
-              :is-open-today="isOpenToday"
-              :today-hours="todayHours"
-            />
-            <HoursDropdown
-              v-show="hoursExpanded"
-              :rows="openingHours"
-              :today-day-index="todayDayIndex"
-            />
-          </div>
         </div>
 
         <div class="main-layout__contact main-layout__contact--left" :class="{ 'main-layout__contact--visible': useSidesLayout }">
-          <div v-if="isSmallScreen" class="main-layout__hours-toggle-wrap">
-            <button
-              type="button"
-              class="main-layout__contact-icon-btn"
-              :class="{ 'main-layout__contact-icon-btn--active': hoursExpanded }"
-              aria-label="Godziny otwarcia"
-              @click="hoursExpanded = !hoursExpanded"
-            >
-              <q-icon name="fa-regular fa-clock" size="22px" />
-            </button>
-            <HoursDropdown
-              v-show="hoursExpanded"
-              :rows="openingHours"
-              :today-day-index="todayDayIndex"
-            />
-          </div>
-
-          <div v-else class="main-layout__hours-toggle-wrap">
+          <div class="main-layout__hours-toggle-wrap">
             <OpenStatusButton
-              v-model:expanded="hoursExpanded"
+              :expandable="false"
               :is-open-today="isOpenToday"
               :today-hours="todayHours"
-            />
-            <HoursDropdown
-              v-show="hoursExpanded"
-              :rows="openingHours"
-              :today-day-index="todayDayIndex"
             />
           </div>
         </div>
@@ -117,18 +83,15 @@ import { useOpeningHours } from '../composables/useOpeningHours.js'
 import { useSiteSettings } from '../composables/useSiteSettings.js'
 import { useIsSmallScreen } from '../composables/useIsSmallScreen.js'
 import { prefetchPageViewIncrement } from '../composables/usePageViews.js'
-import HoursDropdown from '../components/layout/HoursDropdown.vue'
 import OpenStatusButton from '../components/layout/OpenStatusButton.vue'
 
 const { matches: isSmallScreen } = useIsSmallScreen()
 const { effectiveOpeningHours, effectiveTodayHours } = useSiteSettings()
-const { todayDayIndex, todayHours, isOpenToday } = useOpeningHours(effectiveOpeningHours, {
+const { todayHours, isOpenToday } = useOpeningHours(effectiveOpeningHours, {
   liveClock: true,
   todayHours: effectiveTodayHours,
 })
 
-const openingHours = effectiveOpeningHours
-const hoursExpanded = ref(false)
 const headerEl = ref(null)
 
 let headerResizeObserver = null
@@ -142,25 +105,6 @@ function updateHeaderHeightCssVar() {
 
   const height = Math.ceil(el.getBoundingClientRect().height)
   document.documentElement.style.setProperty('--main-layout-header-height', `${height}px`)
-}
-
-function closeHoursDropdown() {
-  hoursExpanded.value = false
-}
-
-function onWindowScroll() {
-  if (hoursExpanded.value) closeHoursDropdown()
-}
-
-function onDocumentPointerDownOutsideHours(event) {
-  const target = event.target
-  if (!(target instanceof Node)) return
-
-  if (hoursExpanded.value) {
-    const inHoursToggle = target.closest('.main-layout__hours-toggle-wrap')
-    const inMobileStatus = target.closest('.main-layout__mobile-status-row')
-    if (!inHoursToggle && !inMobileStatus) closeHoursDropdown()
-  }
 }
 
 function scrollToTop() {
@@ -179,9 +123,7 @@ function onLogoClick() {
 onMounted(() => {
   void prefetchPageViewIncrement()
 
-  window.addEventListener('scroll', onWindowScroll, { passive: true })
   window.addEventListener('resize', updateHeaderHeightCssVar, { passive: true })
-  document.addEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
 
   nextTick(() => {
     updateHeaderHeightCssVar()
@@ -195,9 +137,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', onWindowScroll)
   window.removeEventListener('resize', updateHeaderHeightCssVar)
-  document.removeEventListener('pointerdown', onDocumentPointerDownOutsideHours, true)
   if (headerResizeObserver) {
     headerResizeObserver.disconnect()
     headerResizeObserver = null
@@ -507,10 +447,6 @@ onUnmounted(() => {
   .main-layout__open-status {
     font-size: 1.05rem;
   }
-
-  .main-layout__hours-row {
-    font-size: 1.05rem;
-  }
 }
 
 @media (max-width: 999.98px) {
@@ -593,15 +529,6 @@ onUnmounted(() => {
     font-size: 1.2em !important;
   }
 
-  .main-layout__mobile-status-dropdown.main-layout__hours-dropdown {
-    left: 0;
-    right: 0;
-    transform: none;
-    width: 100%;
-    min-width: unset;
-    max-width: none;
-  }
-
   .main-layout__brand {
     position: static;
     left: auto;
@@ -631,13 +558,6 @@ onUnmounted(() => {
     top: 37px;
   }
 
-  .main-layout__hours-dropdown {
-    left: 0;
-    right: auto;
-    min-width: 220px;
-    max-width: min(320px, calc(100vw - 24px));
-  }
-
   .main-layout__contact--below {
     display: none !important;
   }
@@ -645,8 +565,7 @@ onUnmounted(() => {
 </style>
 
 <style>
-/* Shared hours-related styles (unscoped so child components HoursDropdown.vue
- * and OpenStatusButton.vue can pick them up). */
+/* Shared hours-related styles (unscoped so OpenStatusButton.vue can pick them up). */
 .main-layout__open-status {
   display: inline-flex;
   align-items: center;
@@ -751,64 +670,8 @@ onUnmounted(() => {
   }
 }
 
-.main-layout__hours-chevron {
-  margin-left: 2px;
-  flex-shrink: 0;
-}
-
 .main-layout__hours-value {
   margin-left: 10px;
   font-weight: 600;
-}
-
-.main-layout__hours-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 6px;
-  min-width: 260px;
-  max-width: calc(100vw - 24px);
-  padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(18px) saturate(1.25);
-  -webkit-backdrop-filter: blur(18px) saturate(1.25);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  z-index: 1100;
-  box-sizing: border-box;
-}
-
-.main-layout__hours-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 20px;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  margin: 0 -8px;
-  color: #1a1a1a;
-  border-radius: 6px;
-}
-
-.main-layout__hours-row--today {
-  background: rgba(0, 0, 0, 0.055);
-}
-
-.main-layout__hours-day {
-  text-transform: capitalize;
-  color: rgba(0, 0, 0, 0.52);
-  flex-shrink: 0;
-  font-weight: 400;
-}
-
-.main-layout__hours-time {
-  font-weight: 600;
-  white-space: nowrap;
-  text-align: right;
-  flex-shrink: 0;
-  color: #121212;
 }
 </style>
