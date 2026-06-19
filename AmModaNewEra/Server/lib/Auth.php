@@ -6,7 +6,7 @@ namespace AmModa\Lib;
 final class Auth
 {
     private const ADMIN_USERNAME = 'admin';
-    private const ADMIN_PASSWORD = 'admin';
+    private const ADMIN_PASSWORD = 'amiga';
     private const SESSION_KEY = 'admin_authenticated';
 
     public static function startSession(): void
