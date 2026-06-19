@@ -18,16 +18,20 @@
         :today-store-day-index="todayStoreDayIndex"
         :store-hours-heading-label="storeHoursHeadingLabel"
       />
+    </div>
 
-      <div class="index-page-shop-photo-divider" aria-hidden="true">
-        <img
-          :src="shopPhotoSrc"
-          alt=""
-          class="index-page-shop-photo-divider__img"
-          decoding="async"
-        >
-      </div>
+    <div class="index-page-shop-photo-divider" aria-hidden="true">
+      <img
+        :src="shopPhotoSrc"
+        alt=""
+        class="index-page-shop-photo-divider__img"
+        width="1678"
+        height="937"
+        decoding="async"
+      >
+    </div>
 
+    <div class="index-page__panels-inner">
       <IndexPageShopBottomSections
         :facebook-url="FACEBOOK_URL"
       />
